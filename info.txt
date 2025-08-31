@@ -4,3 +4,7 @@
 Переустановить зависимости 
 pip uninstall aiogram aiohttp python-dotenv
 pip install -r requirements.txt
+
+git add .
+git commit -m "Исправление ошибок в обработчике регистрации"
+git push origin main

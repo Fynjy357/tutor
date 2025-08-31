@@ -37,3 +37,13 @@ def get_cancel_keyboard():
         )
     )
     return builder.as_markup()
+
+def get_promo_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        types.InlineKeyboardButton(
+            text="Пропустить",
+            callback_data="skip_promo"
+        )
+    )
+    return builder.as_markup()

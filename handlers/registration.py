@@ -4,7 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Contact, ReplyKeyboardRemove
 
-from keyboards.registration import get_registration_keyboard, get_cancel_keyboard, get_phone_keyboard
+from keyboards.registration import get_registration_keyboard, get_cancel_keyboard, get_phone_keyboard, get_promo_keyboard
 from keyboards.confirmation import get_confirmation_keyboard
 
 router = Router()
@@ -13,6 +13,7 @@ router = Router()
 class RegistrationStates(StatesGroup):
     waiting_for_name = State()
     waiting_for_phone = State()
+    waiting_for_promo = State()
     confirmation = State()
     editing_name = State()
     editing_phone = State()
@@ -76,7 +77,17 @@ async def process_phone_contact(message: types.Message, state: FSMContext, bot: 
         phone_number = phone_number[1:]
     
     await state.update_data(phone=phone_number, registration_messages=registration_messages)
-    await show_confirmation(message, state, bot)
+    
+    # Отправляем запрос промокода
+    promo_message = await message.answer(
+        "Введите ваш промокод, если он есть:",
+        reply_markup=get_promo_keyboard()
+    )
+    
+    # Добавляем ID нового сообщения в список
+    registration_messages.append(promo_message.message_id)
+    await state.update_data(registration_messages=registration_messages)
+    await state.set_state(RegistrationStates.waiting_for_promo)
 
 # Обработчик ввода телефона вручную
 @router.message(RegistrationStates.waiting_for_phone, F.text)
@@ -94,12 +105,54 @@ async def process_phone_text(message: types.Message, state: FSMContext, bot: Bot
         return
     
     await state.update_data(phone=phone_number, registration_messages=registration_messages)
-    await show_confirmation(message, state, bot)
+    
+    # Отправляем запрос промокода
+    promo_message = await message.answer(
+        "Введите ваш промокод, если он есть:",
+        reply_markup=get_promo_keyboard()
+    )
+    
+    # Добавляем ID нового сообщения в список
+    registration_messages.append(promo_message.message_id)
+    await state.update_data(registration_messages=registration_messages)
+    await state.set_state(RegistrationStates.waiting_for_promo)
 
 # Обработчик для некорректных сообщений в режиме ожидания телефона
 @router.message(RegistrationStates.waiting_for_phone)
 async def process_invalid_phone_input(message: types.Message):
     await message.answer("Пожалуйста, введите номер телефона текстом или используйте кнопку 'Отправить номер телефона'")
+
+# Обработчик ввода промокода
+@router.message(RegistrationStates.waiting_for_promo, F.text)
+async def process_promo(message: types.Message, state: FSMContext, bot: Bot):
+    # Сохраняем ID сообщения пользователя
+    data = await state.get_data()
+    registration_messages = data.get('registration_messages', [])
+    registration_messages.append(message.message_id)
+    
+    promo_code = message.text
+    
+    await state.update_data(promo=promo_code, registration_messages=registration_messages)
+    await show_confirmation(message, state, bot)
+
+# Обработчик пропуска промокода
+@router.callback_query(RegistrationStates.waiting_for_promo, F.data == "skip_promo")
+async def skip_promo(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):
+    await callback_query.answer()
+    
+    # Сохраняем ID сообщения с промокодом
+    data = await state.get_data()
+    registration_messages = data.get('registration_messages', [])
+    registration_messages.append(callback_query.message.message_id)
+    
+    # Устанавливаем промокод как "0"
+    await state.update_data(promo="0", registration_messages=registration_messages)
+    await show_confirmation(callback_query.message, state, bot)
+
+# Обработчик для некорректных сообщений в режиме ожидания промокода
+@router.message(RegistrationStates.waiting_for_promo)
+async def process_invalid_promo_input(message: types.Message):
+    await message.answer("Пожалуйста, введите промокод текстом или используйте кнопку 'Пропустить'")
 
 # Показать подтверждение данных
 async def show_confirmation(message: types.Message, state: FSMContext, bot: Bot):
@@ -107,19 +160,22 @@ async def show_confirmation(message: types.Message, state: FSMContext, bot: Bot)
     
     # Удаляем все сообщения процесса регистрации
     registration_messages = user_data.get('registration_messages', [])
-    if registration_messages:
-        for msg_id in registration_messages:
-            try:
-                await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-            except TelegramBadRequest:
-                # Если сообщение уже удалено, игнорируем ошибку
-                pass
+    for msg_id in registration_messages:
+        try:
+            await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+        except TelegramBadRequest:
+            # Если сообщение уже удалено, игнорируем ошибку
+            pass
+    
+    # Формируем текст с промокодом
+    promo_text = f"Промокод: {user_data.get('promo', 'не указан')}" if user_data.get('promo') != "0" else "Промокод: не указан"
     
     # Отправляем сообщение с подтверждением данных и кнопками
     confirmation_message = await message.answer(
         f"Регистрация завершена!\n\n"
         f"ФИО: {user_data['name']}\n"
-        f"Телефон: {user_data['phone']}\n\n"
+        f"Телефон: {user_data['phone']}\n"
+        f"{promo_text}\n\n"
         f"Подтвердите правильность данных или измените их:",
         reply_markup=get_confirmation_keyboard()
     )
@@ -134,11 +190,15 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     user_data = await state.get_data()
     
+    # Формируем текст с промокодом
+    promo_text = f"Промокод: {user_data.get('promo', 'не указан')}" if user_data.get('promo') != "0" else "Промокод: не указан"
+    
     # Здесь можно сохранить данные в базу
     await callback_query.message.edit_text(
         f"Данные подтверждены!\n\n"
         f"ФИО: {user_data['name']}\n"
-        f"Телефон: {user_data['phone']}\n\n"
+        f"Телефон: {user_data['phone']}\n"
+        f"{promo_text}\n\n"
         f"Теперь вы можете пользоваться всеми функциями бота."
     )
     
@@ -218,7 +278,7 @@ async def process_edited_phone(message: types.Message, state: FSMContext, bot: B
     phone_number = message.text
     
     # Простая валидация номера телефона
-    if not phone_number or not isinstance(phone_number, str) or not phone_number.replace('+', '').replace(' ', '').replace('-', '').replace('(', '').replace(')', '').isdigit():
+    if not phone_number.replace('+', '').replace(' ', '').replace('-', '').replace('(', '').replace(')', '').isdigit():
         await message.answer("Пожалуйста, введите корректный номер телефона:")
         return
     
