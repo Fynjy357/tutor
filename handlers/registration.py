@@ -107,12 +107,13 @@ async def show_confirmation(message: types.Message, state: FSMContext, bot: Bot)
     
     # Удаляем все сообщения процесса регистрации
     registration_messages = user_data.get('registration_messages', [])
-    for msg_id in registration_messages:
-        try:
-            await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-        except TelegramBadRequest:
-            # Если сообщение уже удалено, игнорируем ошибку
-            pass
+    if registration_messages:
+        for msg_id in registration_messages:
+            try:
+                await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+            except TelegramBadRequest:
+                # Если сообщение уже удалено, игнорируем ошибку
+                pass
     
     # Отправляем сообщение с подтверждением данных и кнопками
     confirmation_message = await message.answer(
@@ -217,7 +218,7 @@ async def process_edited_phone(message: types.Message, state: FSMContext, bot: B
     phone_number = message.text
     
     # Простая валидация номера телефона
-    if not phone_number.replace('+', '').replace(' ', '').replace('-', '').replace('(', '').replace(')', '').isdigit():
+    if not phone_number or not isinstance(phone_number, str) or not phone_number.replace('+', '').replace(' ', '').replace('-', '').replace('(', '').replace(')', '').isdigit():
         await message.answer("Пожалуйста, введите корректный номер телефона:")
         return
     
