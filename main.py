@@ -8,6 +8,7 @@ from config import BOT_TOKEN
 from handlers.start import router as start_router
 from handlers.registration import router as registration_router
 from handlers.about import router as about_router
+from database import db 
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)

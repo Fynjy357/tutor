@@ -3,11 +3,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Contact, ReplyKeyboardRemove
+import logging
 
 from keyboards.registration import get_registration_keyboard, get_cancel_keyboard, get_phone_keyboard, get_promo_keyboard
 from keyboards.confirmation import get_confirmation_keyboard
+from database import db  # Импортируем нашу базу данных
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 # Состояния для регистрации
 class RegistrationStates(StatesGroup):
@@ -22,6 +25,17 @@ class RegistrationStates(StatesGroup):
 @router.callback_query(F.data == "start_registration")
 async def start_registration(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
+    
+    # Проверяем, не зарегистрирован ли пользователь уже
+    existing_tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
+    if existing_tutor:
+        await callback_query.message.answer(
+            "Вы уже зарегистрированы в системе!\n\n"
+            f"ФИО: {existing_tutor[2]}\n"
+            f"Телефон: {existing_tutor[3]}\n"
+            f"Промокод: {existing_tutor[4] if existing_tutor[4] != '0' else 'не указан'}"
+        )
+        return
     
     try:
         # Удаляем предыдущее сообщение с кнопками
@@ -132,6 +146,12 @@ async def process_promo(message: types.Message, state: FSMContext, bot: Bot):
     
     promo_code = message.text
     
+    # Проверяем валидность промокода
+    promo_info = db.check_promo_code(promo_code)
+    if not promo_info:
+        await message.answer("Этот промокод недействителен. Пожалуйста, введите другой промокод или нажмите 'Пропустить':")
+        return
+    
     await state.update_data(promo=promo_code, registration_messages=registration_messages)
     await show_confirmation(message, state, bot)
 
@@ -168,7 +188,18 @@ async def show_confirmation(message: types.Message, state: FSMContext, bot: Bot)
             pass
     
     # Формируем текст с промокодом
-    promo_text = f"Промокод: {user_data.get('promo', 'не указан')}" if user_data.get('promo') != "0" else "Промокод: не указан"
+    promo_code = user_data.get('promo', '0')
+    promo_text = f"Промокод: {promo_code}" if promo_code != "0" else "Промокод: не указан"
+    
+    # Проверяем валидность промокода, если он указан
+    if promo_code != "0":
+        promo_info = db.check_promo_code(promo_code)
+        if promo_info:
+            discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
+            discount_type = "%" if promo_info[2] > 0 else "руб."
+            promo_text = f"Промокод: {promo_code} (скидка {discount}{discount_type})"
+        else:
+            promo_text = f"Промокод: {promo_code} (недействителен)"
     
     # Отправляем сообщение с подтверждением данных и кнопками
     confirmation_message = await message.answer(
@@ -190,17 +221,43 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     user_data = await state.get_data()
     
-    # Формируем текст с промокодом
-    promo_text = f"Промокод: {user_data.get('promo', 'не указан')}" if user_data.get('promo') != "0" else "Промокод: не указан"
-    
-    # Здесь можно сохранить данные в базу
-    await callback_query.message.edit_text(
-        f"Данные подтверждены!\n\n"
-        f"ФИО: {user_data['name']}\n"
-        f"Телефон: {user_data['phone']}\n"
-        f"{promo_text}\n\n"
-        f"Теперь вы можете пользоваться всеми функциями бота."
-    )
+    # Сохраняем данные в базу
+    try:
+        tutor_id = db.add_tutor(
+            telegram_id=callback_query.from_user.id,
+            full_name=user_data['name'],
+            phone=user_data['phone'],
+            promo_code=user_data.get('promo', '0')
+        )
+        
+        # Проверяем и используем промокод, если он валидный
+        promo_code = user_data.get('promo')
+        if promo_code and promo_code != '0':
+            promo_info = db.check_promo_code(promo_code)
+            if promo_info:
+                db.use_promo_code(promo_code)
+                discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
+                discount_type = "%" if promo_info[2] > 0 else "руб."
+                promo_text = f"Промокод: {promo_code} (скидка {discount}{discount_type})"
+            else:
+                promo_text = f"Промокод: {promo_code} (недействителен)"
+        else:
+            promo_text = "Промокод: не указан"
+            
+        # Формируем финальное сообщение
+        await callback_query.message.edit_text(
+            f"Данные подтверждены!\n\n"
+            f"ФИО: {user_data['name']}\n"
+            f"Телефон: {user_data['phone']}\n"
+            f"{promo_text}\n\n"
+            f"Теперь вы можете пользоваться всеми функциями бота."
+        )
+        
+    except Exception as e:
+        logger.error(f"Ошибка при сохранении данных: {e}")
+        await callback_query.message.edit_text(
+            "Произошла ошибка при сохранении данных. Пожалуйста, попробуйте позже."
+        )
     
     await state.clear()
 
