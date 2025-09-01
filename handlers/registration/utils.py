@@ -1,6 +1,7 @@
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import ReplyKeyboardRemove
 
+from handlers.registration.states import RegistrationStates
 from keyboards.confirmation import get_confirmation_keyboard
 from database import db
 import logging
@@ -9,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 async def show_confirmation(message, state, bot):
     user_data = await state.get_data()
+    logger.info(f"Данные для подтверждения: {user_data}")
     
     # Удаляем все сообщения процесса регистрации
     registration_messages = user_data.get('registration_messages', [])
@@ -16,6 +18,7 @@ async def show_confirmation(message, state, bot):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
         except TelegramBadRequest:
+            # Если сообщение уже удалено, игнорируем ошибку
             pass
     
     # Формируем текст с промокодом
@@ -44,3 +47,5 @@ async def show_confirmation(message, state, bot):
     
     # Сохраняем ID сообщения с подтверждением
     await state.update_data(registration_messages=[confirmation_message.message_id])
+    await state.set_state(RegistrationStates.confirmation)
+    logger.info(f"Состояние установлено: {await state.get_state()}")

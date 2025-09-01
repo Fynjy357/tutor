@@ -8,6 +8,8 @@ from config import BOT_TOKEN
 from handlers.start import router as start_router
 from handlers.registration import router as registration_router
 from handlers.about import router as about_router
+from handlers.students.handlers import router as students_router
+from handlers.students.invitations import router as invitations_router
 from database import db 
 
 # Настройка логирования
@@ -27,6 +29,8 @@ async def main():
     dp.include_router(start_router)
     dp.include_router(registration_router)
     dp.include_router(about_router)
+    dp.include_router(students_router)
+    dp.include_router(invitations_router)
 
     # Запускаем бота
     await dp.start_polling(bot)

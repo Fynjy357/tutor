@@ -2,8 +2,8 @@ from aiogram import Router, types, F, Bot
 from aiogram.fsm.context import FSMContext
 import logging
 
-from .states import RegistrationStates
-from .utils import show_confirmation
+from handlers.registration.states import RegistrationStates
+from handlers.registration.utils import show_confirmation
 from keyboards.registration import get_phone_keyboard, get_promo_keyboard
 from database import db
 

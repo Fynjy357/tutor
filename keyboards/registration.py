@@ -37,7 +37,6 @@ def get_cancel_keyboard():
         )
     )
     return builder.as_markup()
-
 def get_promo_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(

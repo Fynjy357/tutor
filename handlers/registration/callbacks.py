@@ -3,8 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
 
-from .states import RegistrationStates
-from .utils import show_confirmation
+from handlers.registration.states import RegistrationStates
+from handlers.registration.utils import show_confirmation
 from keyboards.registration import get_cancel_keyboard, get_phone_keyboard, get_promo_keyboard, get_registration_keyboard
 from database import db
 
@@ -56,10 +56,25 @@ async def skip_promo(callback_query: types.CallbackQuery, state: FSMContext, bot
     await state.update_data(promo="0", registration_messages=registration_messages)
     await show_confirmation(callback_query.message, state, bot)
 
-@router.callback_query(RegistrationStates.confirmation, F.data == "confirm_data")
+@router.callback_query(F.data == "confirm_data")
 async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
+    
+    # Получаем текущее состояние
+    current_state = await state.get_state()
+    logger.info(f"Текущее состояние: {current_state}")
+    
+    # Получаем данные из состояния
     user_data = await state.get_data()
+    logger.info(f"Данные состояния: {user_data}")
+    
+    # Проверяем, есть ли необходимые данные
+    if not user_data.get('name') or not user_data.get('phone'):
+        await callback_query.message.edit_text(
+            "Ошибка: данные не найдены. Пожалуйста, начните регистрацию заново."
+        )
+        await state.clear()
+        return
     
     # Сохраняем данные в базу
     try:
@@ -70,33 +85,55 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
             promo_code=user_data.get('promo', '0')
         )
         
+        logger.info(f"Репетитор добавлен с ID: {tutor_id}")
+        
         # Проверяем и используем промокод, если он валидный
         promo_code = user_data.get('promo')
+        promo_text = "не указан"
+        
         if promo_code and promo_code != '0':
             promo_info = db.check_promo_code(promo_code)
             if promo_info:
                 db.use_promo_code(promo_code)
                 discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
                 discount_type = "%" if promo_info[2] > 0 else "руб."
-                promo_text = f"Промокод: {promo_code} (скидка {discount}{discount_type})"
+                promo_text = f"{promo_code} (скидка {discount}{discount_type})"
             else:
-                promo_text = f"Промокод: {promo_code} (недействителен)"
-        else:
-            promo_text = "Промокод: не указан"
-            
-        # Формируем финальное сообщение
-        await callback_query.message.edit_text(
-            f"Данные подтверждены!\n\n"
-            f"ФИО: {user_data['name']}\n"
-            f"Телефон: {user_data['phone']}\n"
-            f"{promo_text}\n\n"
-            f"Теперь вы можете пользоваться всеми функциями бота."
+                promo_text = f"{promo_code} (недействителен)"
+        
+        # Удаляем сообщение с подтверждением
+        try:
+            await callback_query.message.delete()
+        except TelegramBadRequest:
+            logger.warning("Не удалось удалить сообщение подтверждения")
+        
+        # Формируем приветственное сообщение
+        welcome_text = f"""
+<b>Добро пожаловать, {user_data['name']}!</b>
+
+Рады видеть вас в ежедневнике репетитора.
+
+Ваши данные:
+📝 ФИО: {user_data['name']}
+📞 Телефон: {user_data['phone']}
+🎫 Промокод: {promo_text}
+
+Выберите нужный раздел:
+        """
+        
+        # Отправляем приветственное сообщение с главным меню
+        # Вам нужно будет создать клавиатуру для главного меню
+        from keyboards.main_menu import get_main_menu_keyboard
+        await callback_query.message.answer(
+            welcome_text,
+            reply_markup=get_main_menu_keyboard()
         )
         
     except Exception as e:
         logger.error(f"Ошибка при сохранении данных: {e}")
         await callback_query.message.edit_text(
-            "Произошла ошибка при сохранении данных. Пожалуйста, попробуйте позже."
+            f"Произошла ошибка при сохранении данных: {str(e)}\n\n"
+            "Пожалуйста, попробуйте позже или обратитесь к администратору."
         )
     
     await state.clear()
