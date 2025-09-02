@@ -26,11 +26,15 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
 
     # Регистрируем обработчики
+
+    dp.include_router(invitations_router) 
     dp.include_router(start_router)
     dp.include_router(registration_router)
     dp.include_router(about_router)
     dp.include_router(students_router)
-    dp.include_router(invitations_router)
+
+    
+
 
     # Запускаем бота
     await dp.start_polling(bot)

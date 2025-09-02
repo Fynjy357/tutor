@@ -1,233 +1,297 @@
-# handlers/invitations.py
+# handlers/students/invitations.py
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
+import re
 
-from database import db
 from handlers.start import cmd_start
-from keyboards.students import get_students_menu_keyboard
+
+from .keyboards import get_invite_keyboard, get_student_detail_keyboard
+from .utils import format_student_info, get_students_stats
+from keyboards.students import get_students_menu_keyboard, get_students_list_keyboard
+from database import db
 
 router = Router()
 logger = logging.getLogger(__name__)
 
-def get_invite_keyboard(student_id):
-    """Создает клавиатуру для меню приглашений"""
-    keyboard = [
-        [InlineKeyboardButton(text="👤 Пригласить ученика", callback_data=f"invite_student_{student_id}")],
-        [InlineKeyboardButton(text="👨‍👩‍👧‍👦 Пригласить родителя", callback_data=f"invite_parent_{student_id}")],
-        [InlineKeyboardButton(text="◀️ Назад к ученику", callback_data=f"back_to_student_{student_id}")]
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+# Регулярное выражение для проверки формата invite_число
+INVITE_PATTERN = re.compile(r'^invite_(\d+)$')
 
-@router.callback_query(F.data.startswith("invite_student_"))
-async def invite_student(callback_query: types.CallbackQuery):
+@router.callback_query(F.data.regexp(INVITE_PATTERN))
+async def invite_menu(callback_query: types.CallbackQuery):
+    """Меню приглашения для ученика"""
     await callback_query.answer()
-    student_id = int(callback_query.data.split("_")[2])
     
-    student = db.get_student_by_id(student_id)
-    if not student:
-        await callback_query.message.edit_text("❌ Ученик не найден!")
-        return
-    
-    # Генерируем токен, если его нет
-    if not student.get('student_token'):
-        token = db.generate_invite_token()
-        success = db.update_student_token(student_id, token, 'student')
-        if not success:
-            await callback_query.message.edit_text("❌ Ошибка при генерации токена!")
+    try:
+        match = INVITE_PATTERN.match(callback_query.data)
+        if not match:
             return
-    else:
-        token = student['student_token']
-    
-    # Создаем ссылку для приглашения
-    bot_username = (await callback_query.bot.get_me()).username
-    invite_link = f"https://t.me/{bot_username}?start=student_{token}"
-    
-    await callback_query.message.edit_text(
-        f"👤 <b>Приглашение для ученика</b>\n\n"
-        f"Ученик: {student['full_name']}\n\n"
-        f"Отправьте эту ссылку ученику:\n"
-        f"<code>{invite_link}</code>\n\n"
-        f"Ученик сможет привязать свой Telegram аккаунт к вашей базе.",
-        parse_mode="HTML",
-        reply_markup=get_invite_keyboard(student_id)
-    )
-
-@router.callback_query(F.data.startswith("invite_parent_"))
-async def invite_parent(callback_query: types.CallbackQuery):
-    await callback_query.answer()
-    student_id = int(callback_query.data.split("_")[2])
-    
-    student = db.get_student_by_id(student_id)
-    if not student:
-        await callback_query.message.edit_text("❌ Ученик не найден!")
-        return
-    
-    # Генерируем токен, если его нет
-    if not student.get('parent_token'):
-        token = db.generate_invite_token()
-        success = db.update_student_token(student_id, token, 'parent')
-        if not success:
-            await callback_query.message.edit_text("❌ Ошибка при генерации токена!")
-            return
-    else:
-        token = student['parent_token']
-    
-    # Создаем ссылку для приглашения
-    bot_username = (await callback_query.bot.get_me()).username
-    invite_link = f"https://t.me/{bot_username}?start=parent_{token}"
-    
-    await callback_query.message.edit_text(
-        f"👨‍👩‍👧‍👦 <b>Приглашение для родителя</b>\n\n"
-        f"Ученик: {student['full_name']}\n\n"
-        f"Отправьте эту ссылку родителю:\n"
-        f"<code>{invite_link}</code>\n\n"
-        f"Родитель сможет привязать свой Telegram аккаунт к вашей базе.",
-        parse_mode="HTML",
-        reply_markup=get_invite_keyboard(student_id)
-    )
-
-@router.message(CommandStart(deep_link=True))
-async def handle_deep_link(message: types.Message):
-    # Извлекаем аргументы из deep link - используем правильное свойство
-    args = message.text.split()[1] if len(message.text.split()) > 1 else None
-    
-    if not args:
-        # Если нет аргументов, выполняем стандартный старт
-        await cmd_start(message)
-        return
-    
-    # Обрабатываем пригласительные ссылки
-    if args.startswith('student_') or args.startswith('parent_'):
-        invite_type, token = args.split('_', 1)
-        
-        if invite_type not in ['student', 'parent']:
-            await message.answer("❌ Неверная ссылка приглашения.")
-            return
-        
-        # Находим ученика по токену
-        student = db.get_student_by_token(token, invite_type)
-        if not student:
-            await message.answer("❌ Ссылка приглашения недействительна или устарела.")
-            return
-        
-        # Получаем username пользователя
-        username = message.from_user.username
-        if username:
-            username = f"@{username}"
-        else:
-            username = "не указан"
-        
-        # Привязываем Telegram аккаунт к ученику
-        if invite_type == 'student':
-            success = db.update_student_telegram_id(
-                student['id'], 
-                message.from_user.id, 
-                username, 
-                'student'
-            )
-            role = "ученика"
-            tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!"
-        else:
-            success = db.update_student_telegram_id(
-                student['id'], 
-                message.from_user.id, 
-                username, 
-                'parent'
-            )
-            role = "родителя"
-            tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!"
-        
-        if success:
-            # Отправляем сообщение пользователю
-            await message.answer(
-                f"✅ <b>Вы успешно привязаны как {role} ученика {student['full_name']}!</b>\n\n"
-                f"Теперь вы будете получать уведомления о занятиях и успехах.",
-                parse_mode="HTML"
-            )
             
-            # Отправляем уведомление репетитору
-            try:
-                tutor = db.get_tutor_by_id(student['tutor_id'])
-                if tutor and tutor[1]:  # tutor[1] - telegram_id
-                    await message.bot.send_message(
-                        chat_id=tutor[1],
-                        text=tutor_message
-                    )
-            except Exception as e:
-                print(f"Ошибка при отправке уведомления репетитору: {e}")
-        else:
-            await message.answer(
-                "❌ <b>Ошибка при привязке аккаунта!</b>\n\n"
-                "Пожалуйста, попробуйте позже или обратитесь к репетитору.",
-                parse_mode="HTML"
-            )
-        return
-    
-    # Если неизвестный формат, выполняем стандартный старт
-    await cmd_start(message)
+        student_id = int(match.group(1))
+        student = db.get_student_by_id(student_id)
+        
+        if not student:
+            await callback_query.message.edit_text("❌ Ученик не найден!")
+            return
+        
+        await callback_query.message.edit_text(
+            f"👤 <b>Приглашение для {student['full_name']}</b>\n\n"
+            "Выберите, кого вы хотите пригласить:",
+            parse_mode="HTML",
+            reply_markup=get_invite_keyboard(student_id)
+        )
+    except Exception as e:
+        logger.error(f"Ошибка в invite_menu: {e}")
+        await callback_query.message.edit_text("❌ Ошибка при обработке запроса")
 
+@router.callback_query(F.data.startswith("generate_invite_"))
+async def generate_invite(callback_query: types.CallbackQuery):
+    """Генерация приглашения"""
+    await callback_query.answer()
     
+    try:
+        parts = callback_query.data.split("_")
+        if len(parts) < 4:
+            await callback_query.message.edit_text("❌ Неверный формат запроса!")
+            return
+            
+        student_id = int(parts[2])
+        invite_type = parts[3]  # student или parent
+        
+        student = db.get_student_by_id(student_id)
+        if not student:
+            await callback_query.message.edit_text("❌ Ученик не найден!")
+            return
+        
+        # Генерируем токен
+        token = db.generate_invite_token()
+        if db.update_student_token(student_id, token, invite_type):
+            # Формируем ссылку приглашения
+            bot_username = (await callback_query.bot.get_me()).username
+            invite_link = f"https://t.me/{bot_username}?start=invite_{invite_type}_{token}"
+            
+            user_type = "ученика" if invite_type == "student" else "родителя"
+            await callback_query.message.edit_text(
+                f"✅ <b>Приглашение для {user_type} создано!</b>\n\n"
+                f"👤 Ученик: {student['full_name']}\n"
+                f"🔗 Ссылка: {invite_link}\n\n"
+                "Отправьте эту ссылку пользователю. "
+                "При переходе по ссылке аккаунт будет автоматически привязан к ученику.",
+                parse_mode="HTML",
+                reply_markup=get_invite_keyboard(student_id)
+            )
+        else:
+            await callback_query.message.edit_text(
+                "❌ Ошибка при создании приглашения!",
+                reply_markup=get_invite_keyboard(student_id)
+            )
+    except (ValueError, IndexError) as e:
+        logger.error(f"Ошибка парсинга callback data: {e}")
+        await callback_query.message.edit_text("❌ Ошибка при обработке запроса!")
+    except Exception as e:
+        logger.error(f"Ошибка в generate_invite: {e}")
+        await callback_query.message.edit_text("❌ Ошибка при создании приглашения")
+
+# Обработчик возврата к ученику из меню приглашения
 @router.callback_query(F.data.startswith("back_to_student_"))
 async def back_to_student_from_invite(callback_query: types.CallbackQuery):
     await callback_query.answer()
     
-    student_id = int(callback_query.data.split("_")[3])
-    student = db.get_student_by_id(student_id)
+    try:
+        student_id = int(callback_query.data.split("_")[3])
+        student = db.get_student_by_id(student_id)
+        
+        if not student:
+            await callback_query.message.edit_text("❌ Ученик не найден!")
+            return
+        
+        # Используем безопасную функцию форматирования
+        text = format_student_info(student)
+        
+        try:
+            await callback_query.message.edit_text(
+                text,
+                reply_markup=get_student_detail_keyboard(student_id),
+                parse_mode="HTML"
+            )
+        except TelegramBadRequest:
+            await callback_query.message.answer(
+                text,
+                reply_markup=get_student_detail_keyboard(student_id),
+                parse_mode="HTML"
+            )
+            
+    except (ValueError, IndexError) as e:
+        logger.error(f"Ошибка парсинга callback data: {e}")
+        await callback_query.message.edit_text("❌ Ошибка при обработке запроса")
+    except Exception as e:
+        logger.error(f"Ошибка в back_to_student_from_invite: {e}")
+        await callback_query.message.edit_text("❌ Произошла ошибка при загрузке информации")
+
+# Обработчик возврата к списку учеников
+@router.callback_query(F.data == "back_to_students_list")
+async def back_to_students_list(callback_query: types.CallbackQuery):
+    await callback_query.answer()
     
-    if not student:
-        await callback_query.message.edit_text("❌ Ученик не найден!")
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    
+    if not tutor_id:
+        await callback_query.message.edit_text("❌ Ошибка: не найден ID репетитора.")
         return
     
-    # Формируем текст сообщения
-    status_text = student['status']
-    if student.get('delete_after'):
-        status_text = f"{status_text} (будет удален {student['delete_after']})"
+    students = db.get_students_by_tutor(tutor_id)
     
-    student_tg = f"@{student['student_username']}" if student.get('student_username') else "не привязан"
-    parent_tg = f"@{student['parent_username']}" if student.get('parent_username') else "не привязан"
+    if not students:
+        await callback_query.message.edit_text(
+            "📝 <b>Список учеников пуст</b>\n\n"
+            "У вас пока нет добавленных учеников.",
+            reply_markup=get_students_menu_keyboard(),
+            parse_mode="HTML"
+        )
+        return
     
-    text = (
-        f"👤 <b>Информация об ученике</b>\n\n"
-        f"<b>ФИО:</b> {student['full_name']}\n"
-        f"<b>Телефон:</b> {student['phone'] if student['phone'] != '-' else 'не указан'}\n"
-        f"<b>Телефон родителя:</b> {student['parent_phone'] if student['parent_phone'] != '-' else 'не указан'}\n"
-        f"<b>Статус:</b> {status_text}\n"
-        f"<b>ТГ ученика:</b> {student_tg}\n"
-        f"<b>ТГ родителя:</b> {parent_tg}\n"
-        f"<b>Дата добавления:</b> {student['created_at']}"
-    )
-    
-    # Создаем клавиатуру для управления учеником
-    keyboard = [
-        [InlineKeyboardButton(text="✏️ Редактировать", callback_data=f"edit_student_{student_id}")],
-        [InlineKeyboardButton(text="📤 Пригласить", callback_data=f"invite_{student_id}")],
-        [InlineKeyboardButton(text="◀️ Назад к списку", callback_data="back_to_students_list")]
-    ]
+    text = "👥 <b>Список ваших учеников</b>\n\n" + get_students_stats(students)
     
     try:
         await callback_query.message.edit_text(
             text,
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+            reply_markup=get_students_list_keyboard(students, page=0),
             parse_mode="HTML"
         )
     except TelegramBadRequest:
         await callback_query.message.answer(
             text,
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+            reply_markup=get_students_list_keyboard(students, page=0),
             parse_mode="HTML"
         )
 
-@router.callback_query(F.data == "back_to_students_menu")
-async def back_to_students_menu(callback_query: types.CallbackQuery):
+# Обработчик переключения страниц списка учеников
+@router.callback_query(F.data.startswith("students_page_"))
+async def students_list_page(callback_query: types.CallbackQuery):
     await callback_query.answer()
     
+    page = int(callback_query.data.split("_")[2])
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    
+    if not tutor_id:
+        await callback_query.message.edit_text("❌ Ошибка: не найден ID репетитора.")
+        return
+    
+    students = db.get_students_by_tutor(tutor_id)
+    text = "👥 <b>Список ваших учеников</b>\n\n" + get_students_stats(students)
+    
     await callback_query.message.edit_text(
-        "👥 <b>Учет учеников</b>\n\n"
-        "Здесь вы можете управлять вашими учениками: добавлять новых, "
-        "просматривать и редактировать информацию о существующих.",
-        reply_markup=get_students_menu_keyboard(),
+        text,
+        reply_markup=get_students_list_keyboard(students, page=page),
         parse_mode="HTML"
     )
+
+# Обработчик для стартовой команды с приглашением
+@router.message(CommandStart(deep_link=True))
+async def handle_deep_link(message: types.Message):
+    logger.info("=== DEEP LINK HANDLER STARTED ===")
+    logger.info(f"Полное сообщение: {message.text}")
+    logger.info(f"Пользователь: {message.from_user.id} @{message.from_user.username}")
+    
+    # Правильное извлечение аргументов
+    args = message.text.split()
+    if len(args) < 2:
+        logger.warning("Нет аргументов в deep link")
+        await cmd_start(message)
+        return
+    
+    deep_link_args = args[1]
+    logger.info(f"Аргументы deep link: {deep_link_args}")
+    
+    # Обрабатываем пригласительные ссылки
+    if deep_link_args.startswith('student_') or deep_link_args.startswith('parent_'):
+        try:
+            parts = deep_link_args.split('_', 1)
+            if len(parts) < 2:
+                logger.error("Неверный формат deep link")
+                await message.answer("❌ Неверная ссылка приглашения.")
+                return
+                
+            invite_type, token = parts
+            logger.info(f"Тип приглашения: {invite_type}, Токен: {token}")
+            
+            if invite_type not in ['student', 'parent']:
+                logger.error(f"Неизвестный тип приглашения: {invite_type}")
+                await message.answer("❌ Неверная ссылка приглашения.")
+                return
+            
+            # Находим ученика по токену
+            student = db.get_student_by_token(token, invite_type)
+            logger.info(f"Найден ученик: {student is not None}")
+            
+            if not student:
+                logger.error(f"Ученик не найден по токену: {token}")
+                await message.answer("❌ Ссылка приглашения недействительна или устарела.")
+                return
+            
+            logger.info(f"Данные ученика: ID={student['id']}, Name={student['full_name']}")
+            
+            # Получаем username пользователя
+            username = f"@{message.from_user.username}" if message.from_user.username else "не указан"
+            logger.info(f"Username пользователя: {username}")
+            
+            # Привязываем Telegram аккаунт к ученику
+            if invite_type == 'student':
+                success = db.update_student_telegram_id(
+                    student['id'], 
+                    message.from_user.id, 
+                    username, 
+                    'student'
+                )
+                role = "ученика"
+                tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!"
+            else:
+                success = db.update_student_telegram_id(
+                    student['id'], 
+                    message.from_user.id, 
+                    username, 
+                    'parent'
+                )
+                role = "родителя"
+                tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!"
+            
+            logger.info(f"Привязка аккаунта: {success}")
+            
+            if success:
+                # Отправляем сообщение пользователю
+                await message.answer(
+                    f"✅ <b>Вы успешно привязаны как {role} ученика {student['full_name']}!</b>\n\n"
+                    f"Теперь вы будете получать уведомления о занятиях и успехах.",
+                    parse_mode="HTML"
+                )
+                
+                # Отправляем уведомление репетитору
+                try:
+                    tutor = db.get_tutor_by_id(student['tutor_id'])
+                    logger.info(f"Найден репетитор: {tutor is not None}")
+                    if tutor and tutor[1]:  # tutor[1] - telegram_id
+                        await message.bot.send_message(
+                            chat_id=tutor[1],
+                            text=tutor_message
+                        )
+                        logger.info(f"Уведомление отправлено репетитору: {tutor[1]}")
+                except Exception as e:
+                    logger.error(f"Ошибка при отправке уведомления репетитору: {e}")
+            else:
+                await message.answer(
+                    "❌ <b>Ошибка при привязке аккаунта!</b>\n\n"
+                    "Пожалуйста, попробуйте позже или обратитесь к репетитору.",
+                    parse_mode="HTML"
+                )
+            
+        except Exception as e:
+            logger.error(f"Ошибка в обработке deep link: {e}")
+            await message.answer("❌ Произошла ошибка при обработке приглашения.")
+    
+    else:
+        logger.info("Неизвестный формат deep link, выполняется стандартный старт")
+        await cmd_start(message)
+    
+    logger.info("=== DEEP LINK HANDLER FINISHED ===")
