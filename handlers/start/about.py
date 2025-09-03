@@ -3,7 +3,7 @@ from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.exceptions import TelegramBadRequest
 
-from handlers.start.config import ABOUT_TEXT, REGISTRATION_TEXT, WELCOME_BACK_TEXT
+from handlers.start.config import ABOUT_TEXT, REGISTRATION_TEXT
 from keyboards.about import get_about_keyboard
 from handlers.start.keyboards_start import get_registration_keyboard
 
