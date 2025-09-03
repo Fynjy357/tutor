@@ -13,12 +13,12 @@ from database import db
 router = Router()
 logger = logging.getLogger(__name__)
 
-# Регулярное выражение для проверки формата invite_число
+# Регулярное выражение для проверки формата invite_число (из детальной клавиатуры)
 INVITE_PATTERN = re.compile(r'^invite_(\d+)$')
 
 @router.callback_query(F.data.regexp(INVITE_PATTERN))
 async def invite_menu(callback_query: types.CallbackQuery):
-    """Меню приглашения для ученика"""
+    """Меню приглашения для ученика (из детальной информации)"""
     await callback_query.answer()
     
     try:
@@ -43,19 +43,20 @@ async def invite_menu(callback_query: types.CallbackQuery):
         logger.error(f"Ошибка в invite_menu: {e}")
         await callback_query.message.edit_text("❌ Ошибка при обработке запроса")
 
-@router.callback_query(F.data.startswith("generate_invite_"))
-async def generate_invite(callback_query: types.CallbackQuery):
-    """Генерация приглашения"""
+# Обработчик для кнопок приглашения ученика и родителя
+@router.callback_query(F.data.startswith("invite_student_") | F.data.startswith("invite_parent_"))
+async def handle_invite(callback_query: types.CallbackQuery):
+    """Генерация приглашения для ученика или родителя"""
     await callback_query.answer()
     
     try:
         parts = callback_query.data.split("_")
-        if len(parts) < 4:
+        if len(parts) < 3:
             await callback_query.message.edit_text("❌ Неверный формат запроса!")
             return
             
+        invite_type = parts[1]  # student или parent
         student_id = int(parts[2])
-        invite_type = parts[3]  # student или parent
         
         student = db.get_student_by_id(student_id)
         if not student:
@@ -69,11 +70,12 @@ async def generate_invite(callback_query: types.CallbackQuery):
             bot_username = (await callback_query.bot.get_me()).username
             invite_link = f"https://t.me/{bot_username}?start={invite_type}_{token}"
             
+            
             user_type = "ученика" if invite_type == "student" else "родителя"
             await callback_query.message.edit_text(
                 f"✅ <b>Приглашение для {user_type} создано!</b>\n\n"
                 f"👤 Ученик: {student['full_name']}\n"
-                f"🔗 Ссылка: {invite_link}\n\n"
+                f"🔗 Ссылка:\n <code>{invite_link}</code>\n\n"
                 "Отправьте эту ссылку пользователю. "
                 "При переходе по ссылке аккаунт будет автоматически привязан к ученику.",
                 parse_mode="HTML",
@@ -88,7 +90,7 @@ async def generate_invite(callback_query: types.CallbackQuery):
         logger.error(f"Ошибка парсинга callback data: {e}")
         await callback_query.message.edit_text("❌ Ошибка при обработке запроса!")
     except Exception as e:
-        logger.error(f"Ошибка в generate_invite: {e}")
+        logger.error(f"Ошибка в handle_invite: {e}")
         await callback_query.message.edit_text("❌ Ошибка при создании приглашения")
 
 # Обработчик возврата к ученику из меню приглашения

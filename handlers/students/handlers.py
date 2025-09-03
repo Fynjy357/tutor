@@ -4,17 +4,20 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
 
+from handlers.start.config import WELCOME_BACK_TEXT
 from handlers.students.config import ADD_STUDENT
+from handlers.students.keyboards import get_invite_keyboard
+from keyboards.main_menu import get_main_menu_keyboard
 
 from .states import AddStudentStates
-from .keyboards import get_invite_keyboard, get_student_detail_keyboard
-from .utils import format_student_info, get_students_stats
+
+from .utils import get_students_stats
 from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard, get_students_list_keyboard
 from .edit_handlers import router as edit_router
-from handlers.students.keyboards import get_student_detail_keyboard
 from database import db
 from handlers.students.handlers_add_student import router as add_students_router
 from handlers.students.handlers_edit_student import router as student_
+
 
 
 router = Router()
@@ -79,26 +82,50 @@ async def students_list(callback_query: types.CallbackQuery):
         )
 
 
+# Обработчик для кнопки назад
 
+@router.callback_query(F.data == "back_to_main_students")
+async def back_to_main_menu(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+    
+    # Очищаем состояние если было активно
+    current_state = await state.get_state()
+    if current_state:
+        await state.clear()
+    
+    # Получаем данные репетитора
+    tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
+    
+    if not tutor:
+        # Если репетитор не найден, показываем сообщение об ошибке
+        try:
+            await callback_query.message.edit_text(
+                "❌ Ошибка: не найдены данные репетитора",
+                parse_mode="HTML"
+            )
+        except TelegramBadRequest:
+            await callback_query.message.answer(
+                "❌ Ошибка: не найдены данные репетитора",
+                parse_mode="HTML"
+            )
+        return
+    
+    # Используем функцию show_welcome_back для показа главного меню
+    try:
+        # Пытаемся изменить текущее сообщение
+        await callback_query.message.edit_text(
+            WELCOME_BACK_TEXT.format(tutor_name=tutor[2]),
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
+    except TelegramBadRequest:
+        # Если не получается изменить, отправляем новое сообщение
+        await callback_query.message.answer(
+            WELCOME_BACK_TEXT.format(tutor_name=tutor[2]),
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
 
-# Обработчик для кнопки приглашения
-# @router.callback_query(F.data.startswith("invite_"))
-# async def invite_menu(callback_query: types.CallbackQuery):
-#     await callback_query.answer()
-    
-#     student_id = int(callback_query.data.split("_")[1])
-#     student = db.get_student_by_id(student_id)
-    
-#     if not student:
-#         await callback_query.message.edit_text("❌ Ученик не найден!")
-#         return
-    
-#     await callback_query.message.edit_text(
-#         f"👤 <b>Приглашение для {student['full_name']}</b>\n\n"
-#         "Выберите, кого вы хотите пригласить:",
-#         parse_mode="HTML",
-#         reply_markup=get_invite_keyboard(student_id)
-#     )
 
 # # Обработчик возврата к ученику из меню приглашения
 # @router.callback_query(F.data.startswith("back_to_student_"))

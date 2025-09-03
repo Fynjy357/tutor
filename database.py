@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -374,6 +374,140 @@ class Database:
         except sqlite3.Error as e:
             logger.error(f"Ошибка при обновлении поля {field_name} ученика {student_id}: {e}")
             return False
+        
+    def get_lessons_by_date_range(self, tutor_id: int, start_date: date, end_date: date):
+        """Получает занятия репетитора за период с полной информацией"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id,
+                    l.tutor_id,
+                    l.student_id,
+                    l.lesson_date,
+                    l.duration,
+                    l.price,
+                    l.status,
+                    l.created_at,
+                    s.full_name as student_name,
+                    s.phone as student_phone,
+                    s.grade as student_grade,
+                    s.school as student_school
+                FROM lessons l
+                LEFT JOIN students s ON l.student_id = s.id
+                WHERE l.tutor_id = ? AND date(l.lesson_date) BETWEEN ? AND ?
+                ORDER BY l.lesson_date
+                ''', (tutor_id, start_date, end_date))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при получении занятий: {e}")
+            return []
+    def get_lessons_by_student(self, student_id: int):
+        """Получает все занятия студента"""
+        try:
+                with self.get_connection() as conn:
+                    conn.row_factory = sqlite3.Row
+                    cursor = conn.cursor()
+                    cursor.execute('''
+                    SELECT l.*, t.full_name as tutor_name
+                    FROM lessons l
+                    LEFT JOIN tutors t ON l.tutor_id = t.id
+                    WHERE l.student_id = ?
+                    ORDER BY l.lesson_date DESC
+                    ''', (student_id,))
+                    return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при получении занятий студента: {e}")
+        return []
 
+    # def get_upcoming_lessons(self, tutor_id: int, days: int = 7):
+    #     """Получает ближайшие занятия репетитора"""
+    #     try:
+    #         with self.get_connection() as conn:
+    #             conn.row_factory = sqlite3.Row
+    #             cursor = conn.cursor()
+                    
+    #             # Получаем текущее время в правильном формате
+    #             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #             end_time = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d %H:%M:%S')
+                
+    #             cursor.execute('''
+    #             SELECT l.*, s.full_name as student_name
+    #             FROM lessons l
+    #             LEFT JOIN students s ON l.student_id = s.id
+    #             WHERE l.tutor_id = ? 
+    #             AND l.lesson_date >= ?
+    #             AND l.lesson_date <= ?
+    #             AND l.status = 'planned'
+    #             ORDER BY l.lesson_date
+    #             ''', (tutor_id, current_time, end_time))
+    #             result = [dict(row) for row in cursor.fetchall()]
+    #             return result
+    #     except Exception as e:
+    #         logger.error(f"Ошибка при получении ближайших занятий: {e}")
+    #         return []
+    def get_upcoming_lessons(self, tutor_id: int, days: int = 7):
+        """Получает ближайшие занятия репетитора"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                # Отладочная информация
+                print(f"Поиск занятий для tutor_id: {tutor_id}")
+                
+                # Сначала посмотрим ВСЕ занятия этого репетитора
+                cursor.execute('''
+                SELECT l.*, s.full_name as student_name
+                FROM lessons l
+                LEFT JOIN students s ON l.student_id = s.id
+                WHERE l.tutor_id = ?
+                ORDER BY l.lesson_date
+                ''', (tutor_id,))
+                
+                all_lessons = [dict(row) for row in cursor.fetchall()]
+                print(f"Все занятия репетитора: {len(all_lessons)}")
+                for lesson in all_lessons:
+                    print(f"Урок: {lesson}")
+                
+                # Теперь ищем ближайшие
+                cursor.execute('''
+                SELECT l.*, s.full_name as student_name
+                FROM lessons l
+                LEFT JOIN students s ON l.student_id = s.id
+                WHERE l.tutor_id = ? 
+                AND l.lesson_date >= datetime('now')
+                AND l.lesson_date <= datetime('now', ? || ' days')
+                AND l.status = 'planned'
+                ORDER BY l.lesson_date
+                ''', (tutor_id, days))
+                
+                result = [dict(row) for row in cursor.fetchall()]
+                print(f"Найдено ближайших занятий: {len(result)}")
+                
+                return result
+                
+        except Exception as e:
+            logger.error(f"Ошибка при получении ближайших занятий: {e}")
+            print(f"Ошибка: {e}")
+            return []
+        
+    def add_lesson(self, tutor_id: int, student_id: int, lesson_date: str, 
+               duration: int, price: float):
+        """Добавляет новое занятие"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price)
+                VALUES (?, ?, ?, ?, ?)
+                ''', (tutor_id, student_id, lesson_date, duration, price))
+                conn.commit()
+                return cursor.lastrowid
+        except Exception as e:
+            logger.error(f"Ошибка при добавлении занятия: {e}")
+            return None
 # Создаем глобальный экземпляр базы данных
 db = Database()

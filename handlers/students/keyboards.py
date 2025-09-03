@@ -17,3 +17,4 @@ def get_student_detail_keyboard(student_id):
         [InlineKeyboardButton(text="◀️ Назад к списку", callback_data="students_list")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+

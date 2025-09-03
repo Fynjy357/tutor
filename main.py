@@ -7,10 +7,11 @@ import logging
 from config import BOT_TOKEN
 from handlers.start import start_router
 from handlers.start import about_router
-from handlers.students.invitations import router as invitations_router
 from handlers.students.edit_handlers import router as edit_students_router
 from handlers.students.handlers import router as add_students_router
 from handlers.students.main import router as students_router
+from handlers.students.invitations import router as invitations_router
+from handlers.schedule.handlers import router as schedule_router
 
 from database import db 
 
@@ -31,6 +32,7 @@ async def main():
     dp.include_router(students_router)
     dp.include_router(invitations_router)
     dp.include_router(add_students_router)
+    dp.include_router(schedule_router)
 
 
 
