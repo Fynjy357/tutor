@@ -1,16 +1,13 @@
 # handlers/students/invitations.py
 from aiogram import Router, types, F
-from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
 import re
 
-from handlers.start import cmd_start
-
 from .keyboards import get_invite_keyboard, get_student_detail_keyboard
 from .utils import format_student_info, get_students_stats
-from keyboards.students import get_students_menu_keyboard, get_students_list_keyboard
+from handlers.students.keyboards_student import get_students_menu_keyboard, get_students_list_keyboard
 from database import db
 
 router = Router()
@@ -70,7 +67,7 @@ async def generate_invite(callback_query: types.CallbackQuery):
         if db.update_student_token(student_id, token, invite_type):
             # Формируем ссылку приглашения
             bot_username = (await callback_query.bot.get_me()).username
-            invite_link = f"https://t.me/{bot_username}?start=invite_{invite_type}_{token}"
+            invite_link = f"https://t.me/{bot_username}?start={invite_type}_{token}"
             
             user_type = "ученика" if invite_type == "student" else "родителя"
             await callback_query.message.edit_text(
@@ -187,111 +184,3 @@ async def students_list_page(callback_query: types.CallbackQuery):
         reply_markup=get_students_list_keyboard(students, page=page),
         parse_mode="HTML"
     )
-
-# Обработчик для стартовой команды с приглашением
-@router.message(CommandStart(deep_link=True))
-async def handle_deep_link(message: types.Message):
-    logger.info("=== DEEP LINK HANDLER STARTED ===")
-    logger.info(f"Полное сообщение: {message.text}")
-    logger.info(f"Пользователь: {message.from_user.id} @{message.from_user.username}")
-    
-    # Правильное извлечение аргументов
-    args = message.text.split()
-    if len(args) < 2:
-        logger.warning("Нет аргументов в deep link")
-        await cmd_start(message)
-        return
-    
-    deep_link_args = args[1]
-    logger.info(f"Аргументы deep link: {deep_link_args}")
-    
-    # Обрабатываем пригласительные ссылки
-    if deep_link_args.startswith('student_') or deep_link_args.startswith('parent_'):
-        try:
-            parts = deep_link_args.split('_', 1)
-            if len(parts) < 2:
-                logger.error("Неверный формат deep link")
-                await message.answer("❌ Неверная ссылка приглашения.")
-                return
-                
-            invite_type, token = parts
-            logger.info(f"Тип приглашения: {invite_type}, Токен: {token}")
-            
-            if invite_type not in ['student', 'parent']:
-                logger.error(f"Неизвестный тип приглашения: {invite_type}")
-                await message.answer("❌ Неверная ссылка приглашения.")
-                return
-            
-            # Находим ученика по токену
-            student = db.get_student_by_token(token, invite_type)
-            logger.info(f"Найден ученик: {student is not None}")
-            
-            if not student:
-                logger.error(f"Ученик не найден по токену: {token}")
-                await message.answer("❌ Ссылка приглашения недействительна или устарела.")
-                return
-            
-            logger.info(f"Данные ученика: ID={student['id']}, Name={student['full_name']}")
-            
-            # Получаем username пользователя
-            username = f"@{message.from_user.username}" if message.from_user.username else "не указан"
-            logger.info(f"Username пользователя: {username}")
-            
-            # Привязываем Telegram аккаунт к ученику
-            if invite_type == 'student':
-                success = db.update_student_telegram_id(
-                    student['id'], 
-                    message.from_user.id, 
-                    username, 
-                    'student'
-                )
-                role = "ученика"
-                tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!"
-            else:
-                success = db.update_student_telegram_id(
-                    student['id'], 
-                    message.from_user.id, 
-                    username, 
-                    'parent'
-                )
-                role = "родителя"
-                tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!"
-            
-            logger.info(f"Привязка аккаунта: {success}")
-            
-            if success:
-                # Отправляем сообщение пользователю
-                await message.answer(
-                    f"✅ <b>Вы успешно привязаны как {role} ученика {student['full_name']}!</b>\n\n"
-                    f"Теперь вы будете получать уведомления о занятиях и успехах.",
-                    parse_mode="HTML"
-                )
-                
-                # Отправляем уведомление репетитору
-                try:
-                    tutor = db.get_tutor_by_id(student['tutor_id'])
-                    logger.info(f"Найден репетитор: {tutor is not None}")
-                    if tutor and tutor[1]:  # tutor[1] - telegram_id
-                        await message.bot.send_message(
-                            chat_id=tutor[1],
-                            text=tutor_message
-                        )
-                        logger.info(f"Уведомление отправлено репетитору: {tutor[1]}")
-                except Exception as e:
-                    logger.error(f"Ошибка при отправке уведомления репетитору: {e}")
-            else:
-                await message.answer(
-                    "❌ <b>Ошибка при привязке аккаунта!</b>\n\n"
-                    "Пожалуйста, попробуйте позже или обратитесь к репетитору.",
-                    parse_mode="HTML"
-                )
-            
-        except Exception as e:
-            logger.error(f"Ошибка в обработке deep link: {e}")
-            await message.answer("❌ Произошла ошибка при обработке приглашения.")
-    
-    else:
-        logger.info("Неизвестный формат deep link, выполняется стандартный старт")
-        await cmd_start(message)
-    
-    logger.info("=== DEEP LINK HANDLER FINISHED ===")

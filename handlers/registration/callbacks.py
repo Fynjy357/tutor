@@ -5,7 +5,11 @@ import logging
 
 from handlers.registration.states import RegistrationStates
 from handlers.registration.utils import show_confirmation
-from keyboards.registration import get_cancel_keyboard, get_phone_keyboard, get_promo_keyboard, get_registration_keyboard
+from handlers.start.config import WELCOME_BACK_TEXT
+from keyboards.keyboard_phone import get_phone_keyboard
+from handlers.registration.keyboards import get_cancel_keyboard
+from handlers.start.keyboards_start import get_registration_keyboard
+from keyboards.main_menu import get_main_menu_keyboard
 from database import db
 
 router = Router()
@@ -14,17 +18,6 @@ logger = logging.getLogger(__name__)
 @router.callback_query(F.data == "start_registration")
 async def start_registration(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
-    
-    # Проверяем, не зарегистрирован ли пользователь уже
-    existing_tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
-    if existing_tutor:
-        await callback_query.message.answer(
-            "Вы уже зарегистрированы в системе!\n\n"
-            f"ФИО: {existing_tutor[2]}\n"
-            f"Телефон: {existing_tutor[3]}\n"
-            f"Промокод: {existing_tutor[4] if existing_tutor[4] != '0' else 'не указан'}"
-        )
-        return
     
     try:
         # Удаляем предыдущее сообщение с кнопками
@@ -108,25 +101,13 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
             logger.warning("Не удалось удалить сообщение подтверждения")
         
         # Формируем приветственное сообщение
-        welcome_text = f"""
-<b>Добро пожаловать, {user_data['name']}!</b>
-
-Рады видеть вас в ежедневнике репетитора.
-
-Ваши данные:
-📝 ФИО: {user_data['name']}
-📞 Телефон: {user_data['phone']}
-🎫 Промокод: {promo_text}
-
-Выберите нужный раздел:
-        """
+        welcome_text = WELCOME_BACK_TEXT
         
         # Отправляем приветственное сообщение с главным меню
-        # Вам нужно будет создать клавиатуру для главного меню
-        from keyboards.main_menu import get_main_menu_keyboard
         await callback_query.message.answer(
             welcome_text,
-            reply_markup=get_main_menu_keyboard()
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
         )
         
     except Exception as e:

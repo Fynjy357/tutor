@@ -358,6 +358,22 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при обновлении ученика: {e}")
             return False
+        
+    def update_student_field(self, student_id, field_name, field_value):
+        """Обновляет конкретное поле ученика"""
+        try:
+            # Используйте self.get_connection() вместо self.conn
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"UPDATE students SET {field_name} = ? WHERE id = ?",
+                    (field_value, student_id)
+                )
+                conn.commit()  # Явное сохранение изменений
+                return cursor.rowcount > 0
+        except sqlite3.Error as e:
+            logger.error(f"Ошибка при обновлении поля {field_name} ученика {student_id}: {e}")
+            return False
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

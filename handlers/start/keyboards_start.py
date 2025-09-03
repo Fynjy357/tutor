@@ -1,7 +1,6 @@
 # keyboards/registration.py
 from aiogram import types
-from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardMarkup, KeyboardButton
-
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 def get_registration_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(
@@ -17,16 +16,6 @@ def get_registration_keyboard():
         )
     )
     return builder.as_markup()
-
-def get_phone_keyboard():
-    # Создаем Reply-клавиатуру (не инлайн) для запроса номера телефона
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
 
 def get_cancel_keyboard():
     builder = InlineKeyboardBuilder()

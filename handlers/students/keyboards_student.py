@@ -22,13 +22,13 @@ def get_students_menu_keyboard():
     builder.row(
         types.InlineKeyboardButton(
             text="◀️ Назад в главное меню",
-            callback_data="back_to_main"
+            callback_data="back_to_main_students"
         )
     )
     
     return builder.as_markup()
 
-def get_cancel_keyboard():
+def get_cancel_keyboard_add_students():
     builder = InlineKeyboardBuilder()
     builder.row(
         types.InlineKeyboardButton(

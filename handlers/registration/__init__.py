@@ -1,4 +1,4 @@
+from .main import router as registration_router
 from .states import RegistrationStates
-from .handlers import router
 
-__all__ = ['RegistrationStates', 'router']
+__all__ = ['registration_router', 'RegistrationStates']

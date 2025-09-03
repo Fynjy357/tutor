@@ -1,51 +1,65 @@
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import ReplyKeyboardRemove
-
-from handlers.registration.states import RegistrationStates
-from keyboards.confirmation import get_confirmation_keyboard
+from aiogram import types, Bot
+from aiogram.fsm.context import FSMContext
 from database import db
-import logging
+from handlers.registration.states import RegistrationStates
+from handlers.registration.keyboards import get_confirmation_keyboard
 
-logger = logging.getLogger(__name__)
-
-async def show_confirmation(message, state, bot):
-    user_data = await state.get_data()
-    logger.info(f"Данные для подтверждения: {user_data}")
+async def show_confirmation(message: types.Message, state: FSMContext, bot: Bot):
+    """Показ подтверждения данных"""
+    data = await state.get_data()
     
-    # Удаляем все сообщения процесса регистрации
-    registration_messages = user_data.get('registration_messages', [])
+    confirmation_text = f"""
+<b>Проверьте ваши данные:</b>
+
+📝 <b>ФИО:</b> {data.get('name', 'не указано')}
+📞 <b>Телефон:</b> {data.get('phone', 'не указан')}
+🎫 <b>Промокод:</b> {data.get('promo', 'не указан') if data.get('promo') != '0' else 'не указан'}
+
+Всё верно?
+"""
+    
+    # Удаляем предыдущие сообщения регистрации
+    registration_messages = data.get('registration_messages', [])
     for msg_id in registration_messages:
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-        except TelegramBadRequest:
-            # Если сообщение уже удалено, игнорируем ошибку
+        except:
             pass
     
-    # Формируем текст с промокодом
-    promo_code = user_data.get('promo', '0')
-    promo_text = f"Промокод: {promo_code}" if promo_code != "0" else "Промокод: не указан"
-    
-    # Проверяем валидность промокода, если он указан
-    if promo_code != "0":
-        promo_info = db.check_promo_code(promo_code)
-        if promo_info:
-            discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
-            discount_type = "%" if promo_info[2] > 0 else "руб."
-            promo_text = f"Промокод: {promo_code} (скидка {discount}{discount_type})"
-        else:
-            promo_text = f"Промокод: {promo_code} (недействителен)"
-    
-    # Отправляем сообщение с подтверждением данных и кнопками
-    confirmation_message = await message.answer(
-        f"Регистрация завершена!\n\n"
-        f"ФИО: {user_data['name']}\n"
-        f"Телефон: {user_data['phone']}\n"
-        f"{promo_text}\n\n"
-        f"Подтвердите правильность данных или измените их:",
-        reply_markup=get_confirmation_keyboard()
+    # Отправляем сообщение с подтверждением
+    confirm_message = await message.answer(
+        confirmation_text,
+        reply_markup=get_confirmation_keyboard(),
+        parse_mode="HTML"
     )
     
-    # Сохраняем ID сообщения с подтверждением
-    await state.update_data(registration_messages=[confirmation_message.message_id])
+    # Сохраняем ID нового сообщения
+    await state.update_data(registration_messages=[confirm_message.message_id])
     await state.set_state(RegistrationStates.confirmation)
-    logger.info(f"Состояние установлено: {await state.get_state()}")
+
+async def save_tutor_data(callback_query: types.CallbackQuery, user_data: dict):
+    """Сохранение данных репетитора в БД"""
+    try:
+        tutor_id = db.add_tutor(
+            telegram_id=callback_query.from_user.id,
+            full_name=user_data['name'],
+            phone=user_data['phone'],
+            promo_code=user_data.get('promo', '0')
+        )
+        return tutor_id, True
+    except Exception as e:
+        return None, False
+
+async def process_promo_code(promo_code: str):
+    """Обработка промокода"""
+    if not promo_code or promo_code == '0':
+        return "не указан"
+    
+    promo_info = db.check_promo_code(promo_code)
+    if promo_info:
+        db.use_promo_code(promo_code)
+        discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
+        discount_type = "%" if promo_info[2] > 0 else "руб."
+        return f"{promo_code} (скидка {discount}{discount_type})"
+    else:
+        return f"{promo_code} (недействителен)"
