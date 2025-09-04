@@ -14,7 +14,9 @@ class Database:
 
     def get_connection(self):
         """Создает и возвращает соединение с базой данных"""
-        return sqlite3.connect(self.db_name)
+        conn = sqlite3.connect(self.db_name)
+        conn.row_factory = sqlite3.Row  # Для работы с dict-like строками
+        return conn
 
     def init_db(self):
         """Инициализирует базу данных и создает таблицы"""
@@ -145,7 +147,7 @@ class Database:
             return None
 
     def get_tutor_by_id(self, tutor_id):
-        """Возвращает данные репетитора по ID"""
+        """Возвращает данные реpетитора по ID"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
@@ -391,14 +393,13 @@ class Database:
     def update_student_field(self, student_id, field_name, field_value):
         """Обновляет конкретное поле ученика"""
         try:
-            # Используйте self.get_connection() вместо self.conn
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     f"UPDATE students SET {field_name} = ? WHERE id = ?",
                     (field_value, student_id)
                 )
-                conn.commit()  # Явное сохранение изменений
+                conn.commit()
                 return cursor.rowcount > 0
         except sqlite3.Error as e:
             logger.error(f"Ошибка при обновлении поля {field_name} ученика {student_id}: {e}")
@@ -421,9 +422,7 @@ class Database:
                     l.status,
                     l.created_at,
                     s.full_name as student_name,
-                    s.phone as student_phone,
-                    s.grade as student_grade,
-                    s.school as student_school
+                    s.phone as student_phone
                 FROM lessons l
                 LEFT JOIN students s ON l.student_id = s.id
                 WHERE l.tutor_id = ? AND date(l.lesson_date) BETWEEN ? AND ?
@@ -433,23 +432,24 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении занятий: {e}")
             return []
+
     def get_lessons_by_student(self, student_id: int):
         """Получает все занятия студента"""
         try:
-                with self.get_connection() as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    cursor.execute('''
-                    SELECT l.*, t.full_name as tutor_name
-                    FROM lessons l
-                    LEFT JOIN tutors t ON l.tutor_id = t.id
-                    WHERE l.student_id = ?
-                    ORDER BY l.lesson_date DESC
-                    ''', (student_id,))
-                    return [dict(row) for row in cursor.fetchall()]
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT l.*, t.full_name as tutor_name
+                FROM lessons l
+                LEFT JOIN tutors t ON l.tutor_id = t.id
+                WHERE l.student_id = ?
+                ORDER BY l.lesson_date DESC
+                ''', (student_id,))
+                return [dict(row) for row in cursor.fetchall()]
         except Exception as e:
             logger.error(f"Ошибка при получении занятий студента: {e}")
-        return []
+            return []
 
     def get_upcoming_lessons(self, tutor_id: int, days: int = 7):
         """Получает ближайшие занятия репетитора"""
@@ -458,7 +458,6 @@ class Database:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 
-                # Используем правильный запрос с информацией о группах
                 cursor.execute('''
                 SELECT l.*, s.full_name as student_name,
                     g.id as group_id, g.name as group_name
@@ -642,6 +641,7 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при обновлении названия группы: {e}")
             return False
+
     def get_students_by_group(self, group_id: int):
         """Получить всех учеников группы"""
         try:
@@ -660,28 +660,28 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении учеников группы: {e}")
             return []
+
     def get_tutor_groups(self, tutor_id: int):
         """Получить все группы репетитора"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 
-                # Логируем запрос для отладки
                 logger.info(f"Поиск групп для tutor_id: {tutor_id}")
                 
                 cursor.execute('SELECT id, name FROM groups WHERE tutor_id = ?', (tutor_id,))
                 groups = cursor.fetchall()
                 
-                # Логируем результат
                 logger.info(f"Найдено групп: {len(groups)} для tutor_id: {tutor_id}")
                 for group in groups:
                     logger.info(f"Группа: {group}")
                 
-                return groups  # Возвращаем кортежи (id, name)
+                return groups
                     
         except Exception as e:
             logger.error(f"Ошибка при получении групп репетитора: {e}")
             return []
+
     def add_group_lesson(self, tutor_id: int, group_id: int, lesson_date: datetime, 
                     duration: int, price: float, status: str = "planned"):
         """Добавляет занятие для всей группы"""
@@ -699,7 +699,6 @@ class Database:
                 
                 for student in students:
                     logger.info(f"Добавление занятия для student_id={student['id']}, group_id={group_id}")
-                    # Используем существующий метод add_lesson с передачей group_id
                     cursor.execute('''
                     INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price, status, group_id)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -712,6 +711,158 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при добавлении группового занятия: {e}")
             return False
+
+    def get_lesson_by_id(self, lesson_id):
+        """Получить занятие по ID"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                SELECT l.*, s.full_name as student_name 
+                FROM lessons l 
+                LEFT JOIN students s ON l.student_id = s.id 
+                WHERE l.id = ?
+                ''', (lesson_id,))
+                
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Ошибка при получении занятия по ID: {e}")
+            return None
+
+    def update_lesson_datetime(self, lesson_id, new_datetime):
+        """Обновить дату/время занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE lessons SET lesson_date = ? WHERE id = ?', (new_datetime, lesson_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении даты/времени: {e}")
+            return False
+
+    def update_lesson_price(self, lesson_id, new_price):
+        """Обновить стоимость занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE lessons SET price = ? WHERE id = ?', (new_price, lesson_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении стоимости: {e}")
+            return False
+
+    def update_lesson_duration(self, lesson_id, new_duration):
+        """Обновить длительность занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE lessons SET duration = ? WHERE id = ?', (new_duration, lesson_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении длительности: {e}")
+            return False
+
+    def update_lesson_student(self, lesson_id, student_id):
+        """Обновить ученика занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE lessons SET student_id = ?, group_id = NULL WHERE id = ?', (student_id, lesson_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении ученика: {e}")
+            return False
+
+    def update_lesson_group(self, lesson_id, group_id):
+        """Обновить группу занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE lessons SET group_id = ?, student_id = NULL WHERE id = ?', (group_id, lesson_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении группы: {e}")
+            return False
+
+    def delete_lesson(self, lesson_id):
+        """Удалить занятие"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('DELETE FROM lessons WHERE id = ?', (lesson_id,))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при удалении занятия: {e}")
+            return False
+        
+    def update_group_lesson_datetime(self, group_id: int, new_datetime: str) -> bool:
+        """Обновить дату/время для всех занятий группы"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE lessons SET lesson_date = ? WHERE group_id = ?", (new_datetime, group_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении даты/времени группы: {e}")
+            return False
+
+    def update_group_lesson_price(self, group_id: int, price: float) -> bool:
+        """Обновить стоимость для всех занятий группы"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE lessons SET price = ? WHERE group_id = ?", (price, group_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении стоимости группы: {e}")
+            return False
+
+    def update_group_lesson_duration(self, group_id: int, duration: int) -> bool:
+        """Обновить длительность для всех занятий группы"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE lessons SET duration = ? WHERE group_id = ?", (duration, group_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении длительности группы: {e}")
+            return False
+
+    def get_lessons_by_date(self, tutor_id: int, date_str: str) -> list:
+        """Получить занятия на определенную дату"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                query = """
+                SELECT l.id, l.lesson_date, l.duration, l.price, l.status, 
+                    l.group_id, l.student_id,
+                    s.full_name as student_name,
+                    g.name as group_name
+                FROM lessons l
+                LEFT JOIN students s ON l.student_id = s.id
+                LEFT JOIN groups g ON l.group_id = g.id
+                WHERE l.tutor_id = ? AND DATE(l.lesson_date) = ?
+                ORDER BY l.lesson_date
+                """
+                cursor.execute(query, (tutor_id, date_str))
+                lessons = cursor.fetchall()
+                return [dict(lesson) for lesson in lessons]
+        except Exception as e:
+            logger.error(f"Ошибка при получении занятий по дате: {e}")
+            return []
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

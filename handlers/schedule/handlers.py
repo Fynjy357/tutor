@@ -3,7 +3,8 @@ from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
@@ -118,12 +119,6 @@ async def get_upcoming_lessons(tutor_id: int) -> str:
     
     return schedule_text
 
-
-@router.callback_query(F.data == "edit_lesson")
-async def edit_lesson_start(callback_query: types.CallbackQuery, state: FSMContext):
-    """Начало редактирования занятия"""
-    await callback_query.answer()
-    await callback_query.message.answer("Функция редактирования занятия в разработке...")
 
 @router.callback_query(F.data == "back_from_schedule")
 async def back_from_schedule(callback_query: types.CallbackQuery, state: FSMContext):
