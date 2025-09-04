@@ -9,3 +9,5 @@ class AddLessonStates(StatesGroup):
     entering_time = State()                 # Время
     choosing_students = State()             # Выбор учеников
     confirmation = State()                  # Подтверждение
+    choosing_group = State()                # Выбор группы
+    confirming_lesson = State()

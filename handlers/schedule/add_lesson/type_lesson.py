@@ -32,9 +32,8 @@ async def add_lesson_start(callback_query: types.CallbackQuery, state: FSMContex
 async def process_lesson_type(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка выбора типа занятия"""
     await callback_query.answer()
-    
-    lesson_type = callback_query.data.split("_")[2]  # individual или group
-    await state.update_data(lesson_type=lesson_type)
+
+    await state.update_data(lesson_type="individual")
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📅 Единоразовое", callback_data="frequency_single")],
@@ -48,3 +47,15 @@ async def process_lesson_type(callback_query: types.CallbackQuery, state: FSMCon
         parse_mode="HTML"
     )
     await state.set_state(AddLessonStates.choosing_frequency)
+
+# Обработчик выбора типа занятия - ГРУППОВОЕ
+@router.callback_query(F.data == "lesson_type_group", AddLessonStates.choosing_lesson_type)
+async def process_group_lesson_type(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка выбора группового занятия"""
+    await callback_query.answer()
+    
+    await state.update_data(lesson_type="group")
+    
+    # Для групповых занятий сразу переходим к выбору группы
+    from handlers.schedule.add_lesson.group_lesson import choose_group_for_lesson
+    await choose_group_for_lesson(callback_query, state)

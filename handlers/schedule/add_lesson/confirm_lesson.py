@@ -4,6 +4,7 @@ from datetime import datetime
 from database import db
 from handlers.schedule.states import AddLessonStates
 from datetime import datetime, timedelta
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
 
 
@@ -88,3 +89,52 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             f"Ошибка: {str(e)}",
             parse_mode="HTML"
         )
+
+@router.message(AddLessonStates.confirming_lesson)
+async def confirm_lesson_data(message: types.Message, state: FSMContext):
+    """Подтверждение данных занятия"""
+    data = await state.get_data()
+    
+    # Формируем текст для подтверждения
+    confirm_text = f"""
+✅ <b>Проверьте данные занятия:</b>
+
+📅 Дата: {data.get('date')}
+⏰ Время: {data.get('time')}
+👥 Тип: {'Групповое' if data.get('lesson_type') == 'group' else 'Индивидуальное'}
+"""
+
+    if data.get('lesson_type') == 'individual':
+        confirm_text += f"👤 Ученик: {data.get('student_name')}"
+    else:
+        confirm_text += f"👥 Группа: {data.get('group_name')}"
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Подтвердить", callback_data="confirm_lesson")],
+        [InlineKeyboardButton(text="❌ Отменить", callback_data="cancel_lesson")]
+    ])
+    
+    await message.answer(confirm_text, reply_markup=keyboard, parse_mode="HTML")
+
+@router.callback_query(F.data == "confirm_lesson", AddLessonStates.confirming_lesson)
+async def process_lesson_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка подтверждения занятия"""
+    data = await state.get_data()
+    
+    # Сохраняем занятие в БД
+    # db.add_lesson(...)
+    
+    await callback_query.message.edit_text(
+        "✅ <b>Занятие успешно добавлено в расписание!</b>",
+        parse_mode="HTML"
+    )
+    await state.clear()
+
+@router.callback_query(F.data == "cancel_lesson", AddLessonStates.confirming_lesson)
+async def process_lesson_cancellation(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка отмены занятия"""
+    await callback_query.message.edit_text(
+        "❌ <b>Добавление занятия отменено</b>",
+        parse_mode="HTML"
+    )
+    await state.clear()

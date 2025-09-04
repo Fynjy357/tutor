@@ -108,6 +108,11 @@ class Database:
                 UNIQUE(student_id, group_id)
             )
             ''')
+            try:
+                cursor.execute('ALTER TABLE lessons ADD COLUMN group_id INTEGER')
+            except sqlite3.OperationalError:
+                # Поле уже существует - игнорируем ошибку
+                pass
             
             conn.commit()
         logger.info("База данных инициализирована")
@@ -453,28 +458,14 @@ class Database:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 
-                # Отладочная информация
-                print(f"Поиск занятий для tutor_id: {tutor_id}")
-                
-                # Сначала посмотрим ВСЕ занятия этого репетитора
+                # Используем правильный запрос с информацией о группах
                 cursor.execute('''
-                SELECT l.*, s.full_name as student_name
+                SELECT l.*, s.full_name as student_name,
+                    g.id as group_id, g.name as group_name
                 FROM lessons l
                 LEFT JOIN students s ON l.student_id = s.id
-                WHERE l.tutor_id = ?
-                ORDER BY l.lesson_date
-                ''', (tutor_id,))
-                
-                all_lessons = [dict(row) for row in cursor.fetchall()]
-                print(f"Все занятия репетитора: {len(all_lessons)}")
-                for lesson in all_lessons:
-                    print(f"Урок: {lesson}")
-                
-                # Теперь ищем ближайшие
-                cursor.execute('''
-                SELECT l.*, s.full_name as student_name
-                FROM lessons l
-                LEFT JOIN students s ON l.student_id = s.id
+                LEFT JOIN student_groups sg ON s.id = sg.student_id
+                LEFT JOIN groups g ON sg.group_id = g.id AND g.tutor_id = l.tutor_id
                 WHERE l.tutor_id = ? 
                 AND l.lesson_date >= datetime('now')
                 AND l.lesson_date <= datetime('now', ? || ' days')
@@ -492,17 +483,18 @@ class Database:
             print(f"Ошибка: {e}")
             return []
         
-    def add_lesson(self, tutor_id: int, student_id: int, lesson_date: str, 
-               duration: int, price: float):
-        """Добавляет новое занятие"""
+    def add_lesson(self, tutor_id: int, student_id: int, lesson_date: datetime, 
+                duration: int, price: float, status: str = "planned", group_id: int = None):
+        """Добавляет новое занятие (индивидуальное или групповое)"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute('''
-                INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price)
-                VALUES (?, ?, ?, ?, ?)
-                ''', (tutor_id, student_id, lesson_date, duration, price))
+                INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price, status, group_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (tutor_id, student_id, lesson_date, duration, price, status, group_id))
                 conn.commit()
+                logger.info(f"Добавлено занятие: student_id={student_id}, group_id={group_id}")
                 return cursor.lastrowid
         except Exception as e:
             logger.error(f"Ошибка при добавлении занятия: {e}")
@@ -650,5 +642,76 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при обновлении названия группы: {e}")
             return False
+    def get_students_by_group(self, group_id: int):
+        """Получить всех учеников группы"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT s.id, s.full_name 
+                    FROM students s 
+                    JOIN student_groups gs ON s.id = gs.student_id 
+                    WHERE gs.group_id = ?
+                """, (group_id,))
+                
+                students = cursor.fetchall()
+                return [{'id': student[0], 'full_name': student[1]} for student in students]
+                
+        except Exception as e:
+            logger.error(f"Ошибка при получении учеников группы: {e}")
+            return []
+    def get_tutor_groups(self, tutor_id: int):
+        """Получить все группы репетитора"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Логируем запрос для отладки
+                logger.info(f"Поиск групп для tutor_id: {tutor_id}")
+                
+                cursor.execute('SELECT id, name FROM groups WHERE tutor_id = ?', (tutor_id,))
+                groups = cursor.fetchall()
+                
+                # Логируем результат
+                logger.info(f"Найдено групп: {len(groups)} для tutor_id: {tutor_id}")
+                for group in groups:
+                    logger.info(f"Группа: {group}")
+                
+                return groups  # Возвращаем кортежи (id, name)
+                    
+        except Exception as e:
+            logger.error(f"Ошибка при получении групп репетитора: {e}")
+            return []
+    def add_group_lesson(self, tutor_id: int, group_id: int, lesson_date: datetime, 
+                    duration: int, price: float, status: str = "planned"):
+        """Добавляет занятие для всей группы"""
+        try:
+            # Получаем всех учеников группы
+            students = self.get_students_in_group(group_id)
+            if not students:
+                logger.error(f"Группа {group_id} пустая")
+                return False
+            
+            logger.info(f"Добавление занятий для группы {group_id}: {len(students)} учеников")
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for student in students:
+                    logger.info(f"Добавление занятия для student_id={student['id']}, group_id={group_id}")
+                    # Используем существующий метод add_lesson с передачей group_id
+                    cursor.execute('''
+                    INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price, status, group_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (tutor_id, student['id'], lesson_date, duration, price, status, group_id))
+                
+                conn.commit()
+                logger.info(f"Успешно добавлено {len(students)} занятий для группы {group_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Ошибка при добавлении группового занятия: {e}")
+            return False
+
 # Создаем глобальный экземпляр базы данных
 db = Database()
