@@ -14,13 +14,20 @@ from handlers.students.main import router as students_router
 from handlers.students.invitations import router as invitations_router
 from handlers.groups.handlers import router as groups_router
 from handlers.schedule import setup_schedule_handlers
+from notify import NotificationManager, lesson_notification_scheduler, setup_notification_handlers, register_confirmation_handlers
 
 
 from database import db 
 
 # Настройка логирования
-logging.basicConfig(level=logging.INFO)
-
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('bot.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 
 async def main():
     if not BOT_TOKEN:
@@ -29,6 +36,17 @@ async def main():
 
     bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(storage=MemoryStorage())
+
+    # ИНИЦИАЛИЗАЦИЯ МЕНЕДЖЕРА УВЕДОМЛЕНИЙ - создаем экземпляр менеджера уведомлений
+    notification_manager = NotificationManager(db)
+
+    # ПРОВЕРКА ФОРМАТА ДАТ - добавляем эту проверку
+    notification_manager.check_lesson_dates_format()
+
+    # НАСТРОЙКА ОБРАБОТЧИКОВ УВЕДОМЛЕНИЙ - регистрируем обработчики подтверждений
+    setup_notification_handlers(dp, db, notification_manager)
+
+    register_confirmation_handlers(dp, notification_manager)
 
     dp.include_router(start_router)
     dp.include_router(registration_router)
@@ -41,6 +59,10 @@ async def main():
     schedule_router = setup_schedule_handlers()
     dp.include_router(schedule_router)
     dp.include_router(groups_router)
+
+    # ЗАПУСК ПЛАНИРОВЩИКА УВЕДОМЛЕНИЙ - запускаем фоновую задачу для уведомлений
+    asyncio.create_task(lesson_notification_scheduler(bot, notification_manager))
+
 
     await dp.start_polling(bot)
 

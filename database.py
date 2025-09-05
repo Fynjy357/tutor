@@ -72,6 +72,20 @@ class Database:
                 FOREIGN KEY (student_id) REFERENCES students (id)
             )
             ''')
+
+            # Таблица подтверждений занятий
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS lesson_confirmations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lesson_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                confirmed BOOLEAN,
+                confirmed_at TIMESTAMP,
+                notified_at TIMESTAMP,
+                FOREIGN KEY (lesson_id) REFERENCES lessons (id),
+                FOREIGN KEY (student_id) REFERENCES students (id)
+            )
+            ''')
             
             # Таблица промокодов
             cursor.execute('''
@@ -748,16 +762,21 @@ class Database:
             return False
 
     def get_lesson_by_id(self, lesson_id):
-        """Получить занятие по ID"""
+        """Получить занятие по ID с информацией о студенте и репетиторе"""
         try:
             with self.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 
                 cursor.execute('''
-                SELECT l.*, s.full_name as student_name 
+                SELECT l.*, 
+                    s.full_name as student_name, 
+                    s.student_telegram_id,
+                    t.full_name as tutor_name,
+                    t.telegram_id as tutor_telegram_id
                 FROM lessons l 
                 LEFT JOIN students s ON l.student_id = s.id 
+                LEFT JOIN tutors t ON l.tutor_id = t.id
                 WHERE l.id = ?
                 ''', (lesson_id,))
                 
@@ -766,6 +785,27 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении занятия по ID: {e}")
             return None
+
+
+    # def get_lesson_by_id(self, lesson_id):
+    #     """Получить занятие по ID"""
+    #     try:
+    #         with self.get_connection() as conn:
+    #             conn.row_factory = sqlite3.Row
+    #             cursor = conn.cursor()
+                
+    #             cursor.execute('''
+    #             SELECT l.*, s.full_name as student_name 
+    #             FROM lessons l 
+    #             LEFT JOIN students s ON l.student_id = s.id 
+    #             WHERE l.id = ?
+    #             ''', (lesson_id,))
+                
+    #             result = cursor.fetchone()
+    #             return dict(result) if result else None
+    #     except Exception as e:
+    #         logger.error(f"Ошибка при получении занятия по ID: {e}")
+    #         return None
 
     def update_lesson_datetime(self, lesson_id, new_datetime):
         """Обновить дату/время занятия"""
@@ -911,6 +951,66 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении ученика по telegram_id: {e}")
             return None
+    
+    
+    def get_upcoming_lessons_for_notification(self):
+        """Получает занятия, которые нужно уведомить (за 24 часа)"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                query = '''
+                SELECT l.*, s.full_name as student_name, s.student_telegram_id,
+                    t.full_name as tutor_name, t.telegram_id as tutor_telegram_id
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                JOIN tutors t ON l.tutor_id = t.id
+                WHERE l.lesson_date BETWEEN datetime('now', '+23 hours') AND datetime('now', '+25 hours')
+                AND l.status = 'planned'
+                AND NOT EXISTS (
+                    SELECT 1 FROM lesson_confirmations lc 
+                    WHERE lc.lesson_id = l.id AND lc.notified_at IS NOT NULL
+                )
+                '''
+                cursor.execute(query)
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при получении занятий для уведомления: {e}")
+            return []
+
+    def create_confirmation_record(self, lesson_id, student_id):
+        """Создает запись для подтверждения занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                INSERT INTO lesson_confirmations (lesson_id, student_id, notified_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                ''', (lesson_id, student_id))
+                conn.commit()
+                return cursor.lastrowid
+        except Exception as e:
+            logger.error(f"Ошибка при создании записи подтверждения: {e}")
+            return None
+        
+    def update_confirmation(self, lesson_id, student_id, confirmed):
+        """Обновляет статус подтверждения занятия"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE lesson_confirmations 
+                SET confirmed = ?, confirmed_at = CURRENT_TIMESTAMP
+                WHERE lesson_id = ? AND student_id = ?
+                ''', (confirmed, lesson_id, student_id))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении подтверждения: {e}")
+            return False
+        
+
+
 
 # Создаем глобальный экземпляр базы данных
 db = Database()
