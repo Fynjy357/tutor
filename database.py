@@ -308,26 +308,61 @@ class Database:
             logger.error(f"Ошибка при поиске ученика по токену: {e}")
             return None
 
-    def update_student_telegram_id(self, student_id, telegram_id, username, user_type):
-        """Привязывает Telegram аккаунт к ученику"""
+    def update_student_telegram_id(self, student_id: int, telegram_id: int, 
+                              username: str, role: str, timezone: str = None) -> bool:
+        """Обновление Telegram ID ученика с часовым поясом"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                if user_type == 'student':
+                
+                if role == 'student':
+                    # Обновляем данные для ученика
                     cursor.execute(
-                        'UPDATE students SET student_telegram_id = ?, student_username = ? WHERE id = ?',
-                        (telegram_id, username, student_id)
+                        '''UPDATE students 
+                        SET student_telegram_id = ?, 
+                            student_username = ?,
+                            timezone = COALESCE(?, timezone)
+                        WHERE id = ?''',
+                        (telegram_id, username, timezone, student_id)
                     )
                 else:
+                    # Обновляем данные для родителя
                     cursor.execute(
-                        'UPDATE students SET parent_telegram_id = ?, parent_username = ? WHERE id = ?',
-                        (telegram_id, username, student_id)
+                        '''UPDATE students 
+                        SET parent_telegram_id = ?, 
+                            parent_username = ?,
+                            timezone = COALESCE(?, timezone)
+                        WHERE id = ?''',
+                        (telegram_id, username, timezone, student_id)
                     )
+                
                 conn.commit()
-                return True
+                return cursor.rowcount > 0
+                
         except Exception as e:
-            logger.error(f"Ошибка при привязке Telegram аккаунта: {e}")
+            logger.error(f"Ошибка обновления Telegram ID: {e}")
             return False
+
+    # def update_student_telegram_id(self, student_id, telegram_id, username, user_type):
+    #     """Привязывает Telegram аккаунт к ученику"""
+    #     try:
+    #         with self.get_connection() as conn:
+    #             cursor = conn.cursor()
+    #             if user_type == 'student':
+    #                 cursor.execute(
+    #                     'UPDATE students SET student_telegram_id = ?, student_username = ? WHERE id = ?',
+    #                     (telegram_id, username, student_id)
+    #                 )
+    #             else:
+    #                 cursor.execute(
+    #                     'UPDATE students SET parent_telegram_id = ?, parent_username = ? WHERE id = ?',
+    #                     (telegram_id, username, student_id)
+    #                 )
+    #             conn.commit()
+    #             return True
+    #     except Exception as e:
+    #         logger.error(f"Ошибка при привязке Telegram аккаунта: {e}")
+    #         return False
 
     def block_student(self, student_id, delete_after=None):
         """Блокирует ученика"""
@@ -863,6 +898,19 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении занятий по дате: {e}")
             return []
+    def get_student_by_telegram_id(self, telegram_id):
+        """Получает ученика по telegram_id (студента или родителя)"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM students WHERE student_telegram_id = ? OR parent_telegram_id = ?', 
+                            (telegram_id, telegram_id))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Ошибка при получении ученика по telegram_id: {e}")
+            return None
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

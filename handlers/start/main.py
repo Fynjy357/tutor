@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def handle_start(message: types.Message):
     """Единый обработчик для команды /start"""
+    logger.info(f"Обработчик /start вызван для пользователя {message.from_user.id}")
     
     args = message.text.split()
     
