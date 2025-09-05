@@ -3,7 +3,7 @@ from aiogram import Dispatcher, types, F
 
 logger = logging.getLogger(__name__)
 
-async def handle_confirmation_callback(callback_query: types.CallbackQuery, notification_manager):
+async def handle_confirmation_callback(callback_query: types.CallbackQuery, notification_manager, bot):
     """Обработчик инлайн-кнопок подтверждения"""
     data = callback_query.data
     user_id = callback_query.from_user.id
@@ -44,12 +44,35 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
             # Формат: reschedule_{lesson_id}_{confirmation_id}
             parts = data.split('_')
             if len(parts) >= 3:
-                confirmation_id = parts[-1]  # Берем последнюю часть
-                logger.info(f"🔍 confirmation_id: {confirmation_id}")
+                confirmation_id = parts[-1]
+                lesson_id = parts[1]
+                
+                # Обновляем статус в базе на "перенос"
+                notification_manager.mark_confirmation(confirmation_id, 2)
+                
+                # Отправляем уведомление репетитору
+                try:
+                    # Получаем chat_id репетитора для этого занятия
+                    teacher_chat_id = notification_manager.get_teacher_chat_id_by_confirmation(confirmation_id)
+                    
+                    if teacher_chat_id:
+                        await bot.send_message(
+                            chat_id=teacher_chat_id,
+                            text=f"🔄 Студент запросил перенос занятия\n"
+                                 f"ID подтверждения: {confirmation_id}\n"
+                                 f"ID занятия: {lesson_id}"
+                        )
+                        logger.info(f"✅ Уведомление отправлено репетитору {teacher_chat_id}")
+                    else:
+                        logger.warning(f"⚠️ Не найден chat_id репетитора для подтверждения {confirmation_id}")
+                        
+                except Exception as e:
+                    logger.error(f"❌ Ошибка при отправке уведомления репетитору: {e}")
+                
                 await callback_query.answer("🔄 Запрос на перенос отправлен")
                 await callback_query.message.edit_text(
-                    f"🔄 Запрос на перенос занятия отправлен\n"
-                    f"С вами свяжется преподаватель",
+                    f"🔄 Запрос на перенос занятия отправлен преподавателю\n"
+                    f"С вами свяжутся для согласования нового времени",
                     reply_markup=None
                 )
             
@@ -57,12 +80,12 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
         logger.error(f"❌ Ошибка обработки callback: {e}")
         await callback_query.answer("⚠️ Произошла ошибка")
 
-def register_confirmation_handlers(dp: Dispatcher, notification_manager):
+def register_confirmation_handlers(dp: Dispatcher, notification_manager, bot):
     """Регистрируем обработчики инлайн-кнопок"""
     
     # Единый обработчик для всех типов подтверждений
     async def confirmation_handler(callback_query: types.CallbackQuery):
-        await handle_confirmation_callback(callback_query, notification_manager)
+        await handle_confirmation_callback(callback_query, notification_manager, bot)
     
     # Регистрируем отдельно для каждого типа callback
     dp.callback_query.register(

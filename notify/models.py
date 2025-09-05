@@ -299,3 +299,23 @@ class NotificationManager:
                 
         except Exception as e:
             logger.error(f"❌ Ошибка при обновлении статуса подтверждения: {e}")
+
+    def get_teacher_chat_id_by_confirmation(self, confirmation_id):
+        """Получает chat_id репетитора по ID подтверждения"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT t.telegram_id 
+                    FROM tutors t
+                    JOIN lessons l ON l.tutor_id = t.id
+                    JOIN lesson_confirmations lc ON lc.lesson_id = l.id
+                    WHERE lc.id = ?
+                ''', (confirmation_id,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else None
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка при получении chat_id репетитора: {e}")
+            return None

@@ -44,9 +44,9 @@ async def main():
     notification_manager.check_lesson_dates_format()
 
     # НАСТРОЙКА ОБРАБОТЧИКОВ УВЕДОМЛЕНИЙ - регистрируем обработчики подтверждений
-    setup_notification_handlers(dp, db, notification_manager)
+    setup_notification_handlers(dp, db, notification_manager, bot)
 
-    register_confirmation_handlers(dp, notification_manager)
+    register_confirmation_handlers(dp, notification_manager, bot)
 
     dp.include_router(start_router)
     dp.include_router(registration_router)
