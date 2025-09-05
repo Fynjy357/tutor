@@ -319,3 +319,28 @@ class NotificationManager:
         except Exception as e:
             logger.error(f"❌ Ошибка при получении chat_id репетитора: {e}")
             return None
+        
+    def get_lesson_info(self, lesson_id):
+        """Получает информацию о занятии"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT l.id, l.lesson_date, s.full_name as student_name
+                    FROM lessons l
+                    JOIN students s ON l.student_id = s.id
+                    WHERE l.id = ?
+                ''', (lesson_id,))
+                
+                result = cursor.fetchone()
+                if result:
+                    return {
+                        'lesson_id': result[0],
+                        'lesson_date': result[1],
+                        'student_name': result[2]
+                    }
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка при получении информации о занятии: {e}")
+            return None

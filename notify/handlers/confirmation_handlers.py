@@ -17,8 +17,42 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
             parts = data.split('_')
             if len(parts) >= 3:
                 confirmation_id = parts[-1]  # Берем последнюю часть
+                lesson_id = parts[1]
+                
                 # Обновляем статус в базе
                 notification_manager.mark_confirmation(confirmation_id, True)
+                
+                # Отправляем уведомление репетитору о подтверждении
+                try:
+                    teacher_chat_id = notification_manager.get_teacher_chat_id_by_confirmation(confirmation_id)
+                    
+                    if teacher_chat_id:
+                        # Получаем информацию о занятии для более детального уведомления
+                        lesson_info = notification_manager.get_lesson_info(lesson_id)
+                        if lesson_info:
+                            student_name = lesson_info.get('student_name', 'неизвестный ученик')
+                            lesson_time = lesson_info.get('lesson_date', 'неизвестное время')
+                            
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"✅ Ученик подтвердил занятие\n"
+                                     f"👤 Ученик: {student_name}\n"
+                                     f"📅 Время: {lesson_time}\n"
+                                     f"ID занятия: {lesson_id}"
+                            )
+                        else:
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"✅ Ученик подтвердил занятие\n"
+                                     f"ID занятия: {lesson_id}"
+                            )
+                        logger.info(f"✅ Уведомление о подтверждении отправлено репетитору {teacher_chat_id}")
+                    else:
+                        logger.warning(f"⚠️ Не найден chat_id репетитора для подтверждения {confirmation_id}")
+                        
+                except Exception as e:
+                    logger.error(f"❌ Ошибка при отправке уведомления репетитору: {e}")
+                
                 await callback_query.answer("✅ Занятие подтверждено!")
                 await callback_query.message.edit_text(
                     f"✅ Вы подтвердили участие в занятии\n"
@@ -31,8 +65,42 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
             parts = data.split('_')
             if len(parts) >= 3:
                 confirmation_id = parts[-1]  # Берем последнюю часть
+                lesson_id = parts[1]
+                
                 # Обновляем статус в базе
                 notification_manager.mark_confirmation(confirmation_id, False)
+                
+                # Отправляем уведомление репетитору об отмене
+                try:
+                    teacher_chat_id = notification_manager.get_teacher_chat_id_by_confirmation(confirmation_id)
+                    
+                    if teacher_chat_id:
+                        # Получаем информацию о занятии
+                        lesson_info = notification_manager.get_lesson_info(lesson_id)
+                        if lesson_info:
+                            student_name = lesson_info.get('student_name', 'неизвестный ученик')
+                            lesson_time = lesson_info.get('lesson_date', 'неизвестное время')
+                            
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"❌ Ученик отменил занятие\n"
+                                     f"👤 Ученик: {student_name}\n"
+                                     f"📅 Время: {lesson_time}\n"
+                                     f"ID занятия: {lesson_id}"
+                            )
+                        else:
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"❌ Ученик отменил занятие\n"
+                                     f"ID занятия: {lesson_id}"
+                            )
+                        logger.info(f"✅ Уведомление об отмене отправлено репетитору {teacher_chat_id}")
+                    else:
+                        logger.warning(f"⚠️ Не найден chat_id репетитора для подтверждения {confirmation_id}")
+                        
+                except Exception as e:
+                    logger.error(f"❌ Ошибка при отправке уведомления репетитору: {e}")
+                
                 await callback_query.answer("❌ Занятие отменено")
                 await callback_query.message.edit_text(
                     f"❌ Вы отменили участие в занятии\n"
@@ -52,17 +120,31 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
                 
                 # Отправляем уведомление репетитору
                 try:
-                    # Получаем chat_id репетитора для этого занятия
                     teacher_chat_id = notification_manager.get_teacher_chat_id_by_confirmation(confirmation_id)
                     
                     if teacher_chat_id:
-                        await bot.send_message(
-                            chat_id=teacher_chat_id,
-                            text=f"🔄 Студент запросил перенос занятия\n"
-                                 f"ID подтверждения: {confirmation_id}\n"
-                                 f"ID занятия: {lesson_id}"
-                        )
-                        logger.info(f"✅ Уведомление отправлено репетитору {teacher_chat_id}")
+                        # Получаем информацию о занятии
+                        lesson_info = notification_manager.get_lesson_info(lesson_id)
+                        if lesson_info:
+                            student_name = lesson_info.get('student_name', 'неизвестный ученик')
+                            lesson_time = lesson_info.get('lesson_date', 'неизвестное время')
+                            
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"🔄 Ученик запросил перенос занятия\n"
+                                     f"👤 Ученик: {student_name}\n"
+                                     f"📅 Текущее время: {lesson_time}\n"
+                                     f"ID занятия: {lesson_id}\n\n"
+                                     f"Свяжитесь с учеником для согласования нового времени"
+                            )
+                        else:
+                            await bot.send_message(
+                                chat_id=teacher_chat_id,
+                                text=f"🔄 Ученик запросил перенос занятия\n"
+                                     f"ID занятия: {lesson_id}\n\n"
+                                     f"Свяжитесь с учеником для согласования нового времени"
+                            )
+                        logger.info(f"✅ Уведомление о переносе отправлено репетитору {teacher_chat_id}")
                     else:
                         logger.warning(f"⚠️ Не найден chat_id репетитора для подтверждения {confirmation_id}")
                         
