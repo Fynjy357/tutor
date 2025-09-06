@@ -216,15 +216,29 @@ async def delete_lesson_confirm(callback_query: types.CallbackQuery, state: FSMC
     await state.set_state(EditLessonStates.confirming_delete)
 
 async def confirm_delete_lesson(callback_query: types.CallbackQuery, state: FSMContext):
-    """Подтвержденное удаление занятия"""
+    """Подтвержденное удаление занятия с переходом к расписанию"""
     await callback_query.answer()
     
     data = await state.get_data()
     lesson_id = data.get('lesson_id')
     
     if db.delete_lesson(lesson_id):
+        # Получаем ID репетитора
+        tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+        
+        # Показываем уведомление об успешном удалении
+        await callback_query.answer("✅ Занятие успешно удалено!", show_alert=True)
+        
+        # Получаем актуальное расписание
+        from handlers.schedule.schedule_utils import get_upcoming_lessons_text
+        from handlers.schedule.keyboards_schedule import get_schedule_keyboard
+        
+        schedule_text = await get_upcoming_lessons_text(tutor_id)
+        
+        # Переходим к расписанию
         await callback_query.message.edit_text(
-            "✅ Занятие успешно удалено!",
+            schedule_text,
+            reply_markup=get_schedule_keyboard(),
             parse_mode="HTML"
         )
     else:

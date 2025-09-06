@@ -210,7 +210,7 @@ async def delete_group_lessons_confirm(callback_query: types.CallbackQuery, stat
     await state.set_state(EditLessonStates.confirming_group_delete)
 
 async def confirm_delete_group_lessons(callback_query: types.CallbackQuery, state: FSMContext):
-    """Подтвержденное удаление всех занятий группы"""
+    """Подтвержденное удаление всех занятий группы с переходом к расписанию"""
     await callback_query.answer()
     
     data = await state.get_data()
@@ -221,16 +221,28 @@ async def confirm_delete_group_lessons(callback_query: types.CallbackQuery, stat
         if db.delete_lesson(lesson['id']):
             success_count += 1
     
+    # Получаем ID репетитора
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    
     if success_count == len(group_lessons):
-        await callback_query.message.edit_text(
-            f"✅ Все {success_count} занятий группы успешно удалены!",
-            parse_mode="HTML"
-        )
+        # Показываем уведомление об успешном удалении
+        await callback_query.answer(f"✅ Все {success_count} занятий группы успешно удалены!", show_alert=True)
     else:
-        await callback_query.message.edit_text(
-            f"⚠️ Удалено {success_count} из {len(group_lessons)} занятий группы!",
-            parse_mode="HTML"
-        )
+        # Показываем уведомление о частичном удалении
+        await callback_query.answer(f"⚠️ Удалено {success_count} из {len(group_lessons)} занятий группы!", show_alert=True)
+    
+    # Получаем актуальное расписание
+    from handlers.schedule.schedule_utils import get_upcoming_lessons_text
+    from handlers.schedule.keyboards_schedule import get_schedule_keyboard
+    
+    schedule_text = await get_upcoming_lessons_text(tutor_id)
+    
+    # Переходим к расписанию
+    await callback_query.message.edit_text(
+        schedule_text,
+        reply_markup=get_schedule_keyboard(),
+        parse_mode="HTML"
+    )
     
     await state.clear()
 

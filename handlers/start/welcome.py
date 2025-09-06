@@ -1,5 +1,6 @@
 from aiogram import types
 from database import db
+from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.keyboards_start import get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
 from handlers.start.config import STUDENT_WELCOME_TEXT, WELCOME_BACK_TEXT, REGISTRATION_TEXT
@@ -45,20 +46,40 @@ async def show_student_welcome(message: types.Message, student: dict):
         parse_mode="HTML"
     )
 
-async def show_welcome_back(message: types.Message, tutor: tuple):
-    """Приветствие для зарегистрированного репетитора"""
-    welcome_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2])
+# async def show_welcome_back(message: types.Message, tutor: tuple):
+#     """Приветствие для зарегистрированного репетитора"""
+#     welcome_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2])
     
-    await message.answer(
-        welcome_text,
-        reply_markup=get_main_menu_keyboard(),
-        parse_mode="HTML"
-    )
+#     await message.answer(
+#         welcome_text,
+#         reply_markup=get_main_menu_keyboard(),
+#         parse_mode="HTML"
+#     )
 
 async def show_registration_message(message: types.Message):
     """Приветствие для нового пользователя"""
     await message.answer(
         REGISTRATION_TEXT,
         reply_markup=get_registration_keyboard(),
+        parse_mode="HTML"
+    )
+
+async def show_welcome_back(message: types.Message, tutor: tuple):
+    """Приветствие для зарегистрированного репетитора с расписанием на сегодня"""
+    tutor_name = tutor[2] if tutor else "Пользователь"
+    tutor_id = tutor[0]  # ID репетитора
+    
+    # Получаем расписание на сегодня
+    schedule_text = await get_today_schedule_text(tutor_id)
+    
+    # Формируем полный текст приветствия
+    welcome_text = WELCOME_BACK_TEXT.format(
+        tutor_name=tutor_name,
+        schedule_text=schedule_text
+    )
+    
+    await message.answer(
+        welcome_text,
+        reply_markup=get_main_menu_keyboard(),
         parse_mode="HTML"
     )

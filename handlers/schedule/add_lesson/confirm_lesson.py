@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from database import db
 from handlers.schedule.states import AddLessonStates
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from handlers.schedule.schedule_utils import get_upcoming_lessons_text
+from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 import logging
 
 router = Router()
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Обработчик подтверждения занятия
 @router.callback_query(AddLessonStates.confirmation, F.data == "confirm_lesson")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
-    """Обработка подтверждения занятия"""
+    """Обработка подтверждения занятия с переходом к расписанию"""
     await callback_query.answer()
     
     data = await state.get_data()
@@ -21,6 +23,9 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
     frequency = data.get('frequency')
     
     logger.info(f"Confirming lesson. Type: {lesson_type}, Frequency: {frequency}")
+    
+    # Инициализируем message_text
+    message_text = ""
     
     try:
         if frequency == 'regular':
@@ -78,11 +83,6 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             
             message_text += "Занятия добавлены в расписание на месяц вперед."
             
-            await callback_query.message.edit_text(
-                message_text,
-                parse_mode="HTML"
-            )
-            
         else:
             # Единоразовые занятия
             full_datetime = f"{data.get('date')} {data.get('time')}:00"
@@ -98,17 +98,16 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                 )
                 
                 if lesson_id:
-                    await callback_query.message.edit_text(
-                        "✅ <b>Занятие успешно добавлено!</b>\n\n"
-                        "Занятие добавлено в ваше расписание.",
-                        parse_mode="HTML"
-                    )
+                    student = db.get_student_by_id(data.get('student_id'))
+                    student_name = student['full_name'] if student else "ученика"
+                    message_text = f"✅ <b>Занятие для {student_name} успешно добавлено!</b>\n\n"
                 else:
                     await callback_query.message.edit_text(
                         "❌ <b>Ошибка при добавлении занятия!</b>\n\n"
                         "Попробуйте еще раз.",
                         parse_mode="HTML"
                     )
+                    return
                     
             else:
                 # Групповое единоразовое занятие
@@ -130,22 +129,37 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                 
                 group_name = data.get('group_name', 'группы')
                 if success_count > 0:
-                    await callback_query.message.edit_text(
-                        f"✅ <b>Групповое занятие для {group_name} добавлено!</b>\n\n"
-                        f"Создано занятий: {success_count}/{len(group_students)}",
-                        parse_mode="HTML"
-                    )
+                    message_text = f"✅ <b>Групповое занятие для {group_name} добавлено!</b>\n\n"
+                    message_text += f"Создано занятий: {success_count}/{len(group_students)}"
                 else:
                     await callback_query.message.edit_text(
                         "❌ <b>Ошибка при добавлении группового занятия!</b>\n\n"
                         "Попробуйте еще раз.",
                         parse_mode="HTML"
                     )
+                    return
+        
+        # Если message_text пустая, значит, мы никуда не зашли
+        if not message_text:
+            message_text = "✅ Занятие добавлено!"
+        
+        # Показываем уведомление об успешном добавлении
+        await callback_query.answer(message_text, show_alert=True)
+        
+        # Получаем актуальное расписание
+        schedule_text = await get_upcoming_lessons_text(tutor_id)
+        
+        # Переходим к расписанию
+        await callback_query.message.edit_text(
+            schedule_text,
+            reply_markup=get_schedule_keyboard(),
+            parse_mode="HTML"
+        )
         
         await state.clear()
         
     except Exception as e:
-        logger.error(f"Ошибка при создании занятия: {e}")
+        logger.error(f"Ошибка при создании занятия: {e}", exc_info=True)
         await callback_query.message.edit_text(
             "❌ <b>Ошибка при создании занятия!</b>\n\n"
             f"Ошибка: {str(e)}",
