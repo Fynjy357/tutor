@@ -12,12 +12,12 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
     logger.info(f"📨 Получен callback: {data} от пользователя {user_id}")
     
     try:
-        if data.startswith('confirm_'):
-            # Формат: confirm_{lesson_id}_{confirmation_id}
+        if data.startswith('notify_confirm_'):
+            # Формат: notify_confirm_{lesson_id}_{confirmation_id}
             parts = data.split('_')
-            if len(parts) >= 3:
-                confirmation_id = parts[-1]  # Берем последнюю часть
-                lesson_id = parts[1]
+            if len(parts) >= 4:
+                confirmation_id = parts[3]  # Берем последнюю часть
+                lesson_id = parts[2]  # Третья часть - lesson_id
                 
                 # Обновляем статус в базе
                 notification_manager.mark_confirmation(confirmation_id, True)
@@ -60,12 +60,12 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
                     reply_markup=None
                 )
             
-        elif data.startswith('cancel_'):
-            # Формат: cancel_{lesson_id}_{confirmation_id}
+        elif data.startswith('notify_cancel_'):
+            # Формат: notify_cancel_{lesson_id}_{confirmation_id}
             parts = data.split('_')
-            if len(parts) >= 3:
-                confirmation_id = parts[-1]  # Берем последнюю часть
-                lesson_id = parts[1]
+            if len(parts) >= 4:
+                confirmation_id = parts[3]  # Берем последнюю часть
+                lesson_id = parts[2]  # Третья часть - lesson_id
                 
                 # Обновляем статус в базе
                 notification_manager.mark_confirmation(confirmation_id, False)
@@ -108,12 +108,12 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
                     reply_markup=None
                 )
             
-        elif data.startswith('reschedule_'):
-            # Формат: reschedule_{lesson_id}_{confirmation_id}
+        elif data.startswith('notify_reschedule_'):
+            # Формат: notify_reschedule_{lesson_id}_{confirmation_id}
             parts = data.split('_')
-            if len(parts) >= 3:
-                confirmation_id = parts[-1]
-                lesson_id = parts[1]
+            if len(parts) >= 4:
+                confirmation_id = parts[3]
+                lesson_id = parts[2]  # Третья часть - lesson_id
                 
                 # Обновляем статус в базе на "перенос"
                 notification_manager.mark_confirmation(confirmation_id, 2)
@@ -172,17 +172,17 @@ def register_confirmation_handlers(dp: Dispatcher, notification_manager, bot):
     # Регистрируем отдельно для каждого типа callback
     dp.callback_query.register(
         confirmation_handler,
-        F.data.startswith("confirm_")
+        F.data.startswith("notify_confirm_")
     )
     
     dp.callback_query.register(
         confirmation_handler,
-        F.data.startswith("cancel_")
+        F.data.startswith("notify_cancel_")
     )
     
     dp.callback_query.register(
         confirmation_handler,
-        F.data.startswith("reschedule_")
+        F.data.startswith("notify_reschedule_")
     )
     
     logger.info("✅ Обработчики инлайн-кнопок подтверждения зарегистрированы")

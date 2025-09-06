@@ -3,7 +3,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from handlers.schedule.states import AddLessonStates
-from datetime import datetime
 import logging
 
 router = Router()
@@ -15,7 +14,7 @@ async def choose_group_for_lesson(callback_query: types.CallbackQuery, state: FS
     """Выбор группы для группового занятия"""
     await callback_query.answer()
     
-    # Получаем ID репетитора правильно
+    # Получаем ID репетитора
     tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
     
     if not tutor_id:
@@ -23,7 +22,7 @@ async def choose_group_for_lesson(callback_query: types.CallbackQuery, state: FS
         return
     
     # Получаем список групп преподавателя
-    groups = db.get_tutor_groups(tutor_id)
+    groups = db.get_groups_by_tutor(tutor_id)
     
     # Логируем для отладки
     logger.info(f"Tutor ID: {tutor_id}, Found groups: {groups}")
@@ -46,8 +45,8 @@ async def choose_group_for_lesson(callback_query: types.CallbackQuery, state: FS
     buttons = []
     for group in groups:
         buttons.append([InlineKeyboardButton(
-            text=f"👥 {group[1]}",  # название группы (второй элемент кортежа)
-            callback_data=f"select_group_{group[0]}"  # ID группы (первый элемент)
+            text=f"👥 {group['name']}",
+            callback_data=f"select_group_{group['id']}"
         )])
     
     # Добавляем кнопки назад
@@ -79,18 +78,24 @@ async def group_selected_for_lesson(callback_query: types.CallbackQuery, state: 
     
     # Сохраняем выбранную группу в состоянии
     await state.update_data(
-        lesson_type="group",
         group_id=group_id,
-        group_name=group['name'],
-        student_ids=[]
+        group_name=group['name']
     )
+    
+    # Переходим к выбору частоты занятия
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📅 Единоразовое", callback_data="frequency_single")],
+        [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_group_selection")]
+    ])
     
     await callback_query.message.edit_text(
         f"✅ <b>Группа выбрана:</b> {group['name']}\n\n"
-        "📅 Теперь укажите дату занятия в формате ДД.ММ.ГГГГ:",
+        "📅 <b>Регулярное или единоразовое занятие добавить?</b>",
+        reply_markup=keyboard,
         parse_mode="HTML"
     )
-    await state.set_state(AddLessonStates.entering_date)
+    await state.set_state(AddLessonStates.choosing_frequency)
 
 # Обработчик создания новой группы
 @router.callback_query(F.data == "create_group_for_lesson")

@@ -3,6 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from handlers.schedule.states import AddLessonStates
 import logging
+from database import db
+
 
 
 router = Router()
@@ -56,6 +58,39 @@ async def process_group_lesson_type(callback_query: types.CallbackQuery, state: 
     
     await state.update_data(lesson_type="group")
     
-    # Для групповых занятий сразу переходим к выбору группы
-    from handlers.schedule.add_lesson.group_lesson import choose_group_for_lesson
-    await choose_group_for_lesson(callback_query, state)
+    # Получаем ID репетитора
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    groups = db.get_groups_by_tutor(tutor_id)  # Предполагается, что эта функция есть в database.py
+    
+    if not groups:
+        # Если нет групп, предлагаем создать новую
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="➕ Создать новую группу", callback_data="create_group_for_lesson")],
+            [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_lesson_type")]
+        ])
+        
+        await callback_query.message.edit_text(
+            "❌ <b>У вас нет групп</b>\n\nСначала создайте группу, чтобы добавить групповое занятие",
+            reply_markup=keyboard,
+            parse_mode="HTML"
+        )
+        return
+    
+    # Создаем клавиатуру с группами
+    buttons = []
+    for group in groups:
+        buttons.append([InlineKeyboardButton(
+            text=f"👥 {group['name']}",  # название группы
+            callback_data=f"select_group_{group['id']}"  # ID группы
+        )])
+    
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_lesson_type")])
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    
+    await callback_query.message.edit_text(
+        "👥 <b>Выберите группу для занятия:</b>",
+        reply_markup=keyboard,
+        parse_mode="HTML"
+    )
+    await state.set_state(AddLessonStates.choosing_group)

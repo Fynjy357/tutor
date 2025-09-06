@@ -233,17 +233,17 @@ class NotificationManager:
                     [
                         InlineKeyboardButton(
                             text="✅ Подтвердить", 
-                            callback_data=f"confirm_{lesson_id}_{confirmation_id}"
+                            callback_data=f"notify_confirm_{lesson_id}_{confirmation_id}"
                         ),
                         InlineKeyboardButton(
                             text="❌ Отменить", 
-                            callback_data=f"cancel_{lesson_id}_{confirmation_id}"
+                            callback_data=f"notify_cancel_{lesson_id}_{confirmation_id}"
                         )
                     ],
                     [
                         InlineKeyboardButton(
                             text="🔄 Перенести", 
-                            callback_data=f"reschedule_{lesson_id}_{confirmation_id}"
+                            callback_data=f"notify_reschedule_{lesson_id}_{confirmation_id}"
                         )
                     ]
                 ]
@@ -264,9 +264,6 @@ class NotificationManager:
             logger.error(traceback.format_exc())
             return False
             
-        except Exception as e:
-            logger.error(f"❌ Ошибка при отправке уведомления: {e}")
-            return False
         
     def mark_notification_sent(self, confirmation_id):
         """Помечает уведомление как отправленное"""

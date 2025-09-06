@@ -6,6 +6,7 @@ from database import db
 from handlers.schedule.add_lesson.type_lesson import add_lesson_start
 from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 from handlers.schedule.states import AddLessonStates
+from handlers.schedule.schedule_utils import get_upcoming_lessons_text
 import logging
 
 
@@ -124,8 +125,18 @@ async def back_to_students(callback_query: types.CallbackQuery, state: FSMContex
 async def back_to_schedule(callback_query: types.CallbackQuery, state: FSMContext):
     """Возврат к расписанию"""
     await state.clear()
+    
+    # Получаем ID репетитора
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    if not tutor_id:
+        await callback_query.message.edit_text("❌ Ошибка: не найден ID репетитора.")
+        return
+    
+    # Получаем актуальное расписание
+    schedule_text = await get_upcoming_lessons_text(tutor_id)
+    
     await callback_query.message.edit_text(
-        "📅 <b>Расписание занятий</b>",
+        schedule_text,
         reply_markup=get_schedule_keyboard(),
         parse_mode="HTML"
     )

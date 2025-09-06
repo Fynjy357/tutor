@@ -18,34 +18,71 @@ async def process_frequency(callback_query: types.CallbackQuery, state: FSMConte
     frequency = callback_query.data.split("_")[1]
     await state.update_data(frequency=frequency)
     
-    if frequency == "regular":
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="Понедельник", callback_data="weekday_0")],
-            [InlineKeyboardButton(text="Вторник", callback_data="weekday_1")],
-            [InlineKeyboardButton(text="Среда", callback_data="weekday_2")],
-            [InlineKeyboardButton(text="Четверг", callback_data="weekday_3")],
-            [InlineKeyboardButton(text="Пятница", callback_data="weekday_4")],
-            [InlineKeyboardButton(text="Суббота", callback_data="weekday_5")],
-            [InlineKeyboardButton(text="Воскресенье", callback_data="weekday_6")],
-            [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")]
-        ])
+    # Получаем данные из состояния чтобы узнать тип занятия
+    data = await state.get_data()
+    lesson_type = data.get('lesson_type')
+    
+    if lesson_type == 'group':
+        # Для групповых занятий - показываем список групп
+        tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+        groups = db.get_groups_by_tutor(tutor_id)
+        
+        if not groups:
+            await callback_query.message.edit_text(
+                "❌ <b>У вас нет групп!</b>\n\n"
+                "Сначала создайте группу в системе.",
+                parse_mode="HTML"
+            )
+            await state.clear()
+            return
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+        for group in groups:
+            keyboard.inline_keyboard.append([
+                InlineKeyboardButton(text=f"👥 {group['name']}", callback_data=f"select_group_{group['id']}")
+            ])
+        keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")])
         
         await callback_query.message.edit_text(
-            "📅 <b>Выберите день недели для регулярного занятия:</b>",
+            "👥 <b>Выберите группу для занятия:</b>",
             reply_markup=keyboard,
             parse_mode="HTML"
         )
-        await state.set_state(AddLessonStates.choosing_weekday)
+        await state.set_state(AddLessonStates.choosing_group)
+        
     else:
-        await callback_query.message.edit_text(
-            "📅 <b>Введите дату занятия в формате ДД.ММ.ГГГГ:</b>\n\n"
-            "Например: 15.01.2024",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+        # Индивидуальные занятия
+        if frequency == "regular":
+            # Для регулярных занятий - выбираем день недели
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="Понедельник", callback_data="weekday_0")],
+                [InlineKeyboardButton(text="Вторник", callback_data="weekday_1")],
+                [InlineKeyboardButton(text="Среда", callback_data="weekday_2")],
+                [InlineKeyboardButton(text="Четверг", callback_data="weekday_3")],
+                [InlineKeyboardButton(text="Пятница", callback_data="weekday_4")],
+                [InlineKeyboardButton(text="Суббота", callback_data="weekday_5")],
+                [InlineKeyboardButton(text="Воскресенье", callback_data="weekday_6")],
                 [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")]
-            ]),
-            parse_mode="HTML"
-        )
-        await state.set_state(AddLessonStates.entering_date)
+            ])
+            
+            await callback_query.message.edit_text(
+                "📅 <b>Выберите день недели для регулярного занятия:</b>",
+                reply_markup=keyboard,
+                parse_mode="HTML"
+            )
+            await state.set_state(AddLessonStates.choosing_weekday)
+            
+        else:
+            # Для единоразовых занятий - запрашиваем дату
+            await callback_query.message.edit_text(
+                "📅 <b>Введите дату занятия в формате ДД.ММ.ГГГГ:</b>\n\n"
+                "Например: 15.01.2024",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")]
+                ]),
+                parse_mode="HTML"
+            )
+            await state.set_state(AddLessonStates.entering_date)
 
 # Обработчик выбора дня недели для регулярных занятий
 @router.callback_query(AddLessonStates.choosing_weekday, F.data.startswith("weekday_"))
@@ -69,23 +106,18 @@ async def process_weekday(callback_query: types.CallbackQuery, state: FSMContext
 # Обработчик ввода даты (универсальный для всех типов занятий)
 @router.message(AddLessonStates.entering_date, F.text.regexp(r'^\d{2}\.\d{2}\.\d{4}$'))
 async def process_date(message: types.Message, state: FSMContext):
-    """Обработка ввода даты для любого типа занятия"""
+    """Обработка ввода даты занятия"""
     try:
-        data = await state.get_data()
-        lesson_type = data.get('lesson_type')
-        logger.info(f"Processing date. Lesson type: {lesson_type}")
-        
+        # Преобразуем дату из формата ДД.ММ.ГГГГ в YYYY-MM-DD
         date_obj = datetime.strptime(message.text, '%d.%m.%Y')
-        await state.update_data(date=date_obj.strftime('%Y-%m-%d'))
+        iso_date = date_obj.strftime('%Y-%m-%d')
         
-        logger.info(f"Date processed: {date_obj.strftime('%Y-%m-%d')}")
+        await state.update_data(date=iso_date)
+        logger.info(f"Date processed: {iso_date}")
         
         await message.answer(
-            "⏰ <b>Введите время занятия в формате ЧЧ:ММ:</b>\n\n"
+            "⏰ <b>Теперь укажите время занятия в формате ЧЧ:ММ</b>\n\n"
             "Например: 14:30",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_date_input")]
-            ]),
             parse_mode="HTML"
         )
         await state.set_state(AddLessonStates.entering_time)
@@ -94,9 +126,13 @@ async def process_date(message: types.Message, state: FSMContext):
         await message.answer(
             "❌ <b>Неверный формат даты!</b>\n\n"
             "Пожалуйста, введите дату в формате ДД.ММ.ГГГГ\n"
-            "Например: 15.01.2024",
+            "Например: 21.12.1994",
             parse_mode="HTML"
         )
+    except Exception as e:
+        logger.error(f"Error processing date: {e}")
+        await message.answer("❌ Произошла ошибка при обработке даты")
+        await state.clear()
 
 # Обработчик ввода времени (универсальный для всех типов занятий)
 @router.message(AddLessonStates.entering_time, F.text.regexp(r'^\d{2}:\d{2}$'))
@@ -105,7 +141,8 @@ async def process_time(message: types.Message, state: FSMContext):
     try:
         data = await state.get_data()
         lesson_type = data.get('lesson_type')
-        logger.info(f"Processing time. Lesson type: {lesson_type}")
+        frequency = data.get('frequency')
+        logger.info(f"Processing time. Lesson type: {lesson_type}, Frequency: {frequency}")
         
         # Проверяем формат времени
         datetime.strptime(message.text, '%H:%M')
@@ -150,51 +187,43 @@ async def process_time(message: types.Message, state: FSMContext):
             )
             await state.set_state(AddLessonStates.choosing_students)
             
-        elif lesson_type == 'group':
+        else:
             # Логика для групповых занятий
             group_id = data.get('group_id')
-            date_str = data.get('date')
-            time_str = data.get('time')
             
-            # Создаем datetime объект из ISO формата даты
-            lesson_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-            
-            # Получаем всех учеников группы
-            group_students = db.get_students_by_group(group_id)
-            student_ids = [student['id'] for student in group_students]
-            
-            # Сохраняем занятие для каждого ученика
-            success_count = 0
-            for student_id in student_ids:
-                lesson_id = db.add_lesson(
-                    tutor_id=tutor_id,
-                    student_id=student_id,
-                    lesson_date=lesson_datetime,
-                    duration=60,
-                    price=500.0,
-                    group_id=group_id
-                )
-                if lesson_id:
-                    success_count += 1
-            
-            # Получаем информацию о группе
-            group = db.get_group_by_id(group_id)
-            
-            if success_count > 0:
-                display_date = lesson_datetime.strftime("%d.%m.%Y")
+            # Формируем текст подтверждения
+            if frequency == 'regular':
+                weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+                weekday = data.get('weekday')
                 
-                await message.answer(
-                    f"✅ <b>Групповое занятие добавлено!</b>\n\n"
-                    f"👥 Группа: {group['name']}\n"
-                    f"📅 Дата: {display_date}\n"
-                    f"⏰ Время: {time_str}\n"
-                    f"👨‍🎓 Учеников: {success_count}/{len(student_ids)}",
-                    parse_mode="HTML"
-                )
+                confirmation_text = "✅ <b>Подтвердите данные регулярного группового занятия:</b>\n\n"
+                confirmation_text += f"👥 Группа: {data.get('group_name')}\n"
+                confirmation_text += f"📅 День: {weekdays[weekday]}\n"
+                confirmation_text += f"⏰ Время: {message.text}\n"
+                confirmation_text += "🔄 Тип: Регулярное\n"
+                
             else:
-                await message.answer("❌ Ошибка при сохранении групповых занятий")
+                # Преобразуем дату обратно в читаемый формат
+                date_obj = datetime.strptime(data.get('date'), '%Y-%m-%d')
+                readable_date = date_obj.strftime('%d.%m.%Y')
+                
+                confirmation_text = "✅ <b>Подтвердите данные единоразового группового занятия:</b>\n\n"
+                confirmation_text += f"👥 Группа: {data.get('group_name')}\n"
+                confirmation_text += f"📅 Дата: {readable_date}\n"
+                confirmation_text += f"⏰ Время: {message.text}\n"
+                confirmation_text += "📋 Тип: Единоразовое\n"
             
-            await state.clear()
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="✅ Подтвердить", callback_data="confirm_lesson")],
+                [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_time_input")]
+            ])
+            
+            await message.answer(
+                confirmation_text,
+                reply_markup=keyboard,
+                parse_mode="HTML"
+            )
+            await state.set_state(AddLessonStates.confirmation)
             
     except ValueError:
         await message.answer(
