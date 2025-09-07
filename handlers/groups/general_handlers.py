@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from handlers.groups.keyboards import *
+from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 
 router = Router()
@@ -35,13 +36,15 @@ async def back_to_main_menu_from_groups(callback_query: CallbackQuery, state: FS
     # Получаем данные преподавателя из базы
     from database import db
     tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
+    tutor_id = tutor[0]
+    schedule_text = await get_today_schedule_text(tutor_id)
     
     if not tutor:
         await callback_query.message.answer("❌ Ошибка: преподаватель не найден")
         return
     
     # Отправляем новое сообщение с главным меню
-    welcome_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2])  # предполагая, что имя в третьем элементе
+    welcome_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text)  # предполагая, что имя в третьем элементе
     from keyboards.main_menu import get_main_menu_keyboard
     await callback_query.message.answer(
         welcome_text,

@@ -8,6 +8,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQu
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from datetime import datetime, timedelta
 import asyncio
+from parent_report.handlers import ParentReportHandlers
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class LessonReportHandlers:
     def __init__(self, db):
         self.db = db
         self.router = Router()
+        self.parent_reports = ParentReportHandlers(db)
         self.setup_handlers()
 
     def setup_handlers(self):
@@ -293,7 +295,7 @@ class LessonReportHandlers:
             f"✅ Отчет по занятию с {lesson['student_name']} сохранен!\n\n"
             f"📝 Ваш комментарий: {performance}"
         )
-        
+        await self.parent_reports.send_report_to_parent(message.bot, lesson_id, student_id)
         await state.clear()
 
     async def start_group_report(self, callback: CallbackQuery, state: FSMContext):
@@ -525,6 +527,12 @@ class LessonReportHandlers:
                     f"✅ Отчет по групповому занятию '{group_name}' завершен!\n\n"
                     f"Отчеты сохранены для всех {len(students)} учеников"
                 )
+
+            # Отправляем отчеты всем родителям через отдельный модуль
+            student_ids = [student['id'] for student in students]
+            await self.parent_reports.send_reports_to_all_parents(
+                update.bot, state_data['report_lesson_id'], student_ids
+            )
             
             await state.clear()
             return

@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
 
+from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 from handlers.students.config import ADD_STUDENT
 from handlers.students.keyboards import get_invite_keyboard
@@ -111,17 +112,20 @@ async def back_to_main_menu(callback_query: types.CallbackQuery, state: FSMConte
         return
     
     # Используем функцию show_welcome_back для показа главного меню
+    tutor_id = tutor[0]
+    schedule_text = await get_today_schedule_text(tutor_id)
+    
     try:
         # Пытаемся изменить текущее сообщение
         await callback_query.message.edit_text(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2]),
+            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
     except TelegramBadRequest:
         # Если не получается изменить, отправляем новое сообщение
         await callback_query.message.answer(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2]),
+            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
