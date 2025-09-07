@@ -1,4 +1,5 @@
 from aiogram import Router, types
+from aiogram.types import Message
 from aiogram.filters import CommandStart
 import logging
 
@@ -9,15 +10,13 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
-async def handle_start(message: types.Message):
+async def handle_start(message: Message):
     """Единый обработчик для команды /start"""
     logger.info(f"Обработчик /start вызван для пользователя {message.from_user.id}")
     
-    args = message.text.split()
-    
-    if len(args) > 1:
+    if len(message.text.split()) > 1:
         # Это deep link - обрабатываем приглашения
-        await handle_deep_link(message, args[1])
+        await handle_deep_link(message)
     else:
         # Обычная команда /start
         await show_welcome_message(message)

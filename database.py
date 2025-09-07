@@ -124,6 +124,21 @@ class Database:
                 UNIQUE(student_id, group_id)
             )
             ''')
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS lesson_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lesson_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                lesson_held BOOLEAN,
+                lesson_paid BOOLEAN,
+                homework_done BOOLEAN,
+                student_performance TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (lesson_id) REFERENCES lessons (id),
+                FOREIGN KEY (student_id) REFERENCES students (id),
+                UNIQUE(lesson_id, student_id)
+            )
+            ''')
             try:
                 cursor.execute('ALTER TABLE lessons ADD COLUMN group_id INTEGER')
             except sqlite3.OperationalError:
@@ -1008,7 +1023,91 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при обновлении подтверждения: {e}")
             return False
-        
+    def save_lesson_report(self, lesson_id, student_id, lesson_held=None, 
+                        lesson_paid=None, homework_done=None, student_performance=None):
+        """Сохраняет отчет по занятию"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Проверяем, существует ли уже запись
+                cursor.execute('SELECT id FROM lesson_reports WHERE lesson_id = ? AND student_id = ?', 
+                            (lesson_id, student_id))
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Обновляем существующую запись
+                    updates = []
+                    params = []
+                    
+                    if lesson_held is not None:
+                        updates.append("lesson_held = ?")
+                        params.append(lesson_held)
+                    if lesson_paid is not None:
+                        updates.append("lesson_paid = ?")
+                        params.append(lesson_paid)
+                    if homework_done is not None:
+                        updates.append("homework_done = ?")
+                        params.append(homework_done)
+                    if student_performance is not None:
+                        updates.append("student_performance = ?")
+                        params.append(student_performance)
+                    
+                    if updates:
+                        params.extend([lesson_id, student_id])
+                        cursor.execute(f'''
+                        UPDATE lesson_reports 
+                        SET {", ".join(updates)} 
+                        WHERE lesson_id = ? AND student_id = ?
+                        ''', params)
+                else:
+                    # Создаем новую запись
+                    cursor.execute('''
+                    INSERT INTO lesson_reports 
+                    (lesson_id, student_id, lesson_held, lesson_paid, homework_done, student_performance)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (lesson_id, student_id, lesson_held, lesson_paid, homework_done, student_performance))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при сохранении отчета: {e}")
+            return False
+
+    def get_lesson_report(self, lesson_id, student_id):
+        """Получает отчет по занятию"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT * FROM lesson_reports 
+                WHERE lesson_id = ? AND student_id = ?
+                ''', (lesson_id, student_id))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Ошибка при получении отчета: {e}")
+            return None
+
+    def is_lesson_report_complete(self, lesson_id, student_id):
+        """Проверяет, полностью ли заполнен отчет"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT lesson_held, lesson_paid, homework_done, student_performance 
+                FROM lesson_reports 
+                WHERE lesson_id = ? AND student_id = ?
+                ''', (lesson_id, student_id))
+                result = cursor.fetchone()
+                
+                if result:
+                    return all(result)  # Все поля должны быть заполнены
+                return False
+        except Exception as e:
+            logger.error(f"Ошибка при проверке отчета: {e}")
+            return False
 
 
 

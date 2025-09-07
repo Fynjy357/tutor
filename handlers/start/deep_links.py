@@ -61,7 +61,12 @@ def determine_timezone_by_offset(hours_diff: float) -> str:
     
     return timezone_mapping.get(user_utc_offset, 'Europe/Moscow')
 
-async def handle_deep_link(message: types.Message, deep_link_args: str):
+async def handle_deep_link(message: types.Message):
+
+    args = message.text.split()
+    print(args)
+    deep_link_args = args[1]
+    
     """Обработка deep link приглашений"""
     logger.info(f"Deep link: {deep_link_args} from user: {message.from_user.id}")
     

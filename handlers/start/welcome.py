@@ -26,6 +26,7 @@ async def show_welcome_message(message: types.Message):
 async def show_student_welcome(message: types.Message, student: dict):
     """Приветствие для ученика с информацией о репетиторе"""
     # Получаем информацию о репетиторе ученика
+    print(student)
     tutor_id = student['tutor_id']
     tutor = db.get_tutor_by_id(tutor_id)
     
