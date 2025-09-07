@@ -1,5 +1,7 @@
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram import types, F, Router
+router = Router()
 
 def get_main_menu_keyboard():
     builder = InlineKeyboardBuilder()
@@ -37,3 +39,12 @@ def get_main_menu_keyboard():
     )
     
     return builder.as_markup()
+
+# Просто добавьте эти обработчики, оставив клавиатуру без изменений
+@router.callback_query(F.data == "payments")
+async def payments_stub(callback_query: types.CallbackQuery):
+    await callback_query.answer("⏳ В разработке", show_alert=False)
+
+@router.callback_query(F.data == "settings")
+async def settings_stub(callback_query: types.CallbackQuery):
+    await callback_query.answer("⏳ В разработке", show_alert=False)
