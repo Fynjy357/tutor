@@ -8,3 +8,35 @@ pip install -r requirements.txt
 git add .
 git commit -m "Исправление ошибок в обработчике регистрации"
 git push origin main
+
+
+# Проверить статус
+sudo systemctl status tutor_bot.service
+
+# Остановить бота
+sudo systemctl stop tutor_bot.service
+
+# Запустить бота
+sudo systemctl start tutor_bot.service
+
+# Перезапустить (после обновления кода)
+sudo systemctl restart tutor_bot.service
+
+# Просмотр логов в реальном времени
+sudo journalctl -u tutor_bot.service -f
+
+# Просмотр последних логов
+sudo journalctl -u tutor_bot.service -n 50
+
+При обновлении кода:
+Загрузите новые файлы в папку /home/tutor/tutor_bot/
+
+Выполните команду:
+
+bash
+sudo systemctl restart tutor_bot.service
+
+Теперь ваши логи будут автоматически ротироваться ежедневно, сохраняя 7 дней истории в сжатом виде. Вы можете просматривать текущие логи в реальном времени с помощью:
+
+bash
+tail -f /var/log/tutor_bot/tutor_bot.log
