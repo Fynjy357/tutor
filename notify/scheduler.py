@@ -64,3 +64,4 @@ async def lesson_notification_scheduler(bot, notification_manager):
         except Exception as e:
             logger.error(f"❌ Критическая ошибка в планировщике уведомлений: {e}")
             await asyncio.sleep(60)
+

@@ -66,7 +66,7 @@ class BotApp:
 
             # Настройка обработчиков уведомлений
             setup_notification_handlers(self.dp, db, self.notification_manager, self.bot)
-            register_confirmation_handlers(self.dp, self.notification_manager, self.bot)
+            #register_confirmation_handlers(self.dp, self.notification_manager, self.bot)
             
             # Регистрация обработчиков отчетов
             self.dp.include_router(self.lesson_report_handlers.router)

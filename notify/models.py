@@ -14,18 +14,18 @@ class NotificationManager:
         logger.info("📊 Менеджер уведомлений инициализирован")
         
         # Проверяем формат дат занятий при инициализации
-        self.check_lesson_dates_format()
+        #self.check_lesson_dates_format()
     
     def get_upcoming_lessons_for_notification(self):
-        """Получает занятия, которые нужно уведомить (за 24 часа)"""
-        logger.info("🔍 Поиск занятий для уведомления за 24 часа")
+        """Получает занятия, которые нужно уведомить (на сегодня и за 24 часа)"""
+        logger.info("🔍 Поиск занятий для уведомления (сегодня + завтра)")
         
         try:
             with self.db.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 
-                # 1. Проверим ВСЕ занятия на завтра
+                # 1. Проверим ВСЕ занятия на СЕГОДНЯ и ЗАВТРА
                 debug_query = """
                 SELECT l.id, l.lesson_date, l.status, 
                     s.full_name as student_name, s.student_telegram_id,
@@ -33,14 +33,14 @@ class NotificationManager:
                 FROM lessons l
                 JOIN students s ON l.student_id = s.id
                 JOIN tutors t ON l.tutor_id = t.id
-                WHERE date(l.lesson_date) = date('now', '+1 day')
+                WHERE date(l.lesson_date) IN (date('now'), date('now', '+1 day'))
                 """
                 
                 cursor.execute(debug_query)
-                all_tomorrow_lessons = [dict(row) for row in cursor.fetchall()]
+                all_upcoming_lessons = [dict(row) for row in cursor.fetchall()]
                 
-                logger.info(f"📊 Все занятия на завтра: {len(all_tomorrow_lessons)}")
-                for lesson in all_tomorrow_lessons:
+                logger.info(f"📊 Все занятия на сегодня и завтра: {len(all_upcoming_lessons)}")
+                for lesson in all_upcoming_lessons:
                     logger.info(f"   📅 #{lesson.get('id')}: {lesson.get('student_name')} - "
                             f"{lesson.get('lesson_date')} - статус: {lesson.get('status')} - "
                             f"TG: {lesson.get('student_telegram_id')}")
@@ -50,7 +50,7 @@ class NotificationManager:
                 SELECT s.id, s.full_name, s.student_telegram_id
                 FROM students s
                 JOIN lessons l ON s.id = l.student_id
-                WHERE date(l.lesson_date) = date('now', '+1 day')
+                WHERE date(l.lesson_date) IN (date('now'), date('now', '+1 day'))
                 AND (s.student_telegram_id IS NULL OR s.student_telegram_id = '')
                 """
                 
@@ -66,7 +66,7 @@ class NotificationManager:
                 FROM lesson_confirmations lc
                 JOIN lessons l ON lc.lesson_id = l.id
                 JOIN students s ON l.student_id = s.id
-                WHERE date(l.lesson_date) = date('now', '+1 day')
+                WHERE date(l.lesson_date) IN (date('now'), date('now', '+1 day'))
                 AND date(lc.notified_at) = date('now')
                 """
                 
@@ -83,7 +83,7 @@ class NotificationManager:
                 FROM lessons l
                 JOIN students s ON l.student_id = s.id
                 JOIN tutors t ON l.tutor_id = t.id
-                WHERE date(l.lesson_date) = date('now', '+1 day')
+                WHERE date(l.lesson_date) IN (date('now'), date('now', '+1 day'))
                 AND l.status = 'planned'
                 AND s.student_telegram_id IS NOT NULL 
                 AND s.student_telegram_id != ''

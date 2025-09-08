@@ -1,4 +1,4 @@
-# handlers/schedule/__init__.py
+# handlers/schedule/add_lesson/__init__.py
 from .type_lesson import router as type_lesson
 from.frequency_of_lesson import router as frequency_of_lesson
 from.student_choice import router as student_choice
