@@ -139,6 +139,18 @@ class Database:
                 UNIQUE(lesson_id, student_id)
             )
             ''')
+
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_subscriptions (
+                user_id INTEGER PRIMARY KEY,
+                valid_until TEXT NOT NULL,
+                tariff TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
+            )
+            ''')
             try:
                 cursor.execute('ALTER TABLE lessons ADD COLUMN group_id INTEGER')
             except sqlite3.OperationalError:

@@ -5,6 +5,7 @@ import logging
 
 from handlers.registration.states import RegistrationStates
 from handlers.registration.utils import show_confirmation
+from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 from keyboards.keyboard_phone import get_phone_keyboard
 from handlers.registration.keyboards import get_cancel_keyboard
@@ -94,14 +95,32 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
             else:
                 promo_text = f"{promo_code} (недействителен)"
         
+         # Получаем данные репетитора из базы
+        tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
+        
+        if not tutor:
+            await callback_query.message.edit_text(
+                "❌ Ошибка: не найдены данные репетитора после регистрации"
+            )
+            await state.clear()
+            return
+        
+        # Получаем расписание на сегодня
+        schedule_text = await get_today_schedule_text(tutor_id)
+        
+        # Формируем приветственное сообщение как в show_welcome_back
+        welcome_text = WELCOME_BACK_TEXT.format(
+            tutor_name=tutor[2],  # Имя репетитора
+            schedule_text=schedule_text
+        )
         # Удаляем сообщение с подтверждением
         try:
             await callback_query.message.delete()
         except TelegramBadRequest:
             logger.warning("Не удалось удалить сообщение подтверждения")
         
-        # Формируем приветственное сообщение
-        welcome_text = WELCOME_BACK_TEXT
+        # # Формируем приветственное сообщение
+        # welcome_text = WELCOME_BACK_TEXT
         
         # Отправляем приветственное сообщение с главным меню
         await callback_query.message.answer(
@@ -158,6 +177,7 @@ async def change_phone(callback_query: types.CallbackQuery, state: FSMContext):
     registration_messages.append(phone_message.message_id)
     await state.update_data(registration_messages=registration_messages)
     await state.set_state(RegistrationStates.editing_phone)
+    
 
 @router.callback_query(F.data == "cancel_registration")
 async def cancel_registration(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):

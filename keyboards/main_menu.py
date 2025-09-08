@@ -44,7 +44,3 @@ def get_main_menu_keyboard():
 @router.callback_query(F.data == "payments")
 async def payments_stub(callback_query: types.CallbackQuery):
     await callback_query.answer("⏳ В разработке", show_alert=False)
-
-@router.callback_query(F.data == "settings")
-async def settings_stub(callback_query: types.CallbackQuery):
-    await callback_query.answer("⏳ В разработке", show_alert=False)

@@ -21,6 +21,8 @@ from notify import NotificationManager, lesson_notification_scheduler, setup_not
 from lesson_reports.handlers import LessonReportHandlers
 from keyboards import main_menu # на время разработки кнопок
 from database import db 
+from payment.middleware import SubscriptionMiddleware
+from payment.handlers import router as payment_router
 
 # Настройка логирования
 logging.basicConfig(
@@ -85,6 +87,10 @@ class BotApp:
             self.dp.include_router(schedule_router)
             self.dp.include_router(groups_router)
             self.dp.include_router(main_menu) # на время разработки кнопок
+
+            # Роутер ЮКасса
+            self.dp.update.middleware(SubscriptionMiddleware()) # Middleware для проверки подписки
+            self.dp.include_router(payment_router)  # Роутер оплаты
 
             self.is_running = True
             logger.info("Бот успешно инициализирован")
