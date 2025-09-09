@@ -82,3 +82,9 @@
 2025-09-09 10:21:51,851 - payment.models - ERROR - Error updating subscription: Database error
 2025-09-09 10:21:51,888 - payment.yookassa_integration - ERROR - Error creating YooKassa payment: Network error
 2025-09-09 10:21:51,985 - TestRunner - INFO - ✅ Все тесты прошли успешно!
+2025-09-09 12:10:51,122 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 12:10:53,019 - database - INFO - База данных инициализирована
+2025-09-09 12:10:53,045 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 12:10:53,237 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 12:10:53,279 - payment.yookassa_integration - ERROR - Error creating YooKassa payment: Network error
+2025-09-09 12:10:53,307 - TestRunner - INFO - ✅ Все тесты прошли успешно!

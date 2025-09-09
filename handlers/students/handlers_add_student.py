@@ -26,7 +26,7 @@ async def process_student_name(message: types.Message, state: FSMContext):
     
     await message.answer(
         STUDENT_PHONE_NUMBER,
-        reply_markup=get_phone_keyboard()
+        reply_markup=get_cancel_keyboard_add_students()
     )
 
 # Обработчик ввода телефона ученика

@@ -14,8 +14,8 @@ def format_student_info(student):
             status_text = f"{status_text} (будет удален {student['delete_after']})"
         
         # Обработка Telegram аккаунтов
-        student_tg = f"@{student['student_username']}" if student.get('student_username') else "не привязан"
-        parent_tg = f"@{student['parent_username']}" if student.get('parent_username') else "не привязан"
+        student_tg = f"{student['student_username']}" if student.get('student_username') else "не привязан"
+        parent_tg = f"{student['parent_username']}" if student.get('parent_username') else "не привязан"
         
         # Безопасный доступ к телефонным номерам
         phone = student.get('phone', '-')

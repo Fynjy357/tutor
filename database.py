@@ -54,6 +54,9 @@ class Database:
                 delete_after TIMESTAMP,
                 student_username TEXT,
                 parent_username TEXT,
+                timezone TEXT DEFAULT 'Europe/Moscow',
+                notification_time TEXT DEFAULT '09:00',
+                notification_enabled BOOLEAN DEFAULT TRUE,
                 FOREIGN KEY (tutor_id) REFERENCES tutors (id)
             )
             ''')
@@ -967,13 +970,27 @@ class Database:
             logger.error(f"Ошибка при получении занятий по дате: {e}")
             return []
     def get_student_by_telegram_id(self, telegram_id):
-        """Получает ученика по telegram_id (студента или родителя)"""
+        """Получает ученика по telegram_id (студента)"""
         try:
             with self.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-                cursor.execute('SELECT * FROM students WHERE student_telegram_id = ? OR parent_telegram_id = ?', 
-                            (telegram_id, telegram_id))
+                cursor.execute('SELECT * FROM students WHERE student_telegram_id = ?', 
+                            (telegram_id,))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Ошибка при получении ученика по telegram_id: {e}")
+            return None
+        
+    def get_parent_by_telegram_id(self, telegram_id):
+        """Получает родителя по telegram_id (студента или родителя)"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM students WHERE parent_telegram_id = ?', 
+                            (telegram_id,))
                 result = cursor.fetchone()
                 return dict(result) if result else None
         except Exception as e:
@@ -1147,7 +1164,92 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при проверке администратора: {e}")
             return False
-
+    def get_student_unpaid_lessons(self, student_id: int):
+        """Получает неоплаченные занятия студента"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    l.price,
+                    t.full_name as tutor_name,
+                    lr.lesson_held,
+                    lr.lesson_paid
+                FROM lessons l
+                LEFT JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND l.student_id = lr.student_id
+                WHERE l.student_id = ? 
+                AND (lr.lesson_paid = FALSE OR lr.lesson_paid IS NULL)
+                AND l.status = 'completed'
+                ORDER BY l.lesson_date DESC
+                ''', (student_id,))
+                
+                unpaid_lessons = [dict(row) for row in cursor.fetchall()]
+                return unpaid_lessons
+        except Exception as e:
+            logger.error(f"Ошибка при получении неоплаченных занятий: {e}")
+            return []
+    def get_student_undone_homeworks(self, student_id: int):
+        """Получает невыполненные домашние работы студента"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    t.full_name as tutor_name,
+                    lr.homework_done,
+                    lr.student_performance
+                FROM lessons l
+                LEFT JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND l.student_id = lr.student_id
+                WHERE l.student_id = ? 
+                AND lr.homework_done = FALSE
+                AND l.status = 'completed'
+                ORDER BY l.lesson_date DESC
+                ''', (student_id,))
+                
+                undone_homeworks = [dict(row) for row in cursor.fetchall()]
+                return undone_homeworks
+        except Exception as e:
+            logger.error(f"Ошибка при получении невыполненных домашних работ: {e}")
+            return []
+        
+    def get_student_upcoming_lessons(self, student_id: int, days: int = 30):
+        """Получает предстоящие занятия студента на указанное количество дней вперед"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    l.price,
+                    t.full_name as tutor_name,
+                    l.status
+                FROM lessons l
+                LEFT JOIN tutors t ON l.tutor_id = t.id
+                WHERE l.student_id = ? 
+                AND l.lesson_date >= datetime('now')
+                AND l.lesson_date <= datetime('now', ? || ' days')
+                AND l.status = 'planned'
+                ORDER BY l.lesson_date ASC
+                ''', (student_id, days))
+                
+                upcoming_lessons = [dict(row) for row in cursor.fetchall()]
+                return upcoming_lessons
+        except Exception as e:
+            logger.error(f"Ошибка при получении предстоящих занятий: {e}")
+            return []
 
 
 # Создаем глобальный экземпляр базы данных

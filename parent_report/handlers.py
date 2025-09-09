@@ -90,3 +90,4 @@ class ParentReportHandlers:
         """Отправляет отчеты всем родителям группы"""
         for student_id in student_ids:
             await self.send_report_to_parent(bot, lesson_id, student_id)
+

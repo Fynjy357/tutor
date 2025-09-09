@@ -26,7 +26,15 @@ async def save_group(callback_query: CallbackQuery, state: FSMContext):
     
     await callback_query.message.edit_text(text)
     await state.clear()
-    # Обработчик удаления группы
+    
+    # Отправляем главное меню групп как новое сообщение
+    await callback_query.message.answer(
+        "👨‍👩‍👧‍👦 <b>Управление группами</b>\n\nВыберите действие:",
+        reply_markup=get_groups_main_menu_keyboard(),
+        parse_mode="HTML"
+    )
+
+# Обработчик удаления группы
 @router.callback_query(F.data.startswith("delete_group_"))
 async def delete_group_confirmation(callback_query: CallbackQuery):
     """Подтверждение удаления группы"""
@@ -43,7 +51,7 @@ async def delete_group_confirmation(callback_query: CallbackQuery):
 
 # Подтверждение удаления группы
 @router.callback_query(F.data.startswith("confirm_delete_"))
-async def confirm_delete_group(callback_query: CallbackQuery):
+async def confirm_delete_group(callback_query: CallbackQuery, state: FSMContext):
     """Подтвержденное удаление группы"""
     await callback_query.answer()
     
@@ -54,6 +62,13 @@ async def confirm_delete_group(callback_query: CallbackQuery):
     text = f"✅ Группа удалена!\n{group['name']}" if success else "❌ Ошибка!"
     
     await callback_query.message.edit_text(text)
+    
+    # Отправляем главное меню групп как новое сообщение
+    await callback_query.message.answer(
+        "👨‍👩‍👧‍👦 <b>Управление группами</b>\n\nВыберите действие:",
+        reply_markup=get_groups_main_menu_keyboard(),
+        parse_mode="HTML"
+    )
 
 # Обработчик редактирования группы
 @router.callback_query(F.data.startswith("edit_group_"))
@@ -91,3 +106,10 @@ async def process_new_group_name(message: Message, state: FSMContext):
     
     await message.answer(text)
     await state.clear()
+    
+    # Отправляем главное меню групп как новое сообщение
+    await message.answer(
+        "👨‍👩‍👧‍👦 <b>Управление группами</b>\n\nВыберите действие:",
+        reply_markup=get_groups_main_menu_keyboard(),
+        parse_mode="HTML"
+    )

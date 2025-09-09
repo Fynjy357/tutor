@@ -24,6 +24,8 @@ from database import db
 from payment.middleware import SubscriptionMiddleware
 from payment.handlers import router as payment_router
 from handlers.admin.admin import router as admin_router
+from handlers.start.handlers_parent import parent_router
+from handlers.start.handlers_student_by_student import student_router
 
 # Настройка логирования
 logging.basicConfig(
@@ -82,6 +84,8 @@ class BotApp:
             self.dp.include_router(students_router)
             self.dp.include_router(invitations_router)
             self.dp.include_router(add_students_router)
+            self.dp.include_router(parent_router)
+            self.dp.include_router(student_router)
             
             # Роутер расписания
             schedule_router = setup_schedule_handlers()
@@ -95,6 +99,7 @@ class BotApp:
 
             #Роутер ролей
             self.dp.include_router(admin_router)
+
 
             self.is_running = True
             logger.info("Бот успешно инициализирован")
