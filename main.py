@@ -23,6 +23,7 @@ from keyboards import main_menu # на время разработки кноп�
 from database import db 
 from payment.middleware import SubscriptionMiddleware
 from payment.handlers import router as payment_router
+from handlers.admin.admin import router as admin_router
 
 # Настройка логирования
 logging.basicConfig(
@@ -91,6 +92,9 @@ class BotApp:
             # Роутер ЮКасса
             self.dp.update.middleware(SubscriptionMiddleware()) # Middleware для проверки подписки
             self.dp.include_router(payment_router)  # Роутер оплаты
+
+            #Роутер ролей
+            self.dp.include_router(admin_router)
 
             self.is_running = True
             logger.info("Бот успешно инициализирован")

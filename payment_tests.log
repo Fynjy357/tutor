@@ -1,0 +1,84 @@
+2025-09-09 08:58:29,400 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 08:58:30,452 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 4
+2025-09-09 09:37:39,264 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:37:49,638 - database - INFO - База данных инициализирована
+2025-09-09 09:37:49,910 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:37:50,180 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:38:24,894 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:38:26,719 - database - INFO - База данных инициализирована
+2025-09-09 09:38:26,754 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:38:26,976 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:41:36,133 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:41:37,950 - database - INFO - База данных инициализирована
+2025-09-09 09:41:37,978 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:41:38,072 - payment.models - ERROR - Error updating subscription: unsupported type for timedelta days component: MagicMock
+2025-09-09 09:41:38,235 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:41:57,061 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:41:58,704 - database - INFO - База данных инициализирована
+2025-09-09 09:41:58,731 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:41:58,850 - payment.models - ERROR - Error updating subscription: unsupported type for timedelta days component: MagicMock
+2025-09-09 09:41:58,998 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:45:01,810 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:45:03,722 - database - INFO - База данных инициализирована
+2025-09-09 09:45:03,747 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:45:03,907 - payment.models - ERROR - Error getting payment info: strptime() argument 1 must be str, not MagicMock
+2025-09-09 09:45:04,068 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:46:06,491 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:46:08,923 - database - INFO - База данных инициализирована
+2025-09-09 09:46:08,949 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:46:09,093 - payment.models - ERROR - Error getting payment info: strptime() argument 1 must be str, not MagicMock
+2025-09-09 09:46:09,248 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:46:40,603 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:46:42,583 - database - INFO - База данных инициализирована
+2025-09-09 09:46:42,606 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:46:42,774 - payment.models - ERROR - Error getting payment info: strptime() argument 1 must be str, not MagicMock
+2025-09-09 09:46:42,920 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:48:36,240 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:48:38,126 - database - INFO - База данных инициализирована
+2025-09-09 09:48:38,152 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:48:38,336 - payment.models - ERROR - Error getting payment info: strptime() argument 1 must be str, not MagicMock
+2025-09-09 09:48:38,494 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:51:24,208 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:51:25,844 - database - INFO - База данных инициализирована
+2025-09-09 09:51:25,872 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:51:26,207 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 09:53:56,887 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 09:53:58,643 - database - INFO - База данных инициализирована
+2025-09-09 09:53:58,669 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 09:53:59,002 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:06:05,384 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:06:07,171 - database - INFO - База данных инициализирована
+2025-09-09 10:06:07,217 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:06:07,558 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:08:18,853 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:08:20,644 - database - INFO - База данных инициализирована
+2025-09-09 10:08:20,677 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:08:20,892 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 10:08:21,039 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:11:30,487 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:11:32,472 - database - INFO - База данных инициализирована
+2025-09-09 10:11:32,499 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:11:32,717 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 10:11:32,884 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:14:43,117 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:14:44,899 - database - INFO - База данных инициализирована
+2025-09-09 10:14:44,923 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:14:45,127 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 10:14:45,150 - payment.yookassa_integration - ERROR - Error creating YooKassa payment: 'coroutine' object does not support the asynchronous context manager protocol
+2025-09-09 10:14:45,300 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:16:51,684 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:16:53,627 - database - INFO - База данных инициализирована
+2025-09-09 10:16:53,652 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:16:53,875 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 2
+2025-09-09 10:19:07,747 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:19:09,498 - database - INFO - База данных инициализирована
+2025-09-09 10:19:09,527 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:19:09,706 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 10:19:09,729 - payment.yookassa_integration - ERROR - Error creating YooKassa payment: 'coroutine' object does not support the asynchronous context manager protocol
+2025-09-09 10:19:09,872 - TestRunner - ERROR - ❌ Тесты завершились с ошибкой. Код возврата: 1
+2025-09-09 10:21:49,809 - TestRunner - INFO - 🚀 Запуск тестов платежного модуля
+2025-09-09 10:21:51,635 - database - INFO - База данных инициализирована
+2025-09-09 10:21:51,658 - dotenv.main - WARNING - Python-dotenv could not parse statement starting at line 2
+2025-09-09 10:21:51,851 - payment.models - ERROR - Error updating subscription: Database error
+2025-09-09 10:21:51,888 - payment.yookassa_integration - ERROR - Error creating YooKassa payment: Network error
+2025-09-09 10:21:51,985 - TestRunner - INFO - ✅ Все тесты прошли успешно!

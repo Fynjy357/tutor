@@ -32,7 +32,8 @@ class Database:
                 phone TEXT NOT NULL,
                 promo_code TEXT DEFAULT '0',
                 registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                status TEXT DEFAULT 'active'
+                status TEXT DEFAULT 'active',
+                user_role TEXT DEFAULT 'user'
             )
             ''')
             
@@ -1120,7 +1121,32 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при проверке отчета: {e}")
             return False
+    def has_free_access(self, telegram_id: int) -> bool:
+        """Проверяет, есть ли у пользователя бесплатный доступ"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT user_role FROM tutors WHERE telegram_id = ?', (telegram_id,))
+                result = cursor.fetchone()
+                
+                if result and result[0] in ['admin', 'vip', 'moderator', 'tester']:
+                    return True
+                return False
+        except Exception as e:
+            logger.error(f"Ошибка при проверке бесплатного доступа: {e}")
+            return False
 
+    def is_admin(self, telegram_id: int) -> bool:
+        """Проверяет, является ли пользователь администратором"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT user_role FROM tutors WHERE telegram_id = ?', (telegram_id,))
+                result = cursor.fetchone()
+                return result and result[0] == 'admin'
+        except Exception as e:
+            logger.error(f"Ошибка при проверке администратора: {e}")
+            return False
 
 
 

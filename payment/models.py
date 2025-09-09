@@ -10,7 +10,7 @@ class PaymentManager:
         """Получение информации об оплате пользователя"""
         try:
             with db.get_connection() as conn:
-                conn.row_factory = db.get_connection().row_factory
+                conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
                 cursor = conn.cursor()
                 cursor.execute(
                     "SELECT valid_until, tariff, is_active FROM user_subscriptions WHERE user_id = ?",

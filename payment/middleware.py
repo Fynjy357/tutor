@@ -2,6 +2,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery, Update
 from typing import Callable, Dict, Any, Awaitable
 from .models import PaymentManager
+from database import db  # Импортируем базу данных
 
 class SubscriptionMiddleware(BaseMiddleware):
     def __init__(self):
@@ -32,6 +33,11 @@ class SubscriptionMiddleware(BaseMiddleware):
         if not real_event:
             return await handler(event, data)
         
+        # 🔥 ВАЖНО: ЕСЛИ ПОЛЬЗОВАТЕЛЬ АДМИН - ПРОПУСКАЕМ ВСЕ ПРОВЕРКИ
+        user_id = real_event.from_user.id
+        if db.is_admin(user_id):
+            return await handler(event, data)
+        
         # 🔍 Проверяем, является ли это премиум-функцией
         is_premium_feature = False
         
@@ -48,7 +54,6 @@ class SubscriptionMiddleware(BaseMiddleware):
             return await handler(event, data)
         
         # ⭐️ Если это премиум-функция - проверяем подписку
-        user_id = real_event.from_user.id
         has_active_subscription = await PaymentManager.check_subscription(user_id)
         
         if not has_active_subscription:
