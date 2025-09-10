@@ -11,10 +11,10 @@ from config import BOT_TOKEN
 from handlers.start import start_router
 from handlers.start import about_router
 from handlers.registration import registration_router
-from handlers.students.edit_handlers import router as edit_students_router
-from handlers.students.handlers import router as add_students_router
-from handlers.students.main import router as students_router
-from handlers.students.invitations import router as invitations_router
+# from handlers.students.edit_handlers import router as edit_students_router
+# from handlers.students.handlers import router as add_students_router
+# from handlers.students.main import router as students_router
+# from handlers.students.invitations import router as invitations_router
 from handlers.groups.handlers import router as groups_router
 from handlers.schedule import setup_schedule_handlers
 from notify import NotificationManager, lesson_notification_scheduler, setup_notification_handlers, register_confirmation_handlers
@@ -26,6 +26,8 @@ from payment.handlers import router as payment_router
 from handlers.admin.admin import router as admin_router
 from handlers.start.handlers_parent import parent_router
 from handlers.start.handlers_student_by_student import student_router
+# from handlers.students.report_editor import router as report_editor_router
+from handlers.students import router as students_module_router
 
 # Настройка логирования
 logging.basicConfig(
@@ -79,13 +81,15 @@ class BotApp:
             # Регистрация роутеров
             self.dp.include_router(start_router)
             self.dp.include_router(registration_router)
-            self.dp.include_router(edit_students_router)
+            # self.dp.include_router(edit_students_router)
             self.dp.include_router(about_router)
-            self.dp.include_router(students_router)
-            self.dp.include_router(invitations_router)
-            self.dp.include_router(add_students_router)
+            # self.dp.include_router(students_router)
+            # self.dp.include_router(invitations_router)
+            # self.dp.include_router(add_students_router)
             self.dp.include_router(parent_router)
             self.dp.include_router(student_router)
+            # self.dp.include_router(report_editor_router)
+            self.dp.include_router(students_module_router)
             
             # Роутер расписания
             schedule_router = setup_schedule_handlers()

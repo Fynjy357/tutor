@@ -7,7 +7,7 @@ import re
 
 from .keyboards import get_invite_keyboard, get_student_detail_keyboard
 from .utils import format_student_info, get_students_stats
-from handlers.students.keyboards_student import get_students_menu_keyboard, get_students_list_keyboard
+from handlers.students.keyboards_student import get_students_list_menu_keyboard, get_students_menu_keyboard
 from database import db
 
 router = Router()
@@ -156,13 +156,13 @@ async def back_to_students_list(callback_query: types.CallbackQuery):
     try:
         await callback_query.message.edit_text(
             text,
-            reply_markup=get_students_list_keyboard(students, page=0),
+            reply_markup=get_students_list_menu_keyboard(students, page=0),
             parse_mode="HTML"
         )
     except TelegramBadRequest:
         await callback_query.message.answer(
             text,
-            reply_markup=get_students_list_keyboard(students, page=0),
+            reply_markup=get_students_list_menu_keyboard(students, page=0),
             parse_mode="HTML"
         )
 
@@ -183,6 +183,6 @@ async def students_list_page(callback_query: types.CallbackQuery):
     
     await callback_query.message.edit_text(
         text,
-        reply_markup=get_students_list_keyboard(students, page=page),
+        reply_markup=get_students_list_menu_keyboard(students, page=page),
         parse_mode="HTML"
     )

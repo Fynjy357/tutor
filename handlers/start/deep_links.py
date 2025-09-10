@@ -40,9 +40,6 @@ async def detect_user_timezone(message: types.Message) -> str:
 
 def determine_timezone_by_offset(hours_diff: float) -> str:
     """Определение часового пояса по разнице во времени"""
-    # Учитываем, что разница показывает смещение пользователя относительно UTC
-    # Если разница 3 часа - значит пользователь в UTC+3 и т.д.
-    
     user_utc_offset = round(hours_diff)
     
     # Сопоставляем смещение с российскими часовыми поясами
@@ -61,10 +58,23 @@ def determine_timezone_by_offset(hours_diff: float) -> str:
     
     return timezone_mapping.get(user_utc_offset, 'Europe/Moscow')
 
-async def handle_deep_link(message: types.Message):
+async def is_user_tutor(telegram_id: int) -> bool:
+    """Проверяет, является ли пользователь репетитором"""
+    try:
+        tutor = db.get_tutor_by_telegram_id(telegram_id)
+        return tutor is not None
+    except Exception as e:
+        logger.error(f"Ошибка при проверке пользователя на репетитора: {e}")
+        return False
 
+async def handle_deep_link(message: types.Message):
     args = message.text.split()
     print(args)
+    
+    if len(args) < 2:
+        await show_welcome_message(message)
+        return
+        
     deep_link_args = args[1]
     
     """Обработка deep link приглашений"""
@@ -80,6 +90,16 @@ async def handle_deep_link(message: types.Message):
 async def process_invitation_link(message: types.Message, deep_link_args: str):
     """Обработка пригласительной ссылки"""
     try:
+        # Проверяем, не является ли пользователь репетитором
+        if await is_user_tutor(message.from_user.id):
+            await message.answer(
+                "❌ <b>Репетиторы не могут использовать пригласительные ссылки!</b>\n\n"
+                "Вы уже зарегистрированы как репетитор. Пригласительные ссылки предназначены "
+                "только для учеников и их родителей.",
+                parse_mode="HTML"
+            )
+            return
+            
         parts = deep_link_args.split('_', 1)
         if len(parts) < 2:
             await message.answer("❌ Неверная ссылка приглашения.")
@@ -91,10 +111,27 @@ async def process_invitation_link(message: types.Message, deep_link_args: str):
             await message.answer("❌ Неверная ссылка приглашения.")
             return
         
-        # Находим ученика по токену
+        # Находим ученика по токену (с проверкой, что токен еще действителен)
         student = db.get_student_by_token(token, invite_type)
         if not student:
-            await message.answer("❌ Ссылка приглашения недействительна или устарела.")
+            await message.answer(
+                "❌ Ссылка приглашения недействительна или уже использована!\n"
+                "Обратитесь к вашему репетитору за новой ссылкой."
+            )
+            return
+        
+        # Проверяем, не привязан ли уже аккаунт этого типа
+        if invite_type == 'student' and student.get('student_telegram_id'):
+            await message.answer(
+                "❌ У ученика уже привязан Telegram аккаунт!\n"
+                "Обратитесь к репетитору за помощью."
+            )
+            return
+        elif invite_type == 'parent' and student.get('parent_telegram_id'):
+            await message.answer(
+                "❌ У родителя уже привязан Telegram аккаунт!\n"
+                "Обратитесь к репетитору за помощью."
+            )
             return
         
         # Привязываем Telegram аккаунт с определением часового пояса
@@ -179,6 +216,7 @@ async def send_success_response(message: types.Message, student: dict, role: str
         f"📅 <b>Уведомления:</b> включены\n\n"
         f"Теперь вы будете получать уведомления о занятиях за 24 часа.\n"
         f"Уведомления приходят в вашем локальном времени.\n\n"
+        f"<b>⚠️ Эта ссылка больше недействительна.</b>\n"
         f"Если часовой пояс определен неправильно, используйте команду /timezone",
         parse_mode="HTML"
     )
@@ -202,281 +240,3 @@ async def notify_tutor(message: types.Message, student: dict, tutor_message: str
             )
     except Exception as e:
         logger.error(f"Ошибка при отправке уведомления репетитору: {e}")
-
-
-
-
-
-
-
-# Определение времени по времени часового пояса сервера 
-# from aiogram import types
-# import logging
-# from datetime import datetime
-# import pytz
-# import tzlocal
-# from database import db
-# from handlers.start.welcome import show_welcome_message
-
-# logger = logging.getLogger(__name__)
-
-# async def detect_user_timezone(message: types.Message) -> str:
-#     """Определение часового пояса пользователя с использованием pytz и tzlocal"""
-#     try:
-#         # Способ 1: Используем локальный часовой пояс сервера как приближение
-#         local_tz = tzlocal.get_localzone()
-#         return str(local_tz)
-        
-#     except Exception as e:
-#         logger.error(f"Ошибка определения часового пояса: {e}")
-#         # Возвращаем московское время по умолчанию
-#         return 'Europe/Moscow'
-
-# async def handle_deep_link(message: types.Message, deep_link_args: str):
-#     """Обработка deep link приглашений"""
-#     logger.info(f"Deep link: {deep_link_args} from user: {message.from_user.id}")
-    
-#     # Обрабатываем пригласительные ссылки
-#     if deep_link_args.startswith(('student_', 'parent_')):
-#         await process_invitation_link(message, deep_link_args)
-#     else:
-#         logger.info("Неизвестный формат deep link")
-#         await show_welcome_message(message)
-
-# async def process_invitation_link(message: types.Message, deep_link_args: str):
-#     """Обработка пригласительной ссылки"""
-#     try:
-#         parts = deep_link_args.split('_', 1)
-#         if len(parts) < 2:
-#             await message.answer("❌ Неверная ссылка приглашения.")
-#             return
-            
-#         invite_type, token = parts
-        
-#         if invite_type not in ['student', 'parent']:
-#             await message.answer("❌ Неверная ссылка приглашения.")
-#             return
-        
-#         # Находим ученика по токену
-#         student = db.get_student_by_token(token, invite_type)
-#         if not student:
-#             await message.answer("❌ Ссылка приглашения недействительна или устарела.")
-#             return
-        
-#         # Привязываем Telegram аккаунт с определением часового пояса
-#         success, role, tutor_message, user_timezone = await link_telegram_account(
-#             message, student, invite_type
-#         )
-        
-#         if success:
-#             await send_success_response(message, student, role, user_timezone)
-#             await notify_tutor(message, student, tutor_message)
-#         else:
-#             await send_error_response(message)
-            
-#     except Exception as e:
-#         logger.error(f"Ошибка в обработке deep link: {e}")
-#         await message.answer("❌ Произошла ошибка при обработке приглашения.")
-
-# async def link_telegram_account(message: types.Message, student: dict, invite_type: str):
-#     """Привязка Telegram аккаунта к ученику с определением часового пояса"""
-#     username = f"@{message.from_user.username}" if message.from_user.username else "не указан"
-    
-#     # Определяем часовой пояс пользователя
-#     user_timezone = await detect_user_timezone(message)
-    
-#     # Получаем понятное название часового пояса
-#     timezone_name = get_timezone_display_name(user_timezone)
-    
-#     if invite_type == 'student':
-#         success = db.update_student_telegram_id(
-#             student['id'], 
-#             message.from_user.id, 
-#             username, 
-#             'student',
-#             user_timezone
-#         )
-#         role = "ученика"
-#         tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!\nЧасовой пояс: {timezone_name}"
-#     else:
-#         success = db.update_student_telegram_id(
-#             student['id'], 
-#             message.from_user.id, 
-#             username, 
-#             'parent',
-#             user_timezone
-#         )
-#         role = "родителя"
-#         tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!\nЧасовой пояс: {timezone_name}"
-    
-#     return success, role, tutor_message, timezone_name
-
-# def get_timezone_display_name(timezone_str: str) -> str:
-#     """Получение понятного названия часового пояса"""
-#     try:
-#         tz = pytz.timezone(timezone_str)
-#         now = datetime.now(tz)
-#         offset = now.utcoffset().total_seconds() / 3600
-        
-#         # Сопоставляем с российскими часовыми поясами
-#         timezone_names = {
-#             'Europe/Moscow': 'Москва (+3)',
-#             'Europe/Kaliningrad': 'Калининград (+2)',
-#             'Asia/Yekaterinburg': 'Екатеринбург (+5)',
-#             'Asia/Omsk': 'Омск (+6)',
-#             'Asia/Krasnoyarsk': 'Красноярск (+7)',
-#             'Asia/Irkutsk': 'Иркутск (+8)',
-#             'Asia/Yakutsk': 'Якутск (+9)',
-#             'Asia/Vladivostok': 'Владивосток (+10)',
-#             'Asia/Magadan': 'Магадан (+11)',
-#             'Asia/Kamchatka': 'Камчатка (+12)'
-#         }
-        
-#         return timezone_names.get(timezone_str, f"{timezone_str} (UTC+{int(offset)})")
-        
-#     except Exception:
-#         return timezone_str
-
-# async def send_success_response(message: types.Message, student: dict, role: str, timezone: str):
-#     """Отправка сообщения об успешной привязке с информацией о часовом поясе"""
-#     await message.answer(
-#         f"✅ <b>Вы успешно привязаны как {role} ученика {student['full_name']}!</b>\n\n"
-#         f"🌍 <b>Часовой пояс:</b> {timezone}\n"
-#         f"📅 <b>Уведомления:</b> включены\n\n"
-#         f"Теперь вы будете получать уведомления о занятиях за 24 часа.\n"
-#         f"Уведомления приходят в вашем локальном времени.\n\n"
-#         f"Если часовой пояс определен неправильно, используйте команду /timezone",
-#         parse_mode="HTML"
-#     )
-
-# async def send_error_response(message: types.Message):
-#     """Отправка сообщения об ошибке"""
-#     await message.answer(
-#         "❌ <b>Ошибка при привязке аккаунта!</b>\n\n"
-#         "Пожалуйста, попробуйте позже или обратитесь к репетитору.",
-#         parse_mode="HTML"
-#     )
-
-# async def notify_tutor(message: types.Message, student: dict, tutor_message: str):
-#     """Уведомление репетитора"""
-#     try:
-#         tutor = db.get_tutor_by_id(student['tutor_id'])
-#         if tutor and tutor[1]:
-#             await message.bot.send_message(
-#                 chat_id=tutor[1],
-#                 text=tutor_message
-#             )
-#     except Exception as e:
-#         logger.error(f"Ошибка при отправке уведомления репетитору: {e}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from aiogram import types
-# import logging
-# from database import db
-# from handlers.start.welcome import show_welcome_message
-
-# logger = logging.getLogger(__name__)
-
-# async def handle_deep_link(message: types.Message, deep_link_args: str):
-#     """Обработка deep link приглашений"""
-#     logger.info(f"Deep link: {deep_link_args} from user: {message.from_user.id}")
-    
-#     # Обрабатываем пригласительные ссылки
-#     if deep_link_args.startswith(('student_', 'parent_')):
-#         await process_invitation_link(message, deep_link_args)
-#     else:
-#         logger.info("Неизвестный формат deep link")
-#         await show_welcome_message(message)
-
-# async def process_invitation_link(message: types.Message, deep_link_args: str):
-#     """Обработка пригласительной ссылки"""
-#     try:
-#         parts = deep_link_args.split('_', 1)
-#         if len(parts) < 2:
-#             await message.answer("❌ Неверная ссылка приглашения.")
-#             return
-            
-#         invite_type, token = parts
-        
-#         if invite_type not in ['student', 'parent']:
-#             await message.answer("❌ Неверная ссылка приглашения.")
-#             return
-        
-#         # Находим ученика по токену
-#         student = db.get_student_by_token(token, invite_type)
-#         if not student:
-#             await message.answer("❌ Ссылка приглашения недействительна или устарела.")
-#             return
-        
-#         # Привязываем Telegram аккаунт
-#         success, role, tutor_message = await link_telegram_account(
-#             message, student, invite_type
-#         )
-        
-#         if success:
-#             await send_success_response(message, student, role)
-#             await notify_tutor(message, student, tutor_message)
-#         else:
-#             await send_error_response(message)
-            
-#     except Exception as e:
-#         logger.error(f"Ошибка в обработке deep link: {e}")
-#         await message.answer("❌ Произошла ошибка при обработке приглашения.")
-
-# async def link_telegram_account(message: types.Message, student: dict, invite_type: str):
-#     """Привязка Telegram аккаунта к ученику"""
-#     username = f"@{message.from_user.username}" if message.from_user.username else "не указан"
-    
-#     if invite_type == 'student':
-#         success = db.update_student_telegram_id(
-#             student['id'], message.from_user.id, username, 'student'
-#         )
-#         role = "ученика"
-#         tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!"
-#     else:
-#         success = db.update_student_telegram_id(
-#             student['id'], message.from_user.id, username, 'parent'
-#         )
-#         role = "родителя"
-#         tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!"
-    
-#     return success, role, tutor_message
-
-# async def send_success_response(message: types.Message, student: dict, role: str):
-#     """Отправка сообщения об успешной привязке"""
-#     await message.answer(
-#         f"✅ <b>Вы успешно привязаны как {role} ученика {student['full_name']}!</b>\n\n"
-#         f"Теперь вы будете получать уведомления о занятиях и успехах.",
-#         parse_mode="HTML"
-#     )
-
-# async def send_error_response(message: types.Message):
-#     """Отправка сообщения об ошибке"""
-#     await message.answer(
-#         "❌ <b>Ошибка при привязке аккаунта!</b>\n\n"
-#         "Пожалуйста, попробуйте позже или обратитесь к репетитору.",
-#         parse_mode="HTML"
-#     )
-
-# async def notify_tutor(message: types.Message, student: dict, tutor_message: str):
-#     """Уведомление репетитора"""
-#     try:
-#         tutor = db.get_tutor_by_id(student['tutor_id'])
-#         if tutor and tutor[1]:
-#             await message.bot.send_message(
-#                 chat_id=tutor[1],
-#                 text=tutor_message
-#             )
-#     except Exception as e:
-#         logger.error(f"Ошибка при отправке уведомления репетитору: {e}")

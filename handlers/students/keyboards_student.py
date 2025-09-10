@@ -1,6 +1,9 @@
-# keyboards/students.py
+# keyboards/keyboards_student.py
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from datetime import datetime
+import math
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def get_students_menu_keyboard():
     builder = InlineKeyboardBuilder()
@@ -16,6 +19,13 @@ def get_students_menu_keyboard():
         types.InlineKeyboardButton(
             text="📋 Список учеников",
             callback_data="students_list"
+        )
+    )
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="📝 Редактировать отчеты",
+            callback_data="edit_reports"
         )
     )
     
@@ -38,8 +48,7 @@ def get_cancel_keyboard_add_students():
     )
     return builder.as_markup()
 
-# Добавим временные клавиатуры для будущего функционала
-def get_students_list_keyboard():
+def get_students_list_menu_keyboard():  # ИЗМЕНЕНО ИМЯ ФУНКЦИИ
     builder = InlineKeyboardBuilder()
     
     builder.row(
@@ -65,7 +74,7 @@ def get_students_list_keyboard():
     
     return builder.as_markup()
 
-def get_students_list_keyboard(students, page=0, page_size=5):
+def get_students_pagination_keyboard(students, page=0, page_size=5):
     builder = InlineKeyboardBuilder()
     
     # Добавляем кнопки для учеников на текущей странице
@@ -112,4 +121,135 @@ def get_students_list_keyboard(students, page=0, page_size=5):
         )
     )
     
+    return builder.as_markup()
+
+# Клавиатуры для редактирования отчетов
+def get_dates_keyboard(dates, page=0, total_pages=1):
+    """Клавиатура с датами занятий"""
+    builder = InlineKeyboardBuilder()
+    
+    # Добавляем кнопки с датами (максимум 6 на страницу)
+    for date in dates[page*6:(page+1)*6]:
+        builder.row(
+            types.InlineKeyboardButton(
+                text=date.strftime("%d.%m.%Y"),
+                callback_data=f"report_date_{date.strftime('%Y-%m-%d')}"
+            )
+        )
+    
+    # Кнопки навигации
+    nav_buttons = []
+    if page > 0:
+        nav_buttons.append(
+            types.InlineKeyboardButton(
+                text="◀️ Назад",
+                callback_data=f"reports_page_{page-1}"
+            )
+        )
+    if page < total_pages - 1:
+        nav_buttons.append(
+            types.InlineKeyboardButton(
+                text="Вперед ▶️",
+                callback_data=f"reports_page_{page+1}"
+            )
+        )
+    
+    if nav_buttons:
+        builder.row(*nav_buttons)
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="◀️ Главное меню",
+            callback_data="back_to_students_menu"
+        )
+    )
+    
+    return builder.as_markup()
+
+def get_reports_keyboard(reports: list, page: int, total_pages: int) -> InlineKeyboardMarkup:
+    """Клавиатура для выбора отчета с пагинацией"""
+    keyboard = InlineKeyboardBuilder()
+    
+    for report in reports:
+        # Безопасное получение данных отчета
+        time_str = report.get('time', 'Не указано')
+        student_name = report.get('student_name', 'Неизвестный ученик')
+        
+        keyboard.row(
+            InlineKeyboardButton(
+                text=f"{time_str} - {student_name}",
+                callback_data=f"select_report:{report['id']}"
+            )
+        )
+    
+    # Добавляем кнопки пагинации
+    pagination_buttons = []
+    if page > 0:
+        pagination_buttons.append(
+            InlineKeyboardButton(text="⬅️ Назад", callback_data=f"reports_list_page_{page-1}")
+        )
+    if page < total_pages - 1:
+        pagination_buttons.append(
+            InlineKeyboardButton(text="Вперед ➡️", callback_data=f"reports_list_page_{page+1}")
+        )
+    
+    if pagination_buttons:
+        keyboard.row(*pagination_buttons)
+    
+    keyboard.row(
+        InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_dates")
+    )
+    
+    return keyboard.as_markup()
+
+def get_report_edit_keyboard(report_id):
+    """Клавиатура для редактирования отчета"""
+    builder = InlineKeyboardBuilder()
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="✅ Присутствие на занятии",
+            callback_data=f"toggle_attendance_{report_id}"
+        )
+    )
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="💰 Оплата занятия",
+            callback_data=f"toggle_payment_{report_id}"
+        )
+    )
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="📚 Домашнее задание",
+            callback_data=f"toggle_homework_{report_id}"
+        )
+    )
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="✏️ Редактировать комментарий",
+            callback_data=f"edit_comment_{report_id}"
+        )
+    )
+    
+    builder.row(
+        types.InlineKeyboardButton(
+            text="◀️ Назад к отчетам",
+            callback_data="back_to_reports"
+        )
+    )
+    
+    return builder.as_markup()
+
+def get_cancel_edit_keyboard():
+    """Клавиатура для отмена редактирования"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        types.InlineKeyboardButton(
+            text="❌ Отменить редактирование",
+            callback_data="cancel_edit"
+        )
+    )
     return builder.as_markup()

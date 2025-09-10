@@ -13,7 +13,7 @@ from keyboards.main_menu import get_main_menu_keyboard
 from .states import AddStudentStates
 
 from .utils import get_students_stats
-from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard, get_students_list_keyboard
+from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard, get_students_pagination_keyboard
 from .edit_handlers import router as edit_router
 from database import db
 from handlers.students.handlers_add_student import router as add_students_router
@@ -72,13 +72,13 @@ async def students_list(callback_query: types.CallbackQuery):
     try:
         await callback_query.message.edit_text(
             text,
-            reply_markup=get_students_list_keyboard(students, page=0),
+            reply_markup=get_students_pagination_keyboard(students, page=0),
             parse_mode="HTML"
         )
     except TelegramBadRequest:
         await callback_query.message.answer(
             text,
-            reply_markup=get_students_list_keyboard(students, page=0),
+            reply_markup=get_students_pagination_keyboard(students, page=0),
             parse_mode="HTML"
         )
 

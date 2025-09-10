@@ -1250,6 +1250,117 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении предстоящих занятий: {e}")
             return []
+    def get_dates_with_reports(self, tutor_id):
+        """Получает даты, для которых есть отчеты"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT DISTINCT DATE(l.lesson_date) as lesson_date
+                FROM lesson_reports lr
+                JOIN lessons l ON lr.lesson_id = l.id
+                WHERE l.tutor_id = ? 
+                ORDER BY lesson_date DESC
+            ''', (tutor_id,))
+            dates = [row[0] for row in cursor.fetchall()]
+            return [datetime.strptime(date_str, '%Y-%m-%d').date() for date_str in dates]
+
+    def get_reports_by_date(self, tutor_id, selected_date):
+        """Получает отчеты по дате"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    lr.*, 
+                    s.full_name as student_name,
+                    l.lesson_date,
+                    TIME(l.lesson_date) as lesson_time
+                FROM lesson_reports lr
+                JOIN lessons l ON lr.lesson_id = l.id
+                JOIN students s ON lr.student_id = s.id
+                WHERE l.tutor_id = ? AND DATE(l.lesson_date) = ?
+                ORDER BY l.lesson_date
+            ''', (tutor_id, selected_date.strftime('%Y-%m-%d')))
+            
+            reports = []
+            for row in cursor.fetchall():
+                report = dict(row)
+                # Преобразуем строку времени в объект времени
+                if 'lesson_time' in report and report['lesson_time']:
+                    try:
+                        report['time'] = datetime.strptime(report['lesson_time'], '%H:%M:%S').strftime('%H:%M')
+                    except ValueError:
+                        report['time'] = report['lesson_time']
+                reports.append(report)
+            return reports
+
+    def get_report_by_id(self, report_id):
+        """Получает отчет по ID"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    lr.*, 
+                    s.full_name as student_name,
+                    l.lesson_date,
+                    TIME(l.lesson_date) as lesson_time
+                FROM lesson_reports lr
+                JOIN lessons l ON lr.lesson_id = l.id
+                JOIN students s ON lr.student_id = s.id
+                WHERE lr.id = ?
+            ''', (report_id,))
+            
+            row = cursor.fetchone()
+            if row:
+                report = dict(row)
+                # Преобразуем строку даты в объект date
+                if 'lesson_date' in report and report['lesson_date']:
+                    report['lesson_date'] = datetime.strptime(report['lesson_date'], '%Y-%m-%d %H:%M:%S').date()
+                return report
+            return None
+
+    def update_report_attendance(self, report_id, new_value):
+        """Обновляет статус присутствия"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE lesson_reports 
+                SET lesson_held = ? 
+                WHERE id = ?
+            ''', (new_value, report_id))
+            conn.commit()
+
+    def update_report_payment(self, report_id, new_value):
+        """Обновляет статус оплаты"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE lesson_reports 
+                SET lesson_paid = ? 
+                WHERE id = ?
+            ''', (new_value, report_id))
+            conn.commit()
+
+    def update_report_homework(self, report_id, new_value):
+        """Обновляет статус домашнего задания"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE lesson_reports 
+                SET homework_done = ? 
+                WHERE id = ?
+            ''', (new_value, report_id))
+            conn.commit()
+
+    def update_report_comment(self, report_id, new_comment):
+        """Обновляет комментарий к отчету"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE lesson_reports 
+                SET student_performance = ? 
+                WHERE id = ?
+            ''', (new_comment, report_id))
+            conn.commit()
 
 
 # Создаем глобальный экземпляр базы данных
