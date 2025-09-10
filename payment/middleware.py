@@ -13,8 +13,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         ]
         
         self.premium_callbacks = [
-            'groups', 'lesson_type_group', 'generate_', 'analyze_', 'deep_',
-            'custom_', 'expert_', 'download_', 'export_'
+            'groups', 'lesson_type_group', 'invite_student_', 'invite_parent_'
         ]
 
     async def __call__(
@@ -64,11 +63,11 @@ class SubscriptionMiddleware(BaseMiddleware):
                     reply_markup=data.get('reply_markup')
                 )
             elif isinstance(real_event, CallbackQuery):
-                # ⚡️ ВАЖНО: Сначала отвечаем на callback, потом показываем alert
-                await real_event.answer()  # Обязательно отвечаем на callback
-                await real_event.message.answer(
+                # ⚡️ ВАЖНО: Используем всплывающее окно (alert) вместо сообщения
+                await real_event.answer(
                     "❌ Это премиум-функция! Требуется активная подписка.\n\n"
-                    "💎 Для доступа оформите подписку в настройках."
+                    "💎 Для доступа оформите подписку в настройках.",
+                    show_alert=True  # ← ВОТ ЭТО КЛЮЧЕВОЕ ИЗМЕНЕНИЕ!
                 )
             return
         

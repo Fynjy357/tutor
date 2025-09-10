@@ -6,6 +6,7 @@ from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 from handlers.start.keyboards_start import get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
+from payment.config import TARIF
 from .models import PaymentManager
 from .yookassa_integration import YooKassaManager
 
@@ -49,11 +50,7 @@ async def payment_menu_handler(callback: types.CallbackQuery, state: FSMContext)
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_settings")]
     ])  # ← Исправлено на back_to_settings
     
-    text = "💳 **Выберите тариф подписки:**\n\n" \
-           "• 1 месяц - 120 рублей\n" \
-           "• 6 месяцев - 650 рублей (≈108 руб/мес)\n" \
-           "• 1 год - 1000 рублей (≈83 руб/мес)\n\n" \
-           "💰 **Экономия при долгосрочной подписке!**"
+    text = TARIF
     
     await callback.message.edit_text(text, reply_markup=keyboard, parse_mode='Markdown')
     await callback.answer()

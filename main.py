@@ -28,6 +28,8 @@ from handlers.start.handlers_parent import parent_router
 from handlers.start.handlers_student_by_student import student_router
 # from handlers.students.report_editor import router as report_editor_router
 from handlers.students import router as students_module_router
+from notify.notify_tutors.reminder_scheduler import ReminderScheduler
+from handlers.freedback.feedback_handlers import router as feedback
 
 # Настройка логирования
 logging.basicConfig(
@@ -46,6 +48,7 @@ class BotApp:
         self.dp = None
         self.notification_manager = None
         self.lesson_report_handlers = None
+        self.reminder_scheduler = None  # ← ДОБАВЛЕНО
         self.tasks = []
         self.is_running = False
 
@@ -67,6 +70,9 @@ class BotApp:
             
             # Инициализация обработчиков отчетов
             self.lesson_report_handlers = LessonReportHandlers(db)
+            
+            # Инициализация планировщика напоминаний  # ← ДОБАВЛЕНО
+            self.reminder_scheduler = ReminderScheduler(self.bot)  # ← ДОБАВЛЕНО
 
             # Проверка формата дат
             self.notification_manager.check_lesson_dates_format()
@@ -90,6 +96,7 @@ class BotApp:
             self.dp.include_router(student_router)
             # self.dp.include_router(report_editor_router)
             self.dp.include_router(students_module_router)
+            self.dp.include_router(feedback)
             
             # Роутер расписания
             schedule_router = setup_schedule_handlers()
@@ -103,7 +110,6 @@ class BotApp:
 
             #Роутер ролей
             self.dp.include_router(admin_router)
-
 
             self.is_running = True
             logger.info("Бот успешно инициализирован")
@@ -121,6 +127,14 @@ class BotApp:
             
         logger.info("Завершение работы бота...")
         self.is_running = False
+
+        # Остановка планировщика напоминаний  # ← ДОБАВЛЕНО
+        if self.reminder_scheduler:  # ← ДОБАВЛЕНО
+            try:  # ← ДОБАВЛЕНО
+                await self.reminder_scheduler.stop()  # ← ДОБАВЛЕНО
+                logger.info("Планировщик напоминаний остановлен")  # ← ДОБАВЛЕНО
+            except Exception as e:  # ← ДОБАВЛЕНО
+                logger.error(f"Ошибка при остановке планировщика: {e}")  # ← ДОБАВЛЕНО
 
         # Отмена всех фоновых задач
         for task in self.tasks:
@@ -170,6 +184,11 @@ class BotApp:
             # Запуск фоновых задач
             self.tasks.append(asyncio.create_task(lesson_notification_scheduler(self.bot, self.notification_manager)))
             self.tasks.append(asyncio.create_task(self.lesson_report_handlers.notify_tutor_about_lesson_end(self.bot)))
+            
+            # Запуск планировщика напоминаний  # ← ДОБАВЛЕНО
+            if self.reminder_scheduler:  # ← ДОБАВЛЕНО
+                self.tasks.append(asyncio.create_task(self.reminder_scheduler.start()))  # ← ДОБАВЛЕНО
+                logger.info("Планировщик напоминаний запущен")  # ← ДОБАВЛЕНО
 
             logger.info("Бот запущен и готов к работе")
             await self.dp.start_polling(self.bot)

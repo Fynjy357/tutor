@@ -7,6 +7,7 @@ from .keyboards import *
 from .utils import *
 from . import individual_handlers, group_handlers
 import logging
+import asyncio
 
 router = Router()
 logger = logging.getLogger(__name__)

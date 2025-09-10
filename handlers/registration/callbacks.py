@@ -177,7 +177,7 @@ async def change_phone(callback_query: types.CallbackQuery, state: FSMContext):
     registration_messages.append(phone_message.message_id)
     await state.update_data(registration_messages=registration_messages)
     await state.set_state(RegistrationStates.editing_phone)
-    
+   
 
 @router.callback_query(F.data == "cancel_registration")
 async def cancel_registration(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):

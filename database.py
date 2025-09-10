@@ -16,6 +16,7 @@ class Database:
         """Создает и возвращает соединение с базой данных"""
         conn = sqlite3.connect(self.db_name)
         conn.row_factory = sqlite3.Row  # Для работы с dict-like строками
+        
         return conn
 
     def init_db(self):
@@ -76,6 +77,12 @@ class Database:
                 FOREIGN KEY (student_id) REFERENCES students (id)
             )
             ''')
+            # Для существующих таблиц - добавляем поле если его нет
+            try:
+                cursor.execute('ALTER TABLE lessons ADD COLUMN reminder_sent INTEGER DEFAULT 0')
+            except sqlite3.OperationalError:
+                # Поле уже существует - игнорируем ошибку
+                pass
 
             # Таблица подтверждений занятий
             cursor.execute('''
@@ -155,11 +162,30 @@ class Database:
                 FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
             )
             ''')
+            # Обращения
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedback_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                user_name TEXT NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status TEXT DEFAULT 'new',  -- new, in_progress, resolved
+                FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
+            )
+            ''')
             try:
                 cursor.execute('ALTER TABLE lessons ADD COLUMN group_id INTEGER')
             except sqlite3.OperationalError:
                 # Поле уже существует - игнорируем ошибку
                 pass
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tutor_settings (
+                tutor_id INTEGER PRIMARY KEY,
+                reminder_hours_before INTEGER DEFAULT 1,
+                FOREIGN KEY (tutor_id) REFERENCES tutors (id)
+            )
+            ''')
             
             conn.commit()
         logger.info("База данных инициализирована")
@@ -1361,7 +1387,182 @@ class Database:
                 WHERE id = ?
             ''', (new_comment, report_id))
             conn.commit()
+    def get_lessons_for_reminder(self):
+        """Получает все занятия, которые начнутся в ближайшие 60 минут"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                # Логируем оба времени для отладки
+                cursor.execute("SELECT datetime('now') as utc_time, datetime('now', 'localtime') as local_time")
+                times = cursor.fetchone()
+                logger.info(f"🕒 UTC время в БД: {times['utc_time']}")
+                logger.info(f"🏠 Локальное время в БД: {times['local_time']}")
+                
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    s.full_name as student_name,
+                    t.telegram_id as tutor_telegram_id,
+                    t.full_name as tutor_name,
+                    l.reminder_sent
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                JOIN tutors t ON l.tutor_id = t.id
+                WHERE l.status = 'planned'
+                AND l.lesson_date > datetime('now', 'localtime')
+                AND l.lesson_date <= datetime('now', 'localtime', '+60 minutes')
+                AND l.reminder_sent = 0
+                ''')
+                
+                results = [dict(row) for row in cursor.fetchall()]
+                return results
+                
+        except Exception as e:
+            logger.error(f"💥 Ошибка при получении занятий для напоминания: {e}")
+            return []
 
+    def mark_reminder_sent(self, lesson_id: int):
+        """Отмечает, что напоминание для занятия было отправлено"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE lessons SET reminder_sent = 1 WHERE id = ?
+                ''', (lesson_id,))
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при отметке отправленного напоминания: {e}")
+            return False
 
+    def reset_reminders_for_past_lessons(self):
+        """Сбрасывает флаги напоминаний для прошедших занятий"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE lessons 
+                SET reminder_sent = 0 
+                WHERE status = 'planned' 
+                AND lesson_date < datetime('now')
+                AND reminder_sent = 1
+                ''')
+                conn.commit()
+                return cursor.rowcount
+        except Exception as e:
+            logger.error(f"Ошибка при сбросе напоминаний: {e}")
+            return 0    
+    # Редактирование времени напоминания уведомлений для репетитора:
+    def set_reminder_time(self, tutor_id: int, hours_before: int):
+        """Устанавливает время напоминания для репетитора"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                INSERT OR REPLACE INTO tutor_settings 
+                (tutor_id, reminder_hours_before) 
+                VALUES (?, ?)
+                ''', (tutor_id, hours_before))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при установке времени напоминания: {e}")
+            return False
+
+    def get_reminder_time(self, tutor_id: int):
+        """Получает время напоминания для репетитора"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT reminder_hours_before FROM tutor_settings 
+                WHERE tutor_id = ?
+                ''', (tutor_id,))
+                result = cursor.fetchone()
+                return result[0] if result else 1  # По умолчанию 1 час
+        except Exception as e:
+            logger.error(f"Ошибка при получении времени напоминания: {e}")
+            return 1
+
+def get_feedback_messages(self, status=None):
+    """Получение списка обращений"""
+    try:
+        with self.get_connection() as conn:
+            conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+            cursor = conn.cursor()
+            
+            if status:
+                cursor.execute("SELECT * FROM feedback_messages WHERE status = ? ORDER BY created_at DESC", (status,))
+            else:
+                cursor.execute("SELECT * FROM feedback_messages ORDER BY created_at DESC")
+            
+            return cursor.fetchall()
+    except Exception as e:
+        logger.error(f"Ошибка при получении списка обращений: {e}")
+        return []
+
+def update_feedback_status(self, feedback_id, status):
+    """Обновление статуса обращения"""
+    try:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE feedback_messages SET status = ? WHERE id = ?",
+                (status, feedback_id)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении статуса обращения: {e}")
+        return False
+
+def save_feedback_message(self, user_id, user_name, message):
+    """Сохранение нового обращения"""
+    try:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO feedback_messages (user_id, user_name, message) VALUES (?, ?, ?)",
+                (user_id, user_name, message)
+            )
+            conn.commit()
+            return cursor.lastrowid
+    except Exception as e:
+        logger.error(f"Ошибка при сохранении обращения: {e}")
+        return None
+
+def get_feedback_message_by_id(self, feedback_id):
+    """Получение обращения по ID"""
+    try:
+        with self.get_connection() as conn:
+            conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM feedback_messages WHERE id = ?", (feedback_id,))
+            return cursor.fetchone()
+    except Exception as e:
+        logger.error(f"Ошибка при получении обращения по ID: {e}")
+        return None
+
+def get_feedback_stats(self):
+    """Получение статистики по обращениям"""
+    try:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    status,
+                    COUNT(*) as count
+                FROM feedback_messages 
+                GROUP BY status
+            """)
+            return {row[0]: row[1] for row in cursor.fetchall()}
+    except Exception as e:
+        logger.error(f"Ошибка при получении статистики обращений: {e}")
+        return {}
+    
 # Создаем глобальный экземпляр базы данных
 db = Database()

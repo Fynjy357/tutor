@@ -29,8 +29,8 @@ def get_main_menu_keyboard():
     # Третий ряд
     builder.row(
         types.InlineKeyboardButton(
-            text="💰 Оплаты",
-            callback_data="payments"
+            text="📞 Связь с разработчиками",
+            callback_data="contact_developers"
         ),
         types.InlineKeyboardButton(
             text="⚙️ Настройки",
