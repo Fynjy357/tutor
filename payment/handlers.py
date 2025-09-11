@@ -82,7 +82,7 @@ async def get_settings_message(user_id: int) -> tuple:
         else:
             formatted_date = str(valid_until)
         
-        message_text = f"💰 **Статус подписки**\n\n" \
+        message_text = f"**Статус подписки**\n\n" \
                       f"✅ Активная подписка\n" \
                       f"📅 Действует до: {formatted_date}\n" \
                       f"💳 Тариф: {payment_info.get('tariff', 'Не указан')}\n\n" \
@@ -93,7 +93,7 @@ async def get_settings_message(user_id: int) -> tuple:
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 Оплата сервиса", callback_data="payment_menu")],
-        [InlineKeyboardButton(text="🔄 Обновить статус", callback_data="settings")],
+        # [InlineKeyboardButton(text="🔄 Обновить статус", callback_data="settings")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main_menu")]
     ])
     
@@ -241,6 +241,9 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
             tariff_name = data.get('tariff_name', '1 месяц')
             amount = data.get('amount', 0)
             
+            # Получаем количество дней из метаданных платежа
+            days = int(payment_info['metadata']['days'])
+            
             # СОЗДАЕМ ЗАПИСЬ В ТАБЛИЦЕ PAYMENTS
             payment_id = payment_info.get('id', f"manual_{datetime.now().timestamp()}")
             success = await PaymentManager.create_payment_record(
@@ -249,7 +252,7 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
                 tariff_name=tariff_name,
                 amount=amount,
                 status='succeeded',
-                days=int(payment_info['metadata']['days'])  # ← ДОБАВЛЕНО ЗАПЯТАЯ И ПАРАМЕТР days
+                days=days  # ← Исправлено
             )
             
             if not success:
@@ -260,10 +263,25 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
             logger.info(f"Current subscription after payment: {current_subscription}")
             
             if current_subscription and current_subscription.get('is_active', False):
-                text = f"✅ **Подписка активирована!**\n\n" \
-                      f"📅 Действует: {tariff_days} дней\n" \
-                      f"💳 Тариф: {tariff_name}\n\n" \
-                      f"Теперь вам доступен полный функционал!"
+                # Получаем дату окончания подписки
+                valid_until_str = current_subscription.get('valid_until')
+                if valid_until_str:
+                    try:
+                        # Преобразуем строку в datetime объект
+                        valid_until = datetime.strptime(valid_until_str, '%Y-%m-%d %H:%M:%S')
+                        formatted_date = valid_until.strftime('%d.%m.%Y')
+                    except:
+                        formatted_date = valid_until_str
+                else:
+                    formatted_date = "не определена"
+                
+                # Формируем сообщение
+                text = (
+                    f"✅ Вы продлили подписку на {days} дней\n\n"
+                    f"📅 Подписка активна до: {formatted_date}\n"
+                    f"💳 Тариф: {tariff_name}\n\n"
+                    f"🎉 Вам доступен весь функционал!"
+                )
             else:
                 text = "❌ Ошибка активации подписки. Обратитесь в поддержку."
             
