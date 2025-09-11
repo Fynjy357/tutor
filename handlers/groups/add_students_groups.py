@@ -41,9 +41,31 @@ async def add_specific_student(callback_query: CallbackQuery):
     group_id = int(parts[4])
     
     success = db.add_student_to_group(student_id, group_id)
-    text = "✅ Ученик добавлен!" if success else "❌ Ошибка!"
     
-    await callback_query.message.edit_text(text)
+    # Получаем информацию о группе
+    group = db.get_group_by_id(group_id)
+    
+    if not group:
+        await callback_query.message.edit_text("❌ Группа не найдена!")
+        return
+    
+    # Получаем список учеников
+    students = db.get_students_in_group(group_id)
+    student_count = len(students)
+    
+    # Формируем список учеников (используем full_name как в вашем примере)
+    students_list = "\n".join([f"• {s['full_name']}" for s in students[:3]])
+    if student_count > 3:
+        students_list += f"\n• ... и еще {student_count - 3} учеников"
+    
+    # Переходим к меню группы
+    await callback_query.message.edit_text(
+        f"👥 <b>Группа: {group['name']}</b>\n\n"
+        f"Учеников: {student_count}\n\n"
+        f"Ученики:\n{students_list if students_list else 'Нет учеников'}",
+        reply_markup=get_group_management_keyboard(group_id),
+        parse_mode="HTML"
+    )
 
 # Экран 6 - Удаление учеников из группы
 @router.callback_query(F.data.startswith("remove_from_group_"))
@@ -80,6 +102,33 @@ async def remove_specific_student(callback_query: CallbackQuery):
     group_id = int(parts[4])
     
     success = db.remove_student_from_group(student_id, group_id)
-    text = "✅ Ученик удален!" if success else "❌ Ошибка!"
     
-    await callback_query.message.edit_text(text)
+    if not success:
+        await callback_query.message.edit_text("❌ Ошибка при удалении ученика!")
+        return
+    
+    # Получаем информацию о группе
+    group = db.get_group_by_id(group_id)
+    
+    if not group:
+        await callback_query.message.edit_text("❌ Группа не найдена!")
+        return
+    
+    # Получаем обновленный список учеников
+    students = db.get_students_in_group(group_id)
+    student_count = len(students)
+    
+    # Формируем список учеников (используем full_name)
+    students_list = "\n".join([f"• {s['full_name']}" for s in students[:3]])
+    if student_count > 3:
+        students_list += f"\n• ... и еще {student_count - 3} учеников"
+    
+    # Показываем обновленную информацию о группе
+    await callback_query.message.edit_text(
+        f"✅ Ученик удален!\n\n"
+        f"👥 <b>Группа: {group['name']}</b>\n\n"
+        f"Учеников: {student_count}\n\n"
+        f"Ученики:\n{students_list if students_list else 'Нет учеников'}",
+        reply_markup=get_group_management_keyboard(group_id),
+        parse_mode="HTML"
+    )
