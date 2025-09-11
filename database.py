@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+from typing import Optional
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -171,6 +172,21 @@ class Database:
                 message TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 status TEXT DEFAULT 'new',  -- new, in_progress, resolved
+                FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
+            )
+            ''')
+            # Таблица платежей (добавьте после других таблиц)
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                payment_id TEXT UNIQUE NOT NULL,
+                tariff_name TEXT NOT NULL,
+                amount REAL NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                valid_until TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
             )
             ''')
@@ -1488,81 +1504,187 @@ class Database:
             logger.error(f"Ошибка при получении времени напоминания: {e}")
             return 1
 
-def get_feedback_messages(self, status=None):
-    """Получение списка обращений"""
-    try:
-        with self.get_connection() as conn:
-            conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
-            cursor = conn.cursor()
-            
-            if status:
-                cursor.execute("SELECT * FROM feedback_messages WHERE status = ? ORDER BY created_at DESC", (status,))
-            else:
-                cursor.execute("SELECT * FROM feedback_messages ORDER BY created_at DESC")
-            
-            return cursor.fetchall()
-    except Exception as e:
-        logger.error(f"Ошибка при получении списка обращений: {e}")
-        return []
+    def get_feedback_messages(self, status=None):
+        """Получение списка обращений"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+                cursor = conn.cursor()
+                
+                if status:
+                    cursor.execute("SELECT * FROM feedback_messages WHERE status = ? ORDER BY created_at DESC", (status,))
+                else:
+                    cursor.execute("SELECT * FROM feedback_messages ORDER BY created_at DESC")
+                
+                return cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Ошибка при получении списка обращений: {e}")
+            return []
 
-def update_feedback_status(self, feedback_id, status):
-    """Обновление статуса обращения"""
-    try:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "UPDATE feedback_messages SET status = ? WHERE id = ?",
-                (status, feedback_id)
-            )
-            conn.commit()
-            return cursor.rowcount > 0
-    except Exception as e:
-        logger.error(f"Ошибка при обновлении статуса обращения: {e}")
-        return False
+    def update_feedback_status(self, feedback_id, status):
+        """Обновление статуса обращения"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE feedback_messages SET status = ? WHERE id = ?",
+                    (status, feedback_id)
+                )
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении статуса обращения: {e}")
+            return False
 
-def save_feedback_message(self, user_id, user_name, message):
-    """Сохранение нового обращения"""
-    try:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO feedback_messages (user_id, user_name, message) VALUES (?, ?, ?)",
-                (user_id, user_name, message)
-            )
-            conn.commit()
-            return cursor.lastrowid
-    except Exception as e:
-        logger.error(f"Ошибка при сохранении обращения: {e}")
-        return None
+    def save_feedback_message(self, user_id, user_name, message):
+        """Сохранение нового обращения"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO feedback_messages (user_id, user_name, message) VALUES (?, ?, ?)",
+                    (user_id, user_name, message)
+                )
+                conn.commit()
+                return cursor.lastrowid
+        except Exception as e:
+            logger.error(f"Ошибка при сохранении обращения: {e}")
+            return None
 
-def get_feedback_message_by_id(self, feedback_id):
-    """Получение обращения по ID"""
-    try:
-        with self.get_connection() as conn:
-            conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM feedback_messages WHERE id = ?", (feedback_id,))
-            return cursor.fetchone()
-    except Exception as e:
-        logger.error(f"Ошибка при получении обращения по ID: {e}")
-        return None
+    def get_feedback_message_by_id(self, feedback_id):
+        """Получение обращения по ID"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM feedback_messages WHERE id = ?", (feedback_id,))
+                return cursor.fetchone()
+        except Exception as e:
+            logger.error(f"Ошибка при получении обращения по ID: {e}")
+            return None
 
-def get_feedback_stats(self):
-    """Получение статистики по обращениям"""
-    try:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT 
-                    status,
-                    COUNT(*) as count
-                FROM feedback_messages 
-                GROUP BY status
-            """)
-            return {row[0]: row[1] for row in cursor.fetchall()}
-    except Exception as e:
-        logger.error(f"Ошибка при получении статистики обращений: {e}")
-        return {}
+    def get_feedback_stats(self):
+        """Получение статистики по обращениям"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT 
+                        status,
+                        COUNT(*) as count
+                    FROM feedback_messages 
+                    GROUP BY status
+                """)
+                return {row[0]: row[1] for row in cursor.fetchall()}
+        except Exception as e:
+            logger.error(f"Ошибка при получении статистики обращений: {e}")
+            return {}
     
+    def save_payment_id(self, user_id: int, payment_id: str, tariff_name: str, amount: float):
+        """Сохраняет ID платежа в базу данных"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Создаем таблицу для платежей если ее нет
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS payments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    payment_id TEXT UNIQUE NOT NULL,
+                    tariff_name TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    status TEXT DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
+                )
+                ''')
+                
+                # Вставляем запись о платеже
+                cursor.execute('''
+                INSERT INTO payments (user_id, payment_id, tariff_name, amount)
+                VALUES (?, ?, ?, ?)
+                ''', (user_id, payment_id, tariff_name, amount))
+                
+                conn.commit()
+                logger.info(f"Payment saved: user_id={user_id}, payment_id={payment_id}")
+                return True
+                
+        except sqlite3.Error as e:
+            logger.error(f"Error saving payment: {e}")
+            return False
+
+    def get_last_payment_id(self, user_id: int) -> Optional[str]:
+        """Получает ID последнего платежа пользователя"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT payment_id FROM payments 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT 1
+                ''', (user_id,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else None
+                
+        except sqlite3.Error as e:
+            logger.error(f"Error getting last payment: {e}")
+            return None
+
+    def update_payment_status(self, payment_id: str, status: str):
+        """Обновляет статус платежа"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE payments 
+                SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE payment_id = ?
+                ''', (status, payment_id))
+                
+                conn.commit()
+                return cursor.rowcount > 0
+                
+        except sqlite3.Error as e:
+            logger.error(f"Error updating payment status: {e}")
+            return False
+
+    def get_payment_info(self, payment_id: str) -> Optional[dict]:
+        """Получает информацию о платеже"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT * FROM payments WHERE payment_id = ?
+                ''', (payment_id,))
+                
+                result = cursor.fetchone()
+                return dict(result) if result else None
+                
+        except sqlite3.Error as e:
+            logger.error(f"Error getting payment info: {e}")
+            return None
+
+    def get_user_payments(self, user_id: int) -> list:
+        """Получает все платежи пользователя"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT * FROM payments 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC
+                ''', (user_id,))
+                
+                return [dict(row) for row in cursor.fetchall()]
+                
+        except sqlite3.Error as e:
+            logger.error(f"Error getting user payments: {e}")
+            return []
 # Создаем глобальный экземпляр базы данных
 db = Database()

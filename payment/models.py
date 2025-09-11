@@ -1,61 +1,179 @@
 from datetime import datetime, timedelta
-from database import db
+from typing import Optional
+from database import Database
 import logging
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
 class PaymentManager:
     @staticmethod
-    async def get_payment_info(user_id: int):
-        """Получение информации об оплате пользователя"""
+    async def get_payment_info(user_id: int) -> dict:
+        """Получает актуальную информацию о подписке пользователя из таблицы payments"""
         try:
+            db = Database()
             with db.get_connection() as conn:
-                conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
                 cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT valid_until, tariff, is_active FROM user_subscriptions WHERE user_id = ?",
-                    (user_id,)
-                )
+                
+                # Ищем последний УСПЕШНЫЙ платеж пользователя с valid_until
+                query = """
+                    SELECT tariff_name, amount, status, created_at, valid_until 
+                    FROM payments 
+                    WHERE user_id = ? 
+                    AND status = 'succeeded'
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                """
+                cursor.execute(query, (user_id,))
                 result = cursor.fetchone()
                 
-                if result:
-                    valid_until = datetime.strptime(result['valid_until'], '%Y-%m-%d')
-                    return {
-                        "valid_until": result['valid_until'],
-                        "tariff": result['tariff'],
-                        "is_active": result['is_active'] and datetime.now() < valid_until
-                    }
+                logger.info(f"DEBUG: Payment query result for user {user_id}: {result}")
                 
-            return None
-            
+                if result:
+                    # Используем valid_undo из базы данных
+                    if result['valid_until']:
+                        valid_until = datetime.strptime(result['valid_until'], '%Y-%m-%d %H:%M:%S')
+                    else:
+                        # Если valid_until нет, рассчитываем от даты оплаты
+                        payment_date = datetime.strptime(result['created_at'], '%Y-%m-%d %H:%M:%S')
+                        valid_until = payment_date + timedelta(days=30)
+                    
+                    logger.info(f"DEBUG: Valid until: {valid_until}, Now: {datetime.now()}")
+                    
+                    return {
+                        'is_active': valid_until > datetime.now(),
+                        'valid_until': valid_until.strftime('%Y-%m-%d %H:%M:%S'),
+                        'tariff': result['tariff_name']
+                    }
+                else:
+                    logger.info(f"DEBUG: No successful payments found for user {user_id}")
+                    return {'is_active': False}
+                        
         except Exception as e:
-            logger.error(f"Error getting payment info: {e}")
-            return None
+            logger.error(f"Error getting payment info for user {user_id}: {e}")
+            return {'is_active': False}
 
     @staticmethod
-    async def update_subscription(user_id: int, days: int, tariff: str):
-        """Обновление подписки пользователя"""
+    async def create_payment_record(user_id: int, payment_id: str, tariff_name: str, 
+                                amount: float, status: str, days: int) -> bool:
+        """Создает или ОБНОВЛЯЕТ запись о платеже и ПРОДЛЕВАЕТ подписку"""
         try:
-            valid_until = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
-            
+            db = Database()
             with db.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute(
-                    """INSERT OR REPLACE INTO user_subscriptions 
-                       (user_id, valid_until, tariff, is_active) 
-                       VALUES (?, ?, ?, ?)""",
-                    (user_id, valid_until, tariff, True)
-                )
-                conn.commit()
                 
-            return True
-            
+                # 1. Проверяем активную подписку пользователя
+                cursor.execute(
+                    """SELECT valid_until FROM payments 
+                    WHERE user_id = ? AND status = 'succeeded' 
+                    ORDER BY created_at DESC LIMIT 1""",
+                    (user_id,)
+                )
+                existing_sub = cursor.fetchone()
+                
+                # 2. Рассчитываем новую дату окончания (ИСПОЛЬЗУЕМ ПЕРЕДАННЫЕ ДНИ)
+                new_valid_until = None
+                
+                if existing_sub and existing_sub['valid_until']:
+                    # ПРОДЛЕВАЕМ существующую подписку
+                    current_end = datetime.strptime(existing_sub['valid_until'], '%Y-%m-%d %H:%M:%S')
+                    new_valid_until = current_end + timedelta(days=days)
+                else:
+                    # Новая подписка (от текущего времени)
+                    new_valid_until = datetime.now() + timedelta(days=days)
+                
+                # 3. Проверяем, существует ли уже запись с таким payment_id
+                cursor.execute(
+                    "SELECT id FROM payments WHERE payment_id = ?", 
+                    (payment_id,)
+                )
+                existing_record = cursor.fetchone()
+                
+                if existing_record:
+                    # ОБНОВЛЯЕМ существующую запись
+                    cursor.execute(
+                        """UPDATE payments 
+                        SET status = ?, tariff_name = ?, amount = ?, 
+                            valid_until = ?, updated_at = datetime('now')
+                        WHERE payment_id = ?""",
+                        (status, tariff_name, amount, new_valid_until.strftime('%Y-%m-%d %H:%M:%S'), payment_id)
+                    )
+                    logger.info(f"Updated existing payment record: {payment_id}")
+                else:
+                    # СОЗДАЕМ новую запись с правильной датой окончания
+                    cursor.execute(
+                        """INSERT INTO payments 
+                        (user_id, payment_id, tariff_name, amount, status, 
+                            created_at, updated_at, valid_until)
+                        VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?)""",
+                        (user_id, payment_id, tariff_name, amount, status, 
+                        new_valid_until.strftime('%Y-%m-%d %H:%M:%S'))
+                    )
+                    logger.info(f"Created new payment record: {payment_id}")
+                
+                conn.commit()
+                return True
+                
         except Exception as e:
-            logger.error(f"Error updating subscription: {e}")
+            logger.error(f"Error creating/updating payment record: {e}")
             return False
 
     @staticmethod
-    async def check_subscription(user_id: int):
+    async def update_payment_status(payment_id: str, status: str) -> bool:
+        """Обновляет статус платежа"""
+        try:
+            db = Database()
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute(
+                    """UPDATE payments 
+                       SET status = ?, updated_at = datetime('now')
+                       WHERE payment_id = ?""",
+                    (status, payment_id)
+                )
+                
+                conn.commit()
+                return cursor.rowcount > 0
+                
+        except Exception as e:
+            logger.error(f"Error updating payment status: {e}")
+            return False
+
+    @staticmethod
+    async def check_subscription(user_id: int) -> bool:
         """Проверка активной подписки"""
         info = await PaymentManager.get_payment_info(user_id)
         return info and info['is_active']
+
+    @staticmethod
+    async def get_subscription_end_date(user_id: int) -> Optional[datetime]:
+        """Возвращает дату окончания текущей подписки"""
+        try:
+            payment_info = await PaymentManager.get_payment_info(user_id)
+            if payment_info and payment_info['is_active']:
+                return datetime.strptime(payment_info['valid_until'], '%Y-%m-%d %H:%M:%S')
+            return None
+        except Exception as e:
+            logger.error(f"Error getting subscription end date for user {user_id}: {e}")
+            return None
+
+    @staticmethod
+    async def debug_check_payments(user_id: int):
+        """Отладочная функция для проверки всех платежей пользователя"""
+        try:
+            db = Database()
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                query = "SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC"
+                cursor.execute(query, (user_id,))
+                results = cursor.fetchall()
+                
+                logger.info(f"DEBUG: All payments for user {user_id}:")
+                for row in results:
+                    logger.info(f"  - ID: {row['id']}, Status: {row['status']}, "
+                            f"Tariff: {row['tariff_name']}, Valid until: {row['valid_until']}")
+                    
+        except Exception as e:
+            logger.error(f"Debug error: {e}")

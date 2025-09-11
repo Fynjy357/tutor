@@ -1,3 +1,4 @@
+from datetime import datetime
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -9,24 +10,82 @@ from keyboards.main_menu import get_main_menu_keyboard
 from payment.config import TARIF
 from .models import PaymentManager
 from .yookassa_integration import YooKassaManager
+import logging
+import asyncio
 
-# Импорты для функции get_today_schedule_text (добавьте если нужно)
-# from your_module import get_today_schedule_text, db
-
+logger = logging.getLogger(__name__)
 router = Router()
 yookassa = YooKassaManager()
 
-@router.callback_query(F.data == "settings")
-async def settings_handler(callback: types.CallbackQuery, state: FSMContext):
-    """Обработчик кнопки настроек"""
-    user_id = callback.from_user.id
+async def safe_edit_message(message, text, reply_markup=None, parse_mode=None):
+    """
+    Безопасное редактирование сообщения с обработкой ошибки 'message not modified'
+    """
+    try:
+        await message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode=parse_mode
+        )
+        return True
+    except TelegramBadRequest as e:
+        if "message is not modified" in str(e):
+            # Сообщение не изменилось - это нормально
+            return False
+        else:
+            logger.error(f"Error editing message: {e}")
+            return False
+    except Exception as e:
+        logger.error(f"Error editing message: {e}")
+        return False
+
+async def get_settings_message(user_id: int) -> tuple:
+    """Получает текст и клавиатуру для настроек"""
+    # Получаем актуальную информацию о подписке
     payment_info = await PaymentManager.get_payment_info(user_id)
+    logger.info(f"Payment info for user {user_id}: {payment_info}")
     
-    if payment_info and payment_info['is_active']:
+    # Дополнительная проверка: если есть valid_until, но is_active = False
+    if payment_info and payment_info.get('valid_until') and not payment_info.get('is_active', False):
+        # Проверяем, не истекла ли подписка
+        try:
+            valid_until = payment_info['valid_until']
+            if isinstance(valid_until, str):
+                valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+            
+            if valid_until > datetime.now():
+                # Подписка активна, но помечена как неактивная - исправляем
+                message_text = f"💰 **Статус подписки**\n\n" \
+                              f"✅ Активная подписка\n" \
+                              f"📅 Действует до: {valid_until.strftime('%d.%m.%Y %H:%M')}\n" \
+                              f"💳 Тариф: {payment_info.get('tariff', 'Не указан')}\n\n" \
+                              f"Вы можете продлить подписку:"
+            else:
+                message_text = "❌ **Сервис не оплачен**\n\n" \
+                              "Для доступа к полному функционалу необходимо оплатить подписку."
+        except:
+            message_text = "❌ **Сервис не оплачен**\n\n" \
+                          "Для доступа к полному функционалу необходимо оплатить подписку."
+    
+    elif payment_info and payment_info.get('is_active', False):
+        # Форматируем дату для красивого отображения
+        valid_until = payment_info['valid_until']
+        if isinstance(valid_until, str):
+            # Если дата в строковом формате, преобразуем
+            try:
+                valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+            except:
+                pass
+        
+        if isinstance(valid_until, datetime):
+            formatted_date = valid_until.strftime('%d.%m.%Y %H:%M')
+        else:
+            formatted_date = str(valid_until)
+        
         message_text = f"💰 **Статус подписки**\n\n" \
-                      f"✅ Сервис оплачен\n" \
-                      f"📅 Действует до: {payment_info['valid_until']}\n" \
-                      f"💳 Тариф: {payment_info['tariff']}\n\n" \
+                      f"✅ Активная подписка\n" \
+                      f"📅 Действует до: {formatted_date}\n" \
+                      f"💳 Тариф: {payment_info.get('tariff', 'Не указан')}\n\n" \
                       f"Вы можете продлить подписку:"
     else:
         message_text = "❌ **Сервис не оплачен**\n\n" \
@@ -34,11 +93,41 @@ async def settings_handler(callback: types.CallbackQuery, state: FSMContext):
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 Оплата сервиса", callback_data="payment_menu")],
+        [InlineKeyboardButton(text="🔄 Обновить статус", callback_data="settings")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main_menu")]
     ])
     
-    await callback.message.edit_text(message_text, reply_markup=keyboard, parse_mode='Markdown')
-    await callback.answer()
+    return message_text, keyboard
+
+@router.callback_query(F.data == "settings")
+async def settings_handler(callback: types.CallbackQuery, state: FSMContext):
+    """Обработчик кнопки настроек с актуальной информацией"""
+    try:
+        user_id = callback.from_user.id
+        logger.info(f"Settings handler called for user {user_id}")
+        
+        # УБРАЛ ОТЛАДОЧНЫЙ ВЫЗОВ - он вызывал ошибку
+        # await PaymentManager.debug_check_payments(user_id)
+        
+        # Получаем актуальное сообщение и клавиатуру
+        message_text, keyboard = await get_settings_message(user_id)
+        
+        # Всегда обновляем сообщение, чтобы показать актуальный статус
+        success = await safe_edit_message(
+            callback.message,
+            text=message_text,
+            reply_markup=keyboard,
+            parse_mode='Markdown'
+        )
+        
+        if success:
+            await callback.answer("✅ Статус обновлен")
+        else:
+            await callback.answer("✅ Статус актуален")
+        
+    except Exception as e:
+        logger.error(f"Error in settings_handler: {e}", exc_info=True)
+        await callback.answer("❌ Ошибка загрузки настроек", show_alert=True)
 
 @router.callback_query(F.data == "payment_menu")
 async def payment_menu_handler(callback: types.CallbackQuery, state: FSMContext):
@@ -48,97 +137,160 @@ async def payment_menu_handler(callback: types.CallbackQuery, state: FSMContext)
         [InlineKeyboardButton(text="📅 6 месяцев - 650 руб", callback_data="payment_6months")],
         [InlineKeyboardButton(text="📅 1 год - 1000 руб", callback_data="payment_1year")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_settings")]
-    ])  # ← Исправлено на back_to_settings
+    ])
     
     text = TARIF
     
-    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode='Markdown')
+    await safe_edit_message(
+        callback.message,
+        text=text,
+        reply_markup=keyboard,
+        parse_mode='Markdown'
+    )
     await callback.answer()
 
 @router.callback_query(F.data.startswith("payment_"))
 async def process_payment_handler(callback: types.CallbackQuery, state: FSMContext):
     """Обработчик выбора тарифа"""
-    tariff_type = callback.data
-    
-    tariffs = {
-        "payment_1month": {"amount": 120, "days": 30, "name": "1 месяц"},
-        "payment_6months": {"amount": 650, "days": 180, "name": "6 месяцев"},
-        "payment_1year": {"amount": 1000, "days": 365, "name": "1 год"}
-    }
-    
-    if tariff_type in tariffs:
-        tariff = tariffs[tariff_type]
+    try:
+        tariff_type = callback.data
         
-        # Сохраняем выбор в состоянии
-        await state.update_data({
-            "selected_tariff": tariff_type,
-            "amount": tariff["amount"],
-            "days": tariff["days"],
-            "tariff_name": tariff["name"]
-        })
+        tariffs = {
+            "payment_1month": {"amount": 120, "days": 30, "name": "1 месяц"},
+            "payment_6months": {"amount": 650, "days": 180, "name": "6 месяцев"},
+            "payment_1year": {"amount": 1000, "days": 365, "name": "1 год"}
+        }
         
-        # Создаем платеж в ЮKassa
-        payment_url = await yookassa.create_payment(
-            amount=tariff["amount"],
-            user_id=callback.from_user.id,
-            tariff_name=tariff["name"],
-            tariff_days=tariff["days"]
-        )
-        
-        if payment_url:
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="💳 Перейти к оплате", url=payment_url)],
-                [InlineKeyboardButton(text="✅ Я оплатил", callback_data="check_payment")],
-                [InlineKeyboardButton(text="◀️ Назад к тарифам", callback_data="payment_menu")]
-            ])
+        if tariff_type in tariffs:
+            tariff = tariffs[tariff_type]
             
-            text = f"💳 **Оплата тарифа: {tariff['name']}**\n\n" \
-                  f"Сумма: {tariff['amount']} руб.\n" \
-                  f"Срок: {tariff['days']} дней\n\n" \
-                  f"Нажмите кнопку ниже для перехода к оплате:"
+            # Сохраняем выбор в состоянии
+            await state.update_data({
+                "selected_tariff": tariff_type,
+                "amount": tariff["amount"],
+                "days": tariff["days"],
+                "tariff_name": tariff["name"]
+            })
             
-            await callback.message.edit_text(text, reply_markup=keyboard, parse_mode='Markdown')
-        else:
-            await callback.message.edit_text(
-                "❌ Ошибка создания платежа. Попробуйте позже.",
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="◀️ Назад", callback_data="payment_menu")]
-                ])
+            # Создаем платеж в ЮKassa
+            payment_url = await yookassa.create_payment(
+                amount=tariff["amount"],
+                user_id=callback.from_user.id,
+                tariff_name=tariff["name"],
+                tariff_days=tariff["days"]
             )
-    
-    await callback.answer()
+            
+            if payment_url:
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="💳 Перейти к оплате", url=payment_url)],
+                    [InlineKeyboardButton(text="✅ Я оплатил", callback_data="check_payment")],
+                    [InlineKeyboardButton(text="◀️ Назад к тарифам", callback_data="payment_menu")]
+                ])
+                
+                text = f"💳 **Оплата тарифа: {tariff['name']}**\n\n" \
+                      f"Сумма: {tariff['amount']} руб.\n" \
+                      f"Срок: {tariff['days']} дней\n\n" \
+                      f"Нажмите кнопку ниже для перехода к оплате:"
+                
+                await safe_edit_message(
+                    callback.message,
+                    text=text,
+                    reply_markup=keyboard,
+                    parse_mode='Markdown'
+                )
+            else:
+                await safe_edit_message(
+                    callback.message,
+                    text="❌ Ошибка создания платежа. Попробуйте позже.",
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text="◀️ Назад", callback_data="payment_menu")]
+                    ])
+                )
+        
+        await callback.answer()
+        
+    except Exception as e:
+        logger.error(f"Error in process_payment_handler: {e}", exc_info=True)
+        await callback.answer("❌ Ошибка создания платежа", show_alert=True)
 
 @router.callback_query(F.data == "check_payment")
 async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext):
-    """Проверка оплаты"""
-    data = await state.get_data()
-    
-    # Здесь должна быть логика проверки оплаты через API ЮKassa
-    # Временно имитируем успешную оплату
-    
-    if data:
-        success = await PaymentManager.update_subscription(
-            user_id=callback.from_user.id,
-            days=data['days'],
-            tariff=data['tariff_name']
-        )
+    """Проверка оплаты через API ЮKassa с продлением подписки"""
+    try:
+        user_id = callback.from_user.id
+        logger.info(f"Checking payment for user {user_id}")
         
-        if success:
-            text = f"✅ **Оплата прошла успешно!**\n\n" \
-                  f"Ваша подписка активирована на {data['days']} дней.\n" \
-                  f"Тариф: {data['tariff_name']}\n\n" \
-                  f"Теперь вам доступен полный функционал сервиса!"
+        # Получаем последний платеж пользователя
+        payment_info = await yookassa.get_last_payment(user_id)
+        logger.info(f"Payment info from YooKassa: {payment_info}")
+        
+        if not payment_info:
+            await callback.answer("❌ Платеж не найден", show_alert=True)
+            return
+        
+        status = payment_info.get('status')
+        
+        if status == 'succeeded':
+            # Получаем данные о выбранном тарифе из состояния
+            data = await state.get_data()
+            if not data:
+                await callback.answer("❌ Данные о тарифе не найдены", show_alert=True)
+                return
+            
+            tariff_days = data.get('days', 30)
+            tariff_name = data.get('tariff_name', '1 месяц')
+            amount = data.get('amount', 0)
+            
+            # СОЗДАЕМ ЗАПИСЬ В ТАБЛИЦЕ PAYMENTS
+            payment_id = payment_info.get('id', f"manual_{datetime.now().timestamp()}")
+            success = await PaymentManager.create_payment_record(
+                user_id=user_id,
+                payment_id=payment_id,
+                tariff_name=tariff_name,
+                amount=amount,
+                status='succeeded',
+                days=int(payment_info['metadata']['days'])  # ← ДОБАВЛЕНО ЗАПЯТАЯ И ПАРАМЕТР days
+            )
+            
+            if not success:
+                logger.error(f"Failed to create payment record for user {user_id}")
+            
+            # Проверяем текущий статус подписки пользователя
+            current_subscription = await PaymentManager.get_payment_info(user_id)
+            logger.info(f"Current subscription after payment: {current_subscription}")
+            
+            if current_subscription and current_subscription.get('is_active', False):
+                text = f"✅ **Подписка активирована!**\n\n" \
+                      f"📅 Действует: {tariff_days} дней\n" \
+                      f"💳 Тариф: {tariff_name}\n\n" \
+                      f"Теперь вам доступен полный функционал!"
+            else:
+                text = "❌ Ошибка активации подписки. Обратитесь в поддержку."
+            
+            # Показываем подробное сообщение
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="◀️ В главное меню", callback_data="back_to_main_menu")]
+            ])
+            
+            await safe_edit_message(
+                callback.message,
+                text=text,
+                reply_markup=keyboard,
+                parse_mode='Markdown'
+            )
+            
+            await callback.answer()
+            
+        elif status == 'pending':
+            await callback.answer("⏳ Платеж в обработке", show_alert=True)
+        elif status in ['canceled', 'failed']:
+            await callback.answer("❌ Платеж не прошел", show_alert=True)
         else:
-            text = "❌ Ошибка активации подписки. Обратитесь в поддержку."
-    else:
-        text = "❌ Не найдены данные об оплате. Попробуйте выбрать тариф заново."
-    
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="◀️ В главное меню", callback_data="back_to_main_menu")]
-    ])  # ← Исправлено на back_to_main_menu
-    
-    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode='Markdown')
-    await callback.answer()
+            await callback.answer("❓ Неизвестный статус платежа", show_alert=True)
+            
+    except Exception as e:
+        logger.error(f"Error in check_payment_handler: {e}", exc_info=True)
+        await callback.answer("❌ Ошибка проверки платежа", show_alert=True)
 
 @router.callback_query(F.data == "back_to_settings")
 async def back_to_settings_handler(callback: types.CallbackQuery, state: FSMContext):
@@ -148,41 +300,35 @@ async def back_to_settings_handler(callback: types.CallbackQuery, state: FSMCont
 @router.callback_query(F.data == "back_to_main_menu")
 async def back_to_main_menu_handler(callback: types.CallbackQuery):
     """Обработчик возврата в главное меню"""
-    # ВАЖНО: Раскомментируйте и настройте импорты для этих функций:
-    from database import db
-    
-    # Получаем данные репетитора
-    tutor = db.get_tutor_by_telegram_id(callback.from_user.id)
-    
-    # Временно закомментировал проблемные части:
-    if not tutor:
-        try:
-            await callback.message.edit_text(
-                "❌ Ошибка: не найдены данные репетитора",
-                parse_mode="HTML"
-            )
-        except TelegramBadRequest:
-            await callback.message.answer(
-                "❌ Ошибка: не найдены данные репетитора",
-                parse_mode="HTML"
-            )
-        return
-    
-    tutor_id = tutor[0]
-    schedule_text = await get_today_schedule_text(tutor_id)
-    
-    # Временное решение - просто показываем главное меню
     try:
-        await callback.message.edit_text(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
+        from database import Database
+        
+        db = Database()
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM tutors WHERE telegram_id = ?", (callback.from_user.id,))
+            tutor = cursor.fetchone()
+        
+        if not tutor:
+            await safe_edit_message(
+                callback.message,
+                text="❌ Ошибка: не найдены данные репетитора",
+                parse_mode="HTML"
+            )
+            return
+        
+        tutor_id = tutor['id']
+        schedule_text = await get_today_schedule_text(tutor_id)
+        
+        await safe_edit_message(
+            callback.message,
+            text=WELCOME_BACK_TEXT.format(tutor_name=tutor['full_name'], schedule_text=schedule_text),
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
-    except TelegramBadRequest:
-        await callback.message.answer(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
-        )
+        
+    except Exception as e:
+        logger.error(f"Error in back_to_main_menu_handler: {e}", exc_info=True)
+        await callback.answer("❌ Ошибка возврата в главное меню", show_alert=True)
     
     await callback.answer()
