@@ -170,7 +170,12 @@ def get_reports_keyboard(reports: list, page: int, total_pages: int) -> InlineKe
     """Клавиатура для выбора отчета с пагинацией"""
     keyboard = InlineKeyboardBuilder()
     
-    for report in reports:
+    # ДОБАВЬТЕ ПАГИНАЦИЮ ДЛЯ ОТЧЕТОВ!
+    start_idx = page * 6
+    end_idx = start_idx + 6
+    current_page_reports = reports[start_idx:end_idx]
+    
+    for report in current_page_reports:  # Используем current_page_reports вместо reports
         # Безопасное получение данных отчета
         time_str = report.get('time', 'Не указано')
         student_name = report.get('student_name', 'Неизвестный ученик')

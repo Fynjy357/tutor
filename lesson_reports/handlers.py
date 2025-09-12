@@ -281,7 +281,7 @@ class LessonReportHandlers:
         await state.set_state(IndividualLessonStates.PERFORMANCE)
 
     async def handle_individual_performance(self, message: Message, state: FSMContext):
-        """Обрабатывает описание работы ученика"""
+        """Обрабатывает описание работы ученика и возвращает в главное меню"""
         performance = message.text
         data = await state.get_data()
         lesson_id = data['report_lesson_id']
@@ -296,7 +296,18 @@ class LessonReportHandlers:
             f"📝 Ваш комментарий: {performance}"
         )
         await self.parent_reports.send_report_to_parent(message.bot, lesson_id, student_id)
+        
+        # Очищаем состояние
         await state.clear()
+        
+        # Получаем данные репетитора и показываем приветствие с главным меню
+        tutor = self.db.get_tutor_by_telegram_id(message.from_user.id)
+        
+        # Импортируем функцию show_welcome_back (замените на правильный импорт)
+        from handlers.start.welcome import show_welcome_back  # замените your_main_module на нужный модуль
+        
+        # Вызываем функцию приветствия
+        await show_welcome_back(message, tutor)
 
     async def start_group_report(self, callback: CallbackQuery, state: FSMContext):
         """Начинает заполнение отчета для группового занятия"""

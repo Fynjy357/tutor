@@ -82,13 +82,55 @@ async def get_upcoming_lessons_text(tutor_id: int) -> str:
 
 # получение расписания на сегодня
 async def get_today_schedule_text(tutor_id: int) -> str:
-    """Формирует текст расписания на сегодня"""
-    from datetime import datetime
+    """Формирует текст расписания на сегодня с финансовой статистикой"""
+    from datetime import datetime, date, timedelta
     today = datetime.now().strftime('%Y-%m-%d')
     lessons = db.get_lessons_by_date(tutor_id, today)
     
+    # Определяем названия месяцев
+    month_names = {
+        1: "январь", 2: "февраль", 3: "март", 4: "апрель",
+        5: "май", 6: "июнь", 7: "июль", 8: "август",
+        9: "сентябрь", 10: "октябрь", 11: "ноябрь", 12: "декабрь"
+    }
+    
+    # Получаем финансовую статистику
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    
+    # Заработок за текущий месяц (с 1 числа)
+    current_month_earnings = db.get_earnings_by_period(
+        tutor_id, 
+        date(current_year, current_month, 1), 
+        datetime.now().date()
+    )
+    
+    # Заработок за прошлый месяц
+    if current_month == 1:
+        prev_month = 12
+        prev_year = current_year - 1
+    else:
+        prev_month = current_month - 1
+        prev_year = current_year
+    
+    prev_month_earnings = db.get_earnings_by_period(
+        tutor_id,
+        date(prev_year, prev_month, 1),
+        date(prev_year, prev_month, 1).replace(day=28) + timedelta(days=4)  # последний день месяца
+    )
+    
+    # Получаем общее количество учеников у репетитора
+    total_students_count = db.get_total_students_count(tutor_id)
+    
     if not lessons:
-        return "У вас сегодня не запланировано занятий."
+        # Возвращаем только финансовую статистику, если нет занятий
+        return (
+            "У вас сегодня не запланировано занятий.\n\n"
+            f"💰 <b>Финансовая статистика:</b>\n"
+            f"👨‍🎓 <b>Всего учеников:</b> {total_students_count}\n"
+            f"📈 За {month_names[current_month]}: {current_month_earnings} руб\n"
+            f"📊 За {month_names[prev_month]}: {prev_month_earnings} руб"
+        )
     
     # Группируем занятия по времени
     schedule_dict = {}
@@ -108,24 +150,27 @@ async def get_today_schedule_text(tutor_id: int) -> str:
         # Проверяем тип занятия
         if group_id:
             if group_id not in schedule_dict[time_key]['group_lessons']:
-                # ПРАВИЛЬНО получаем название группы из базы
                 group_info = db.get_group_by_id(group_id)
                 group_name = group_info['name'] if group_info else f'Группа #{group_id}'
                 
                 schedule_dict[time_key]['group_lessons'][group_id] = {
                     'group_name': group_name,
-                    'students': set(),  # Используем set для уникальности
+                    'students': set(),
                     'duration': lesson['duration'],
                     'price': lesson['price'],
                     'status': lesson['status']
                 }
-            # Добавляем ученика в set (автоматически убирает дубликаты)
             schedule_dict[time_key]['group_lessons'][group_id]['students'].add(lesson['student_name'])
         else:
             schedule_dict[time_key]['individual_lessons'].append(lesson)
     
     # Форматируем расписание
-    schedule_text = "Ваше расписание на сегодня:\n\n"
+    schedule_text = (
+        f"👨‍🎓 <b>Всего учеников:</b> {total_students_count}\n"
+        f"💰 <b>Заработано в {month_names[current_month]}:</b> {current_month_earnings} руб\n"
+        f"📊 <b>Заработано в {month_names[prev_month]}:</b> {prev_month_earnings} руб\n\n"
+        f"📅 <b>Ваше расписание на сегодня:</b>\n\n"
+    )
     
     for time_key in sorted(schedule_dict.keys()):
         slot_data = schedule_dict[time_key]
@@ -141,7 +186,6 @@ async def get_today_schedule_text(tutor_id: int) -> str:
             schedule_text += f"📊 Статус: {group_data['status']}\n"
             schedule_text += f"👨‍🎓 Учеников: {len(group_data['students'])}\n"
             
-            # Список учеников (преобразуем set в отсортированный список)
             students = ", ".join(sorted(group_data['students']))
             schedule_text += f"🎓 Ученики: {students}\n"
         

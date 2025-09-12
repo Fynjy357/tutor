@@ -121,7 +121,7 @@ async def settings_handler(callback: types.CallbackQuery, state: FSMContext):
         )
         
         if success:
-            await callback.answer("✅ Статус обновлен")
+            await callback.answer("🔄 Проверка подписки")
         else:
             await callback.answer("✅ Статус актуален")
         

@@ -1686,5 +1686,42 @@ class Database:
         except sqlite3.Error as e:
             logger.error(f"Error getting user payments: {e}")
             return []
+    def get_earnings_by_period(self, tutor_id: int, start_date: date, end_date: date) -> float:
+        """Возвращает сумму заработка за указанный период по оплаченным занятиям"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT COALESCE(SUM(l.price), 0) as total_earnings
+                FROM lessons l
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id
+                WHERE l.tutor_id = ? 
+                AND DATE(l.lesson_date) BETWEEN ? AND ?
+                AND l.status = 'completed'
+                AND lr.lesson_paid = 1  -- Добавляем проверку оплаты
+                ''', (tutor_id, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')))
+                
+                result = cursor.fetchone()
+                return float(result[0]) if result and result[0] is not None else 0.0
+        except Exception as e:
+            logger.error(f"Ошибка при получении заработка за период: {e}")
+            return 0.0
+        
+    def get_total_students_count(self, tutor_id: int) -> int:
+        """Возвращает общее количество учеников у репетитора"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT COUNT(DISTINCT s.id) 
+                FROM students s
+                WHERE s.tutor_id = ?
+                ''', (tutor_id,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else 0
+        except Exception as e:
+            logger.error(f"Ошибка при получении количества учеников: {e}")
+            return 0
 # Создаем глобальный экземпляр базы данных
 db = Database()

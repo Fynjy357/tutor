@@ -82,7 +82,7 @@ def get_group_edit_keyboard(selected_date):
         [InlineKeyboardButton(text="✏️ Изменить дату/время", callback_data="edit_group_datetime")],
         [InlineKeyboardButton(text="💰 Изменить стоимость", callback_data="edit_group_price")],
         [InlineKeyboardButton(text="⏱️ Изменить длительность", callback_data="edit_group_duration")],
-        [InlineKeyboardButton(text="❌ Удалить все занятия группы", callback_data="delete_group_lessons")],
+        [InlineKeyboardButton(text="❌ Удалить занятие", callback_data="delete_group_lessons")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data=f"edit_date_{selected_date}")]
     ])
 
