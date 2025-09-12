@@ -1723,5 +1723,13 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении количества учеников: {e}")
             return 0
+        
+    def get_tutor_phone(self, telegram_id: int) -> Optional[str]:
+        """Получить телефон репетитора по его telegram_id"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT phone FROM tutors WHERE telegram_id = ?', (telegram_id,))
+            result = cursor.fetchone()
+            return result[0] if result else None
 # Создаем глобальный экземпляр базы данных
 db = Database()

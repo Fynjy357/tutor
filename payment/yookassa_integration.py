@@ -31,17 +31,65 @@ class YooKassaManager:
         logger.info(f"Сгенерирован Idempotence-Key: {key}")
         return key
     
+    def _format_phone(self, phone: str) -> str:
+        """Форматирование телефона для ЮKassa"""
+        # Удаляем все нечисловые символы
+        digits = ''.join(filter(str.isdigit, phone))
+        
+        # Если номер начинается с 8, заменяем на +7
+        if digits.startswith('8') and len(digits) == 11:
+            return '+7' + digits[1:]
+        # Если номер без кода страны, добавляем +7
+        elif len(digits) == 10:
+            return '+7' + digits
+        # Если номер уже в международном формате
+        elif digits.startswith('7') and len(digits) == 11:
+            return '+' + digits
+        else:
+            # Возвращаем как есть, но добавим + если нужно
+            return '+' + digits if not digits.startswith('+') else digits
+    
     async def create_payment(self, amount: int, user_id: int, tariff_name: str, tariff_days: int) -> Optional[str]:
         """Создание платежа в ЮKassa"""
         logger.info(f"Начало создания платежа: user_id={user_id}, amount={amount}, tariff={tariff_name}")
         
         try:
+            # Получаем телефон пользователя из базы данных
+            user_phone = db.get_tutor_phone(user_id)
+            if not user_phone:
+                logger.error(f"Не удалось найти телефон пользователя {user_id} в базе данных")
+                return None
+                
+            # Форматируем телефон для ЮKassa
+            formatted_phone = self._format_phone(user_phone)
+            logger.info(f"Форматированный телефон пользователя: {formatted_phone}")
+            
             idempotence_key = self._generate_idempotence_key(user_id, tariff_name, amount)
             
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Basic {self.auth}",
                 "Idempotence-Key": idempotence_key
+            }
+            
+            # Формируем данные для чека
+            receipt_data = {
+                "customer": {
+                    "phone": formatted_phone  # Используем телефон из базы данных
+                },
+                "items": [
+                    {
+                        "description": f"Доступ к функционалу бота ({tariff_name})",
+                        "quantity": "1.00",
+                        "amount": {
+                            "value": f"{amount:.2f}",
+                            "currency": "RUB"
+                        },
+                        "vat_code": 1,  # Ставка НДС: 1 = без НДС
+                        "payment_mode": "full_prepayment",
+                        "payment_subject": "service"
+                    }
+                ]
             }
             
             payment_data = {
@@ -55,6 +103,7 @@ class YooKassaManager:
                 },
                 "capture": True,
                 "description": f"Оплата доступа к полному коду функционала в чат-боте @TutorPlanetBot на {tariff_name} для пользователя {user_id}",
+                "receipt": receipt_data,  # Добавляем данные для чека
                 "metadata": {
                     "user_id": user_id,
                     "tariff": tariff_name,
