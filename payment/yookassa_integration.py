@@ -51,7 +51,7 @@ class YooKassaManager:
                 },
                 "confirmation": {
                     "type": "redirect",
-                    "return_url": "https://t.me/egeTOP100_bot"
+                    "return_url": "https://t.me/TutorPlanetBot"
                 },
                 "capture": True,
                 "description": f"Оплата доступа к полному коду функционала в чат-боте @TutorPlanetBot на {tariff_name} для пользователя {user_id}",
