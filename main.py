@@ -32,14 +32,54 @@ from notify.notify_tutors.reminder_scheduler import ReminderScheduler
 from handlers.freedback.feedback_handlers import router as feedback
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('bot.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+from logging.handlers import RotatingFileHandler
+import os
+
+# Создаем папку для логов если её нет
+log_dir = 'logs'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+# Настройка логирования
+def setup_logging():
+    # Основной логгер
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Форматтер
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Файловый обработчик с ротацией
+    file_handler = RotatingFileHandler(
+        filename=os.path.join(log_dir, 'bot.log'),
+        maxBytes=10*1024*1024,  # 10 MB
+        backupCount=5,
+        encoding='utf-8'
+    )
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.INFO)
+    
+    # Консольный обработчик
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
+    
+    # Очищаем существующие обработчики и добавляем новые
+    logger.handlers.clear()
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    # Устанавливаем уровень для библиотек
+    logging.getLogger('aiogram').setLevel(logging.WARNING)
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
+    
+    return logger
+
+# Инициализируем логирование
+setup_logging()
 logger = logging.getLogger(__name__)
 
 class BotApp:
