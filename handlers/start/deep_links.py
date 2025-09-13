@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 import pytz
 import tzlocal
 from database import db
-from handlers.start.welcome import show_welcome_message
+from handlers.start.welcome import show_registration_message, show_welcome_back, show_welcome_message
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,9 @@ async def handle_deep_link(message: types.Message):
     # Обрабатываем пригласительные ссылки
     if deep_link_args.startswith(('student_', 'parent_')):
         await process_invitation_link(message, deep_link_args)
+   # Обрабатываем реферальные ссылки
+    elif deep_link_args.startswith('ref_'):
+        await process_referral_link(message, deep_link_args)
     else:
         logger.info("Неизвестный формат deep link")
         await show_welcome_message(message)
@@ -241,3 +244,37 @@ async def notify_tutor(message: types.Message, student: dict, tutor_message: str
             )
     except Exception as e:
         logger.error(f"Ошибка при отправке уведомления репетитору: {e}")
+
+# Добавляем новую функцию для обработки реферальных ссылок
+async def process_referral_link(message: types.Message, deep_link_args: str):
+    """Обработка реферальной ссылки с системой статусов"""
+    try:
+        user_id = message.from_user.id
+        referral_code = deep_link_args
+        
+        logger.info(f"Обрабатываем реферальный код: {referral_code} для пользователя: {user_id}")
+        
+        # ✅ ПРОВЕРКА: если пользователь уже зарегистрирован как репетитор
+        existing_tutor = db.get_tutor_by_telegram_id(user_id)
+        if existing_tutor:
+            logger.info(f"Пользователь {user_id} уже зарегистрирован как репетитор {existing_tutor['id']}, пропускаем реферальную обработку")
+            await show_welcome_back(message, existing_tutor)  # ✅ Используем вашу существующую функцию
+            return
+        
+        if referral_code:
+            referrer = db.get_tutor_by_referral_code(referral_code)
+            logger.info(f"Найден репетитор: {referrer}")
+            
+            if referrer:
+                result = db.create_or_update_referral_visit(
+                    referrer_id=referrer['id'],
+                    visitor_telegram_id=user_id,
+                    referral_code=referral_code
+                )
+                logger.info(f"Результат создания записи: {result}")
+        
+        await show_registration_message(message)
+        
+    except Exception as e:
+        logger.error(f"Ошибка обработки реферальной ссылки: {e}")
+        await show_registration_message(message)

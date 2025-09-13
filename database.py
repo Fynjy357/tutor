@@ -202,6 +202,20 @@ class Database:
                 FOREIGN KEY (tutor_id) REFERENCES tutors (id)
             )
             ''')
+            # Таблица реферальных переходов
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS referrals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                referrer_id INTEGER NOT NULL,
+                visitor_telegram_id INTEGER NOT NULL,
+                referral_code TEXT NOT NULL,
+                status TEXT DEFAULT 'awaiting',
+                visited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (referrer_id) REFERENCES tutors (id),
+                UNIQUE(visitor_telegram_id, status)
+            )
+            ''')
             
             conn.commit()
         logger.info("База данных инициализирована")
@@ -1770,5 +1784,181 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при проверке подписки для репетитора {tutor_id}: {e}")
             return False
+        
+    def create_referral_visit(self, referrer_id: int, visitor_telegram_id: int, referral_code: str):
+        """Создает или ОБНОВЛЯЕТ реферальный переход"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Проверяем, есть ли уже запись для этого пользователя
+                cursor.execute(
+                    "SELECT id FROM referrals WHERE visitor_telegram_id = ?",
+                    (visitor_telegram_id,)
+                )
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # ОБНОВЛЯЕМ существующую запись
+                    cursor.execute(
+                        "UPDATE referrals SET referrer_id = ?, referral_code = ?, visit_date = datetime('now') WHERE visitor_telegram_id = ?",
+                        (referrer_id, referral_code, visitor_telegram_id)
+                    )
+                    logger.info(f"Обновлен реферальный переход для пользователя {visitor_telegram_id}")
+                else:
+                    # СОЗДАЕМ новую запись
+                    cursor.execute(
+                        "INSERT INTO referrals (referrer_id, visitor_telegram_id, referral_code, visit_date) VALUES (?, ?, ?, datetime('now'))",
+                        (referrer_id, visitor_telegram_id, referral_code)
+                    )
+                    logger.info(f"Создан новый реферальный переход для пользователя {visitor_telegram_id}")
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Ошибка при создании реферального перехода: {e}")
+            return False
+
+    def get_tutor_by_referral_code(self, referral_code: str):
+        """Находит репетитора по реферальному коду (части ссылки после start=)"""
+        try:
+            # Формируем полную ссылку для поиска
+            full_promo_link = f"https://t.me/egeTOP100_bot?start={referral_code}"
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT id, telegram_id, full_name, phone, promo_code FROM tutors WHERE promo_code = ?",
+                    (full_promo_link,)
+                )
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Ошибка поиска репетитора по промо-коду {referral_code}: {e}")
+            return None
+        
+    def is_user_tutor(self, telegram_id: int) -> bool:
+        """Проверяет, является ли пользователь репетитором"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id FROM tutors WHERE telegram_id = ?",
+                (telegram_id,)
+            )
+            return cursor.fetchone() is not None
+
+
+    def create_or_update_referral_visit(self, referrer_id: int, visitor_telegram_id: int, referral_code: str):
+        """Создает или обновляет реферальный переход с системой статусов"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Проверяем, есть ли уже awaiting запись для этого пользователя
+                cursor.execute(
+                    "SELECT id, referral_code FROM referrals WHERE visitor_telegram_id = ? AND status = 'awaiting'",
+                    (visitor_telegram_id,)
+                )
+                existing = cursor.fetchone()
+                
+                if existing:
+                    existing_id, existing_code = existing
+                    
+                    # Если тот же referral_code - ничего не делаем
+                    if existing_code == referral_code:
+                        logger.info(f"Повторный переход по той же ссылке: {visitor_telegram_id}")
+                        return True
+                    
+                    # Если другой referral_code - помечаем старый как inactive
+                    cursor.execute(
+                        "UPDATE referrals SET status = 'inactive', updated_at = datetime('now') WHERE id = ?",
+                        (existing_id,)
+                    )
+                    logger.info(f"Старая реферальная ссылка помечена как inactive: {existing_id}")
+                
+                # Создаем новую запись со статусом awaiting
+                cursor.execute(
+                    "INSERT INTO referrals (referrer_id, visitor_telegram_id, referral_code, status) VALUES (?, ?, ?, 'awaiting')",
+                    (referrer_id, visitor_telegram_id, referral_code)
+                )
+                
+                conn.commit()
+                logger.info(f"Создан новый реферальный переход: {referrer_id} -> {visitor_telegram_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Ошибка при обработке реферального перехода: {e}")
+            return False
+        
+    def activate_referral(self, visitor_telegram_id: int, registered_tutor_id: int):
+        """Активирует реферальную связь при регистрации пользователя"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Находим актуальный awaiting переход
+                cursor.execute(
+                    "SELECT id, referrer_id FROM referrals WHERE visitor_telegram_id = ? AND status = 'awaiting' ORDER BY visited_at DESC LIMIT 1",
+                    (visitor_telegram_id,)
+                )
+                referral = cursor.fetchone()
+                
+                if referral:
+                    referral_id, referrer_id = referral
+                    
+                    # Меняем статус на active
+                    cursor.execute(
+                        "UPDATE referrals SET status = 'active', updated_at = datetime('now') WHERE id = ?",
+                        (referral_id,)
+                    )
+                    
+                    # Сохраняем окончательную связь (опционально)
+                    cursor.execute(
+                        "INSERT INTO final_referrals (referrer_id, referred_tutor_id, registration_date) VALUES (?, ?, datetime('now'))",
+                        (referrer_id, registered_tutor_id)
+                    )
+                    
+                    conn.commit()
+                    logger.info(f"Реферал активирован: {referrer_id} -> {registered_tutor_id}")
+                    return referrer_id
+                
+                logger.info(f"Не найдено awaiting рефералов для пользователя: {visitor_telegram_id}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Ошибка при активации реферала: {e}")
+            return None
+    def activate_referral(self, visitor_telegram_id: int, registered_tutor_id: int):
+        """Активирует реферальную связь при регистрации пользователя"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Находим awaiting переход для этого пользователя
+                cursor.execute(
+                    "SELECT id, referrer_id FROM referrals WHERE visitor_telegram_id = ? AND status = 'awaiting'",
+                    (visitor_telegram_id,)
+                )
+                referral = cursor.fetchone()
+                
+                if referral:
+                    referral_id, referrer_id = referral
+                    
+                    # Меняем статус на active
+                    cursor.execute(
+                        "UPDATE referrals SET status = 'active', updated_at = datetime('now') WHERE id = ?",
+                        (referral_id,)
+                    )
+                    
+                    conn.commit()
+                    logger.info(f"Реферал активирован: ID {referral_id}, статус изменен на active")
+                    return referrer_id
+                
+                return None
+                
+        except Exception as e:
+            logger.error(f"Ошибка при активации реферала: {e}")
+            return None
+
 # Создаем глобальный экземпляр базы данных
 db = Database()

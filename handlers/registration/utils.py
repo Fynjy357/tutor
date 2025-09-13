@@ -74,7 +74,12 @@ async def save_tutor_data(callback_query: types.CallbackQuery, user_data: dict, 
             promo_code=referral_link
         )
         
+        # АКТИВАЦИЯ РЕФЕРАЛА (просто меняем статус)
+        user_id = callback_query.from_user.id
+        db.activate_referral(user_id, tutor_id)
+        
         return tutor_id, True
+        
     except Exception as e:
         logger.error(f"Ошибка сохранения данных репетитора: {e}")
         return None, False
