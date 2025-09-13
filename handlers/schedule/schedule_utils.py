@@ -87,6 +87,7 @@ async def get_today_schedule_text(tutor_id: int) -> str:
     today = datetime.now().strftime('%Y-%m-%d')
     lessons = db.get_lessons_by_date(tutor_id, today)
     
+    
     # Определяем названия месяцев
     month_names = {
         1: "январь", 2: "февраль", 3: "март", 4: "апрель",
@@ -125,9 +126,9 @@ async def get_today_schedule_text(tutor_id: int) -> str:
     if not lessons:
         # Возвращаем только финансовую статистику, если нет занятий
         return (
-            "У вас сегодня не запланировано занятий.\n\n"
-            f"💰 <b>Финансовая статистика:</b>\n"
+            f"У вас сегодня не запланировано занятий.\n\n"
             f"👨‍🎓 <b>Всего учеников:</b> {total_students_count}\n"
+            f"💰 <b>Финансовая статистика:</b>\n\n"
             f"📈 За {month_names[current_month]}: {current_month_earnings} руб\n"
             f"📊 За {month_names[prev_month]}: {prev_month_earnings} руб"
         )
@@ -196,6 +197,6 @@ async def get_today_schedule_text(tutor_id: int) -> str:
             schedule_text += f"💰 Цена: {lesson['price']} руб\n"
             schedule_text += f"📊 Статус: {lesson['status']}\n"
         
-        schedule_text += "───────────────\n"
+        schedule_text += f"───────────────\n"
     
     return schedule_text

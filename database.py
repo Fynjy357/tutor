@@ -1731,5 +1731,44 @@ class Database:
             cursor.execute('SELECT phone FROM tutors WHERE telegram_id = ?', (telegram_id,))
             result = cursor.fetchone()
             return result[0] if result else None
+        
+    def check_tutor_subscription(self, tutor_id: int) -> bool:
+        """
+        Проверяет наличие активной подписки у репетитора на основе таблицы payments
+        """
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Сначала получаем telegram_id репетитора по его id
+                cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
+                tutor_data = cursor.fetchone()
+                
+                if not tutor_data:
+                    logger.warning(f"Репетитор с id={tutor_id} не найден")
+                    return False
+                    
+                telegram_id = tutor_data[0]
+                
+                # Теперь проверяем подписку по telegram_id
+                cursor.execute('''
+                SELECT COUNT(*) FROM payments 
+                WHERE user_id = ? 
+                AND status = 'succeeded'
+                AND valid_until >= datetime('now')
+                ORDER BY created_at DESC
+                LIMIT 1
+                ''', (telegram_id,))
+                
+                result = cursor.fetchone()
+                has_subscription = result[0] > 0 if result else False
+                
+                logger.debug(f"Проверка подписки: tutor_id={tutor_id}, telegram_id={telegram_id}, результат={has_subscription}")
+                
+                return has_subscription
+                
+        except Exception as e:
+            logger.error(f"Ошибка при проверке подписки для репетитора {tutor_id}: {e}")
+            return False
 # Создаем глобальный экземпляр базы данных
 db = Database()

@@ -338,9 +338,14 @@ async def back_to_main_menu_handler(callback: types.CallbackQuery):
         tutor_id = tutor['id']
         schedule_text = await get_today_schedule_text(tutor_id)
         
+            # Проверяем активную подписку
+        has_active_subscription = db.check_tutor_subscription(tutor_id)
+        subscription_icon = "💎 " if has_active_subscription else ""
+        welcome_message = f"{subscription_icon}{WELCOME_BACK_TEXT.format(tutor_name=tutor['full_name'], schedule_text=schedule_text)}"
+
         await safe_edit_message(
             callback.message,
-            text=WELCOME_BACK_TEXT.format(tutor_name=tutor['full_name'], schedule_text=schedule_text),
+            text=welcome_message,
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )

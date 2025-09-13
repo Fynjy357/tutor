@@ -86,12 +86,17 @@ async def show_welcome_back(message: types.Message, tutor: tuple):
     
     # Получаем расписание на сегодня
     schedule_text = await get_today_schedule_text(tutor_id)
+
+    # Проверяем активную подписку
+    has_active_subscription = db.check_tutor_subscription(tutor_id)
+    subscription_icon = "💎 " if has_active_subscription else ""
     
     # Формируем полный текст приветствия
-    welcome_text = WELCOME_BACK_TEXT.format(
+    formatted_text = WELCOME_BACK_TEXT.format(
         tutor_name=tutor_name,
         schedule_text=schedule_text
     )
+    welcome_text = f"{subscription_icon}{formatted_text}"
     
     await message.answer(
         welcome_text,

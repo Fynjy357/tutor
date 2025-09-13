@@ -13,7 +13,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         ]
         
         self.premium_callbacks = [
-            'groups', 'lesson_type_group', 'invite_student_', 'invite_parent_'
+            'groups', 'lesson_type_group', 'invite_student_', 'invite_parent_', 'edit_datetime'
         ]
 
     async def __call__(

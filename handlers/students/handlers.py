@@ -114,18 +114,23 @@ async def back_to_main_menu(callback_query: types.CallbackQuery, state: FSMConte
     # Используем функцию show_welcome_back для показа главного меню
     tutor_id = tutor[0]
     schedule_text = await get_today_schedule_text(tutor_id)
+    # Проверяем активную подписку
+    has_active_subscription = db.check_tutor_subscription(tutor_id)
+    subscription_icon = "💎 " if has_active_subscription else ""
     
+    welcome_message = f"{subscription_icon}{WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text)}"
+
     try:
         # Пытаемся изменить текущее сообщение
         await callback_query.message.edit_text(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
+            welcome_message,
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
     except TelegramBadRequest:
         # Если не получается изменить, отправляем новое сообщение
         await callback_query.message.answer(
-            WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text),
+            welcome_message,
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )

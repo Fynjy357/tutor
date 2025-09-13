@@ -45,6 +45,15 @@ async def back_to_main_menu_from_groups(callback_query: CallbackQuery, state: FS
     
     # Отправляем новое сообщение с главным меню
     welcome_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text)  # предполагая, что имя в третьем элементе
+
+        # Проверяем активную подписку
+    has_active_subscription = db.check_tutor_subscription(tutor_id)
+    subscription_icon = "💎 " if has_active_subscription else ""
+    
+    # Формируем полный текст приветствия
+    formatted_text = WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text
+    )
+    welcome_text = f"{subscription_icon}{formatted_text}"
     from keyboards.main_menu import get_main_menu_keyboard
     await callback_query.message.answer(
         welcome_text,
