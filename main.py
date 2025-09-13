@@ -23,13 +23,22 @@ from keyboards import main_menu # на время разработки кноп�
 from database import db 
 from payment.middleware import SubscriptionMiddleware
 from payment.handlers import router as payment_router
-from handlers.admin.admin import router as admin_router
+from commands.admin.admin import router as admin_router
 from handlers.start.handlers_parent import parent_router
 from handlers.start.handlers_student_by_student import student_router
 # from handlers.students.report_editor import router as report_editor_router
 from handlers.students import router as students_module_router
 from notify.notify_tutors.reminder_scheduler import ReminderScheduler
 from handlers.freedback.feedback_handlers import router as feedback
+from commands.ref.take_ref import router as take_ref
+from commands.ref.take_ref_pay import router as take_ref_pay
+from commands.admin_help import router as admin_help
+from commands.last_users.last_users import router as last_users
+from commands.payments.admin_payments import router as admin_payments
+from commands.logs.logs import router as logs
+from commands.backup.backup import router as backup
+from commands.system_info.system_info import router as system_help
+
 
 # Настройка логирования
 from logging.handlers import RotatingFileHandler
@@ -137,6 +146,17 @@ class BotApp:
             # self.dp.include_router(report_editor_router)
             self.dp.include_router(students_module_router)
             self.dp.include_router(feedback)
+            self.dp.include_router(take_ref)
+            self.dp.include_router(take_ref_pay)
+            self.dp.include_router(admin_help)
+            self.dp.include_router(last_users)
+            self.dp.include_router(admin_payments)
+            self.dp.include_router(logs)
+            self.dp.include_router(backup)
+            self.dp.include_router(system_help)
+
+            
+            
             
             # Роутер расписания
             schedule_router = setup_schedule_handlers()

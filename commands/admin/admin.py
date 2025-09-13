@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command, CommandObject
 from database import db
-from handlers.admin.config import SUPER_ADMIN_ID
+from commands.config import SUPER_ADMIN_ID
 
 router = Router()
 

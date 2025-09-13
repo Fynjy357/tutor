@@ -175,7 +175,8 @@ class Database:
                 FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
             )
             ''')
-            # Таблица платежей (добавьте после других таблиц)
+            
+            # Таблица платежей
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS payments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
