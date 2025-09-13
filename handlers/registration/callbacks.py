@@ -2,15 +2,17 @@ from aiogram import Router, types, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
+import re
 
 from handlers.registration.states import RegistrationStates
-from handlers.registration.utils import show_confirmation
+from handlers.registration.utils import show_confirmation, save_tutor_data
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 from keyboards.keyboard_phone import get_phone_keyboard
 from handlers.registration.keyboards import get_cancel_keyboard
 from handlers.start.keyboards_start import get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
+from handlers.registration.utils import validate_phone_number, handle_invalid_phone
 from database import db
 
 router = Router()
@@ -37,21 +39,8 @@ async def start_registration(callback_query: types.CallbackQuery, state: FSMCont
     await state.set_state(RegistrationStates.waiting_for_name)
     await state.update_data(registration_messages=[message.message_id])
 
-@router.callback_query(RegistrationStates.waiting_for_promo, F.data == "skip_promo")
-async def skip_promo(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):
-    await callback_query.answer()
-    
-    # Сохраняем ID сообщения с промокодом
-    data = await state.get_data()
-    registration_messages = data.get('registration_messages', [])
-    registration_messages.append(callback_query.message.message_id)
-    
-    # Устанавливаем промокод как "0"
-    await state.update_data(promo="0", registration_messages=registration_messages)
-    await show_confirmation(callback_query.message, state, bot)
-
 @router.callback_query(F.data == "confirm_data")
-async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
+async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):
     await callback_query.answer()
     
     # Получаем текущее состояние
@@ -72,30 +61,14 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
     
     # Сохраняем данные в базу
     try:
-        tutor_id = db.add_tutor(
-            telegram_id=callback_query.from_user.id,
-            full_name=user_data['name'],
-            phone=user_data['phone'],
-            promo_code=user_data.get('promo', '0')
-        )
+        tutor_id, success = await save_tutor_data(callback_query, user_data, bot)
+        
+        if not success:
+            raise Exception("Не удалось сохранить данные репетитора")
         
         logger.info(f"Репетитор добавлен с ID: {tutor_id}")
         
-        # Проверяем и используем промокод, если он валидный
-        promo_code = user_data.get('promo')
-        promo_text = "не указан"
-        
-        if promo_code and promo_code != '0':
-            promo_info = db.check_promo_code(promo_code)
-            if promo_info:
-                db.use_promo_code(promo_code)
-                discount = promo_info[2] if promo_info[2] > 0 else promo_info[3]
-                discount_type = "%" if promo_info[2] > 0 else "руб."
-                promo_text = f"{promo_code} (скидка {discount}{discount_type})"
-            else:
-                promo_text = f"{promo_code} (недействителен)"
-        
-         # Получаем данные репетитора из базы
+        # Получаем данные репетитора из базы
         tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
         
         if not tutor:
@@ -108,19 +81,17 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
         # Получаем расписание на сегодня
         schedule_text = await get_today_schedule_text(tutor_id)
         
-        # Формируем приветственное сообщение как в show_welcome_back
+        # Формируем приветственное сообщение
         welcome_text = WELCOME_BACK_TEXT.format(
             tutor_name=tutor[2],  # Имя репетитора
             schedule_text=schedule_text
         )
+        
         # Удаляем сообщение с подтверждением
         try:
             await callback_query.message.delete()
         except TelegramBadRequest:
             logger.warning("Не удалось удалить сообщение подтверждения")
-        
-        # # Формируем приветственное сообщение
-        # welcome_text = WELCOME_BACK_TEXT
         
         # Отправляем приветственное сообщение с главным меню
         await callback_query.message.answer(
@@ -177,7 +148,6 @@ async def change_phone(callback_query: types.CallbackQuery, state: FSMContext):
     registration_messages.append(phone_message.message_id)
     await state.update_data(registration_messages=registration_messages)
     await state.set_state(RegistrationStates.editing_phone)
-   
 
 @router.callback_query(F.data == "cancel_registration")
 async def cancel_registration(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot):
@@ -212,3 +182,7 @@ async def cancel_registration(callback_query: types.CallbackQuery, state: FSMCon
         reply_markup=get_registration_keyboard(),
         parse_mode="HTML"
     )
+
+# УДАЛЕНО: Дублирующиеся обработчики сообщений для телефонов
+# Эти обработчики уже есть в messages.py и правильно форматируют номера
+# Удаляем их, чтобы избежать конфликта и передачи неформатированных номеров
