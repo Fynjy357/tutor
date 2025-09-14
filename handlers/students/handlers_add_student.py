@@ -4,8 +4,10 @@ from aiogram.exceptions import TelegramBadRequest
 import logging
 
 from handlers.students.config import ANSWER_ADD_STUDENT, PARENTS_PHONE_NUMBER, STUDENT_MENU, STUDENT_PHONE_NUMBER
+from handlers.students.keyboards import get_student_detail_keyboard
 from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard
 from handlers.students.states import AddStudentStates
+from handlers.students.utils import format_student_info
 from keyboards.keyboard_phone import get_phone_keyboard
 
 
@@ -72,11 +74,11 @@ async def process_parent_phone_and_save(message: types.Message, state: FSMContex
         ),
             parse_mode="HTML"
         )
-        
+        student = db.get_student_by_id(student_id)
+        text = format_student_info(student)
         await message.answer(
-            "👥 <b>Учет учеников</b>\n\n"
-            "Выберите действие:",
-            reply_markup=get_students_menu_keyboard(),
+            text,
+            reply_markup=get_student_detail_keyboard(student_id),
             parse_mode="HTML"
         )
     else:

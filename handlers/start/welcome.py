@@ -65,10 +65,11 @@ async def show_parent_welcome(message: types.Message, parent: dict):
     if tutor:
         welcome_text = PARENT_WELCOME_TEXT.format(
             student_name=parent['full_name'],
-            tutor_name=tutor[2]
+            tutor_name=tutor[2],
+            tutor_contact=tutor[3]
         )
     else:
-        welcome_text = f"Добрый день! Ваш ребенок ({parent['full_name']}) прикреплен к репетитору."
+        welcome_text = f"Добрый день! Ваш ребенок {parent['full_name']} прикреплен к репетитору."
     
         # Создаем инлайн клавиатуру
     keyboard = get_parent_welcome_keyboard()
