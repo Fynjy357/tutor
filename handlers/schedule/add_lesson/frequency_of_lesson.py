@@ -17,42 +17,52 @@ logger = logging.getLogger(__name__)
 @router.callback_query(AddLessonStates.choosing_frequency, F.data.startswith("frequency_"))
 async def process_frequency(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка выбора частоты занятия"""
+    logger.info(f"🔥 FREQUENCY SELECTED: User {callback_query.from_user.id}, data: {callback_query.data}")
+    logger.info(f"🔥 Current state: {await state.get_state()}")
     await callback_query.answer()
     
     frequency = callback_query.data.split("_")[1]
     await state.update_data(frequency=frequency)
+    logger.info(f"🔥 Frequency set to: {frequency}")
     
     # Получаем данные из состояния чтобы узнать тип занятия
     data = await state.get_data()
     lesson_type = data.get('lesson_type')
     
     if lesson_type == 'group':
-        # Для групповых занятий - показываем список групп
-        tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
-        groups = db.get_groups_by_tutor(tutor_id)
+        # ДЛЯ ГРУППОВЫХ ЗАНЯТИЙ - ПЕРЕХОДИМ К ВЫБОРУ ДАТЫ/ВРЕМЕНИ!
         
-        if not groups:
+        if frequency == "regular":
+            # Для регулярных групповых занятий - выбираем день недели
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="Понедельник", callback_data="weekday_0")],
+                [InlineKeyboardButton(text="Вторник", callback_data="weekday_1")],
+                [InlineKeyboardButton(text="Среда", callback_data="weekday_2")],
+                [InlineKeyboardButton(text="Четверг", callback_data="weekday_3")],
+                [InlineKeyboardButton(text="Пятница", callback_data="weekday_4")],
+                [InlineKeyboardButton(text="Суббота", callback_data="weekday_5")],
+                [InlineKeyboardButton(text="Воскресенье", callback_data="weekday_6")],
+                [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")]
+            ])
+            
             await callback_query.message.edit_text(
-                "❌ <b>У вас нет групп!</b>\n\n"
-                "Сначала создайте группу в системе.",
+                "📅 <b>Выберите день недели для регулярного занятия:</b>",
+                reply_markup=keyboard,
                 parse_mode="HTML"
             )
-            await state.clear()
-            return
-        
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[])
-        for group in groups:
-            keyboard.inline_keyboard.append([
-                InlineKeyboardButton(text=f"👥 {group['name']}", callback_data=f"select_group_{group['id']}")
-            ])
-        keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")])
-        
-        await callback_query.message.edit_text(
-            "👥 <b>Выберите группу для занятия:</b>",
-            reply_markup=keyboard,
-            parse_mode="HTML"
-        )
-        await state.set_state(AddLessonStates.choosing_group)
+            await state.set_state(AddLessonStates.choosing_weekday)
+            
+        else:
+            # Для единоразовых групповых занятий - запрашиваем дату
+            await callback_query.message.edit_text(
+                "📅 <b>Введите дату занятия в формате ДД.ММ.ГГГГ:</b>\n\n"
+                "Например: 15.01.2024",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_frequency")]
+                ]),
+                parse_mode="HTML"
+            )
+            await state.set_state(AddLessonStates.entering_date)
         
     else:
         # Индивидуальные занятия

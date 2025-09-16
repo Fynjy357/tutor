@@ -782,8 +782,12 @@ class Database:
     def get_students_by_group(self, group_id: int):
         """Получить всех учеников группы"""
         try:
+            logger.info(f"🔥 GET_STUDENTS_BY_GROUP CALLED: group_id={group_id}")
+            
             with self.get_connection() as conn:
                 cursor = conn.cursor()
+                
+                # ИСПРАВЛЕННЫЙ ЗАПРОС - используем правильное название таблицы student_groups!
                 cursor.execute("""
                     SELECT s.id, s.full_name 
                     FROM students s 
@@ -792,10 +796,13 @@ class Database:
                 """, (group_id,))
                 
                 students = cursor.fetchall()
-                return [{'id': student[0], 'full_name': student[1]} for student in students]
+                result = [{'id': student[0], 'full_name': student[1]} for student in students]
+                
+                logger.info(f"🔥 FOUND {len(result)} STUDENTS IN GROUP {group_id}")
+                return result
                 
         except Exception as e:
-            logger.error(f"Ошибка при получении учеников группы: {e}")
+            logger.error(f"🔥 ERROR in get_students_by_group: {e}", exc_info=True)
             return []
 
     def get_tutor_groups(self, tutor_id: int):
@@ -1436,6 +1443,7 @@ class Database:
                     l.id as lesson_id,
                     l.lesson_date,
                     l.duration,
+                    l.group_id,
                     s.full_name as student_name,
                     t.telegram_id as tutor_telegram_id,
                     t.full_name as tutor_name,
@@ -1961,6 +1969,41 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при активации реферала: {e}")
             return None
+    def get_lessons_for_reminder_grouped(self):
+        """Получает занятия для напоминания, группируя групповые занятия"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                SELECT DISTINCT
+                    l.group_id,
+                    MIN(l.id) as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    g.name as group_name,
+                    t.telegram_id as tutor_telegram_id,
+                    t.full_name as tutor_name,
+                    l.reminder_sent,
+                    COUNT(DISTINCT l.student_id) as student_count
+                FROM lessons l
+                JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN groups g ON l.group_id = g.id
+                WHERE l.status = 'planned'
+                AND l.lesson_date > datetime('now', 'localtime')
+                AND l.lesson_date <= datetime('now', 'localtime', '+60 minutes')
+                AND l.reminder_sent = 0
+                GROUP BY l.group_id, l.lesson_date, l.duration
+                HAVING COUNT(*) > 0
+                ''')
+                
+                results = [dict(row) for row in cursor.fetchall()]
+                return results
+                
+        except Exception as e:
+            logger.error(f"💥 Ошибка при получении групповых занятий для напоминания: {e}")
+            return []
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

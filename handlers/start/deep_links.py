@@ -213,9 +213,10 @@ def get_timezone_display_name(timezone_str: str) -> str:
 
 async def send_success_response(message: types.Message, student: dict, role: str, timezone: str):
     """Отправка сообщения об успешной привязке с информацией о часовом поясе"""
+    tutor = db.get_tutor_by_id(student['tutor_id'])
     await message.answer(
         f"✅ <b>Вы успешно привязаны как {role}</b>\n\n" 
-        f"<b>Ваш репетитор: {student['full_name']}!</b>\n\n"
+        f"<b>Ваш репетитор: {tutor['full_name']}!</b>\n\n"
         # f"🌍 <b>Часовой пояс:</b> {timezone}\n"
         f" С помощью этого бота вы можете:\n\n"
         f"📚 Посмотреть информацию о домашних заданиях\n\n"

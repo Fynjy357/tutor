@@ -8,6 +8,7 @@ from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 from handlers.schedule.states import AddLessonStates
 from handlers.schedule.schedule_utils import get_upcoming_lessons_text
 import logging
+from handlers.schedule.states import AddLessonStates
 
 
 router = Router()
@@ -140,3 +141,32 @@ async def back_to_schedule(callback_query: types.CallbackQuery, state: FSMContex
         reply_markup=get_schedule_keyboard(),
         parse_mode="HTML"
     )
+# Добавьте в utils.py или создайте новый обработчик
+# utils.py - добавьте этот обработчик
+@router.callback_query(F.data == "back_to_group_selection", AddLessonStates.choosing_frequency)
+async def back_to_group_selection(callback_query: types.CallbackQuery, state: FSMContext):
+    """Возврат к выбору группы"""
+    await callback_query.answer()
+    
+    # Получаем ID репетитора
+    tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)
+    groups = db.get_groups_by_tutor(tutor_id)
+    
+    # Создаем клавиатуру с группами
+    buttons = []
+    for group in groups:
+        buttons.append([InlineKeyboardButton(
+            text=f"👥 {group['name']}",
+            callback_data=f"select_group_{group['id']}"
+        )])
+    
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_lesson_type")])
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    
+    await callback_query.message.edit_text(
+        "👥 <b>Выберите группу для занятия:</b>",
+        reply_markup=keyboard,
+        parse_mode="HTML"
+    )
+    await state.set_state(AddLessonStates.choosing_group)

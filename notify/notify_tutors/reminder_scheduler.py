@@ -57,17 +57,36 @@ class ReminderScheduler:
             
             lessons = db.get_lessons_for_reminder()
             
+            # Словарь для отслеживания уже отправленных групповых занятий
+            sent_group_lessons = {}
+            
             if lessons:
                 logger.info(f"Найдено {len(lessons)} занятий для напоминания")
                 
                 for lesson in lessons:
                     try:
-                        await self.send_lesson_reminder(lesson)
-                        if db.mark_reminder_sent(lesson['lesson_id']):
-                            logger.info(f"✅ Напоминание отправлено для занятия #{lesson['lesson_id']}")
+                        # Проверяем, является ли занятие групповым
+                        group_id = lesson.get('group_id')
+                        
+                        if group_id:  # Это групповое занятие
+                            if group_id not in sent_group_lessons:
+                                # Отправляем напоминание о групповом занятии
+                                await self.send_group_lesson_reminder(lesson)
+                                sent_group_lessons[group_id] = True
+                                
+                                # Помечаем ВСЕ занятия этой группы как отправленные
+                                self.mark_group_lessons_as_sent(group_id)
+                                logger.info(f"✅ Групповое напоминание отправлено для группы #{group_id}")
+                            else:
+                                logger.debug(f"Пропускаем дублирующее групповое занятие #{group_id}")
                         else:
-                            logger.error(f"❌ Не удалось пометить напоминание как отправленное для занятия #{lesson['lesson_id']}")
-                            
+                            # Это индивидуальное занятие
+                            await self.send_lesson_reminder(lesson)
+                            if db.mark_reminder_sent(lesson['lesson_id']):
+                                logger.info(f"✅ Индивидуальное напоминание отправлено для занятия #{lesson['lesson_id']}")
+                            else:
+                                logger.error(f"❌ Не удалось пометить напоминание как отправленное для занятия #{lesson['lesson_id']}")
+                                
                     except Exception as e:
                         logger.error(f"Ошибка при отправке напоминания для занятия #{lesson['lesson_id']}: {e}")
             else:
@@ -100,6 +119,60 @@ class ReminderScheduler:
             
         except Exception as e:
             logger.error(f"💥 Ошибка при отправке напоминания для занятия {lesson['lesson_id']}: {e}")
+
+    async def send_group_lesson_reminder(self, lesson):
+        """Отправляет напоминание о групповом занятии"""
+        try:
+            tutor_telegram_id = lesson['tutor_telegram_id']
+            lesson_date = datetime.strptime(lesson['lesson_date'], '%Y-%m-%d %H:%M:%S')
+            formatted_date = lesson_date.strftime('%d.%m.%Y в %H:%M')
+            
+            # Получаем количество студентов в группе
+            group_id = lesson['group_id']
+            students = db.get_students_in_group(group_id)
+            students_count = len(students) if students else 0
+            
+            # Получаем название группы
+            group = db.get_group_by_id(group_id)
+            group_name = group['name'] if group else 'Без названия'
+            
+            message = (
+                f"⏰ Напоминание о групповом занятии!\n\n"
+                f"👥 Группа: {group_name}\n"
+                f"👨‍🎓 Количество студентов: {students_count}\n"
+                f"📅 Дата и время: {formatted_date}\n"
+                f"⏱ Продолжительность: {lesson['duration']} минут\n\n"
+                f"Не забудьте подготовиться к занятию! 🎯"
+            )
+            
+            await self.bot.send_message(
+                chat_id=tutor_telegram_id,
+                text=message
+            )
+            logger.info(f"✅ Групповое напоминание отправлено репетитору {tutor_telegram_id} для группы #{group_id}")
+            
+        except Exception as e:
+            logger.error(f"💥 Ошибка при отправке группового напоминания: {e}")
+
+    def mark_group_lessons_as_sent(self, group_id):
+        """Помечает все занятия группы как отправленные"""
+        try:
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE lessons 
+                SET reminder_sent = 1 
+                WHERE group_id = ? 
+                AND status = 'planned'
+                AND reminder_sent = 0
+                ''', (group_id,))
+                conn.commit()
+                marked_count = cursor.rowcount
+                logger.info(f"Помечено {marked_count} занятий группы #{group_id} как отправленные")
+                return marked_count
+        except Exception as e:
+            logger.error(f"Ошибка при отметке групповых занятий: {e}")
+            return 0
 
     async def stop(self):
         """Корректная остановка планировщика"""

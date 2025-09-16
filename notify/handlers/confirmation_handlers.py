@@ -38,13 +38,11 @@ async def handle_confirmation_callback(callback_query: types.CallbackQuery, noti
                                 text=f"✅ Ученик подтвердил занятие\n"
                                      f"👤 Ученик: {student_name}\n"
                                      f"📅 Время: {lesson_time}\n"
-                                     f"ID занятия: {lesson_id}"
                             )
                         else:
                             await bot.send_message(
                                 chat_id=teacher_chat_id,
                                 text=f"✅ Ученик подтвердил занятие\n"
-                                     f"ID занятия: {lesson_id}"
                             )
                         logger.info(f"✅ Уведомление о подтверждении отправлено репетитору {teacher_chat_id}")
                     else:

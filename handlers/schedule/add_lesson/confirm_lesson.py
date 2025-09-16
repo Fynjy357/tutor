@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Обработчик подтверждения занятия
 @router.callback_query(AddLessonStates.confirmation, F.data == "confirm_lesson")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
-    """Обработка подтверждения занятия с переходом к расписанию"""
+    """Обработка подтверждения занятия с переходом к редактированию"""
     await callback_query.answer()
     
     data = await state.get_data()
@@ -24,8 +24,11 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
     
     logger.info(f"Confirming lesson. Type: {lesson_type}, Frequency: {frequency}")
     
-    # Инициализируем message_text
-    message_text = ""
+    # ДЕБАГ: выводим все данные состояния
+    logger.info(f"State data: {data}")
+    
+    created_lesson_ids = []  # Храним ID созданных занятий
+    group_id = None
     
     try:
         if frequency == 'regular':
@@ -42,9 +45,10 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                 
                 # Формируем полную дату и время
                 full_datetime = f"{lesson_date.strftime('%Y-%m-%d')} {time_str}:00"
-                
                 if lesson_type == 'individual':
                     # Индивидуальное регулярное занятие
+                    logger.info(f"🔥 BEFORE ADD LESSON: tutor={tutor_id}, student={data.get('student_id')}, "
+                            f"date={full_datetime}, duration=60, price=1000, group=None")
                     lesson_id = db.add_lesson(
                         tutor_id=tutor_id,
                         student_id=data.get('student_id'),
@@ -54,34 +58,46 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                     )
                     if lesson_id:
                         created_count += 1
+                        created_lesson_ids.append(lesson_id)
                         
                 else:
-                    # Групповое регулярное занятие
+                    # Групповое единоразовое занятие
                     group_id = data.get('group_id')
-                    group_students = db.get_students_by_group(group_id)
                     
+                    # ДОБАВЬТЕ ЭТУ ПРОВЕРКУ ПЕРЕД ЦИКЛОМ!
+                    logger.info(f"🔥 Getting students for group {group_id}")
+                    group_students = db.get_students_by_group(group_id)
+                    logger.info(f"🔥 Group students result: {group_students}")
+                    
+                    if not group_students:
+                        await callback_query.message.edit_text(
+                            "❌ <b>В группе нет студентов или ошибка получения!</b>\n\n"
+                            "Добавьте студентов в группу перед созданием занятия.",
+                            parse_mode="HTML"
+                        )
+                        await state.clear()
+                        return
+                    
+                    success_count = 0
                     for student in group_students:
+                        # ИСПРАВЛЕННЫЙ ЛОГ - используем student из цикла
+                        logger.info(f"🔥 BEFORE ADD LESSON: tutor={tutor_id}, student={student['id']}, "
+                                f"date={full_datetime}, duration=60, price=500.0, group={group_id}")
+                        
                         lesson_id = db.add_lesson(
                             tutor_id=tutor_id,
                             student_id=student['id'],
                             lesson_date=full_datetime,
                             duration=60,
-                            price=500.0,  # Групповые обычно дешевле
+                            price=500.0,
                             group_id=group_id
                         )
+                        
+                        logger.info(f"🔥 AFTER ADD LESSON: result={lesson_id}")
+                        
                         if lesson_id:
-                            created_count += 1
-            
-            # Формируем сообщение об успехе
-            if lesson_type == 'individual':
-                student = db.get_student_by_id(data.get('student_id'))
-                student_name = student['full_name'] if student else "ученика"
-                message_text = f"✅ <b>Создано {created_count} регулярных занятий для {student_name}!</b>\n\n"
-            else:
-                group_name = data.get('group_name', 'группы')
-                message_text = f"✅ <b>Создано {created_count} регулярных групповых занятий для {group_name}!</b>\n\n"
-            
-            message_text += "Занятия добавлены в расписание на месяц вперед."
+                            success_count += 1
+                            created_lesson_ids.append(lesson_id)
             
         else:
             # Единоразовые занятия
@@ -89,18 +105,24 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             
             if lesson_type == 'individual':
                 # Индивидуальное единоразовое занятие
+                student_id = data.get('student_id')  # ДОБАВЬТЕ ЭТУ СТРОКУ
+                
+                # ИСПРАВЛЕННЫЙ ЛОГ
+                logger.info(f"🔥 BEFORE ADD LESSON: tutor={tutor_id}, student={student_id}, "
+                        f"date={full_datetime}, duration=60, price=1000, group=None")
+                
                 lesson_id = db.add_lesson(
                     tutor_id=tutor_id,
-                    student_id=data.get('student_id'),
+                    student_id=student_id,  # ИСПРАВЛЕНО
                     lesson_date=full_datetime,
                     duration=60,
                     price=1000
                 )
                 
+                logger.info(f"🔥 AFTER ADD LESSON: result={lesson_id}")
+                
                 if lesson_id:
-                    student = db.get_student_by_id(data.get('student_id'))
-                    student_name = student['full_name'] if student else "ученика"
-                    message_text = f"✅ <b>Занятие для {student_name} успешно добавлено!</b>\n\n"
+                    created_lesson_ids.append(lesson_id)
                 else:
                     await callback_query.message.edit_text(
                         "❌ <b>Ошибка при добавлении занятия!</b>\n\n"
@@ -116,6 +138,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                 success_count = 0
                 
                 for student in group_students:
+                    logger.info(f"🔥 BEFORE ADD LESSON: tutor={tutor_id}, student={data.get('student_id')}, "
+                            f"date={full_datetime}, duration=60, price=1000, group=None")
                     lesson_id = db.add_lesson(
                         tutor_id=tutor_id,
                         student_id=student['id'],
@@ -126,12 +150,9 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                     )
                     if lesson_id:
                         success_count += 1
+                        created_lesson_ids.append(lesson_id)
                 
-                group_name = data.get('group_name', 'группы')
-                if success_count > 0:
-                    message_text = f"✅ <b>Групповое занятие для {group_name} добавлено!</b>\n\n"
-                    message_text += f"Создано занятий: {success_count}/{len(group_students)}"
-                else:
+                if success_count == 0:
                     await callback_query.message.edit_text(
                         "❌ <b>Ошибка при добавлении группового занятия!</b>\n\n"
                         "Попробуйте еще раз.",
@@ -139,24 +160,43 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
                     )
                     return
         
-        # Если message_text пустая, значит, мы никуда не зашли
-        if not message_text:
-            message_text = "✅ Занятие добавлено!"
+        # НЕМЕДЛЕННЫЙ ПЕРЕХОД К РЕДАКТИРОВАНИЮ
+        if created_lesson_ids:
+            first_lesson_id = created_lesson_ids[0]
+            
+            # Получаем необходимые данные
+            selected_date = data.get('date') if frequency == 'single' else datetime.now().strftime('%Y-%m-%d')
+            selected_time = data.get('time')
+            
+            # Очищаем состояние перед переходом
+            await state.clear()
+            
+            if lesson_type == 'individual':
+                # ПРЯМОЙ ВЫЗОВ ФУНКЦИИ РЕДАКТИРОВАНИЯ ДЛЯ ИНДИВИДУАЛЬНОГО ЗАНЯТИЯ
+                await show_individual_edit_options_directly(
+                    callback_query.message, 
+                    first_lesson_id, 
+                    state
+                )
+                
+            else:
+                # ПРЯМОЙ ВЫЗОВ ФУНКЦИИ РЕДАКТИРОВАНИЯ ДЛЯ ГРУППОВОГО ЗАНЯТИЯ
+                await show_group_edit_options_directly(
+                    callback_query.message, 
+                    group_id, 
+                    selected_date, 
+                    selected_time, 
+                    state
+                )
+            
+            return
         
-        # Показываем уведомление об успешном добавлении
-        await callback_query.answer(message_text, show_alert=True)
-        
-        # Получаем актуальное расписание
-        schedule_text = await get_upcoming_lessons_text(tutor_id)
-        
-        # Переходим к расписанию
+        # Если не удалось создать занятия
         await callback_query.message.edit_text(
-            schedule_text,
-            reply_markup=get_schedule_keyboard(),
+            "❌ <b>Не удалось создать занятия!</b>\n\n"
+            "Попробуйте еще раз.",
             parse_mode="HTML"
         )
-        
-        await state.clear()
         
     except Exception as e:
         logger.error(f"Ошибка при создании занятия: {e}", exc_info=True)
@@ -165,3 +205,37 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             f"Ошибка: {str(e)}",
             parse_mode="HTML"
         )
+
+async def show_individual_edit_options_directly(message: types.Message, lesson_id: int, state: FSMContext):
+    """Прямой вызов функции редактирования для индивидуального занятия"""
+    from handlers.schedule.edit_lesson.individual_handlers import show_edit_options
+    
+    # Создаем простой callback-like объект
+    class SimpleCallback:
+        def __init__(self, message, lesson_id):
+            self.message = message
+            self.data = f"edit_lesson_{lesson_id}"
+            self.from_user = message.from_user
+            
+        async def answer(self):
+            pass
+    
+    callback = SimpleCallback(message, lesson_id)
+    await show_edit_options(callback, state)
+
+async def show_group_edit_options_directly(message: types.Message, group_id: int, date: str, time: str, state: FSMContext):
+    """Прямой вызов функции редактирования для группового занятия"""
+    from handlers.schedule.edit_lesson.group_handlers import show_group_edit_options
+    
+    # Создаем простой callback-like объект
+    class SimpleCallback:
+        def __init__(self, message, group_id, date, time):
+            self.message = message
+            self.data = f"edit_group_{group_id}_{date}_{time}"
+            self.from_user = message.from_user
+            
+        async def answer(self):
+            pass
+    
+    callback = SimpleCallback(message, group_id, date, time)
+    await show_group_edit_options(callback, state)
