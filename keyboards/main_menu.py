@@ -17,7 +17,7 @@ def get_main_menu_keyboard():
     # Второй ряд
     builder.row(
         types.InlineKeyboardButton(
-            text="👥 Учет учеников",
+            text="👥 Мои ученики",
             callback_data="students"
         ),
         types.InlineKeyboardButton(
