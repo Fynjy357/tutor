@@ -21,7 +21,7 @@ def get_main_menu_keyboard():
             callback_data="students"
         ),
         types.InlineKeyboardButton(
-            text="👨‍👩‍👧‍👦 Управление группами",
+            text="👨‍👩‍👧‍👦 Список групп",
             callback_data="groups"
         )
     )
