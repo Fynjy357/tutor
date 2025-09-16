@@ -13268,3 +13268,334 @@ aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinE
 2025-09-16 11:12:02 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
 2025-09-16 11:12:02 - __main__ - INFO - Планировщик напоминаний остановлен
 2025-09-16 11:12:02 - __main__ - INFO - Бот успешно остановлен
+2025-09-16 11:13:26 - __main__ - INFO - Запуск приложения...
+2025-09-16 11:13:26 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-16 11:13:26 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-16 11:13:26 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #67: '2025-09-16 11:05:00' - completed
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #68: '2025-09-16 11:05:00' - completed
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #69: '2025-09-16 11:05:00' - completed
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #70: '2025-09-16 11:05:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #71: '2025-09-16 11:05:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #72: '2025-09-16 11:05:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #73: '2025-09-16 11:08:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #74: '2025-09-16 11:08:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #75: '2025-09-16 11:08:00' - planned
+2025-09-16 11:13:26 - notify.models - INFO -    Занятие #76: '2025-09-16 11:10:00' - planned
+2025-09-16 11:13:26 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-16 11:13:26 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-16 11:13:26 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-16 11:13:26 - __main__ - INFO - Бот успешно инициализирован
+2025-09-16 11:13:26 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-16 11:13:26 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-16 11:13:26 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-16 11:13:26 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-16 11:13:26 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 14
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #67: Петров Петр - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #68: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #69: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: completed - TG: 7516387188
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #70: Петров Петр - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #71: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #72: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: planned - TG: 7516387188
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #73: Петров Петр - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #74: Василек Иван Гаврилович - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #75: Рыбникова Полина Антоновна - 2025-09-16 11:08:00 - статус: planned - TG: 7516387188
+2025-09-16 11:13:26 - notify.models - INFO -    📅 #76: Рыбникова Полина Антоновна - 2025-09-16 11:10:00 - статус: planned - TG: 7516387188
+2025-09-16 11:13:26 - notify.models - INFO - 👥 Ученики без telegram_id: 10
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:13:26 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:13:26 - notify.models - INFO - 📨 Уже отправленные уведомления: 4
+2025-09-16 11:13:26 - notify.models - INFO -    📤 #69 - отправлено в 2025-09-16 07:48:08
+2025-09-16 11:13:26 - notify.models - INFO -    📤 #72 - отправлено в 2025-09-16 08:03:19
+2025-09-16 11:13:26 - notify.models - INFO -    📤 #75 - отправлено в 2025-09-16 08:07:01
+2025-09-16 11:13:26 - notify.models - INFO -    📤 #76 - отправлено в 2025-09-16 08:09:19
+2025-09-16 11:13:26 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-16 11:13:26 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-16 11:13:26 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-16 11:13:26 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:13:26 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:13:26 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-16 11:13:26 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-16 11:13:26 - database - INFO - 🕒 UTC время в БД: 2025-09-16 08:13:26
+2025-09-16 11:13:26 - database - INFO - 🏠 Локальное время в БД: 2025-09-16 11:13:26
+2025-09-16 11:13:32 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 ADD_LESSON START: User 79669142, data: add_lesson
+2025-09-16 11:13:32 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Current state before: None
+2025-09-16 11:13:32 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 State set to: AddLessonStates:choosing_lesson_type
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 ADD_LESSON screen shown successfully
+2025-09-16 11:13:33 - database - INFO - База данных инициализирована
+2025-09-16 11:13:33 - payment.models - INFO - DEBUG: Payment query result for user 79669142: <sqlite3.Row object at 0x000001F85EA5C2E0>
+2025-09-16 11:13:33 - payment.models - INFO - DEBUG: Valid until: 2025-10-12 18:40:22, Now: 2025-09-16 11:13:33.667805
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 GROUP LESSON TYPE: User 79669142, data: lesson_type_group
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Current state: AddLessonStates:choosing_lesson_type
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Lesson type set to: group
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Found 2 groups for tutor 1
+2025-09-16 11:13:33 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 State changed to: AddLessonStates:choosing_group
+2025-09-16 11:13:35 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 GROUP SELECTED: User 79669142, data: select_group_5
+2025-09-16 11:13:35 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Current state: AddLessonStates:choosing_group
+2025-09-16 11:13:35 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Selected group ID: 5
+2025-09-16 11:13:35 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Group data saved: Продвинутая группа
+2025-09-16 11:13:35 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 State changed to: AddLessonStates:choosing_frequency
+2025-09-16 11:13:36 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 FREQUENCY SELECTED: User 79669142, data: frequency_regular
+2025-09-16 11:13:36 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 Current state: AddLessonStates:choosing_frequency
+2025-09-16 11:13:36 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 Frequency set to: regular
+2025-09-16 11:13:48 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - Processing time. Lesson type: group, Frequency: regular
+2025-09-16 11:13:48 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - Time processed: 11:15
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - Confirming lesson. Type: group, Frequency: regular
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - State data: {'lesson_type': 'group', 'group_id': 5, 'group_name': 'Продвинутая группа', 'frequency': 'regular', 'weekday': 1, 'time': '11:15'}
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Getting students for group 5
+2025-09-16 11:13:50 - database - INFO - 🔥 GET_STUDENTS_BY_GROUP CALLED: group_id=5
+2025-09-16 11:13:50 - database - INFO - 🔥 FOUND 3 STUDENTS IN GROUP 5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Group students result: [{'id': 1, 'full_name': 'Петров Петр'}, {'id': 17, 'full_name': 'Василек Иван Гаврилович'}, {'id': 19, 'full_name': 'Рыбникова Полина Антоновна'}]
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=1, date=2025-09-16 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=1, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=77
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=17, date=2025-09-16 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=17, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=78
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=19, date=2025-09-16 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=19, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=79
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Getting students for group 5
+2025-09-16 11:13:50 - database - INFO - 🔥 GET_STUDENTS_BY_GROUP CALLED: group_id=5
+2025-09-16 11:13:50 - database - INFO - 🔥 FOUND 3 STUDENTS IN GROUP 5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Group students result: [{'id': 1, 'full_name': 'Петров Петр'}, {'id': 17, 'full_name': 'Василек Иван Гаврилович'}, {'id': 19, 'full_name': 'Рыбникова Полина Антоновна'}]
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=1, date=2025-09-23 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=1, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=80
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=17, date=2025-09-23 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=17, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=81
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=19, date=2025-09-23 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=19, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=82
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Getting students for group 5
+2025-09-16 11:13:50 - database - INFO - 🔥 GET_STUDENTS_BY_GROUP CALLED: group_id=5
+2025-09-16 11:13:50 - database - INFO - 🔥 FOUND 3 STUDENTS IN GROUP 5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Group students result: [{'id': 1, 'full_name': 'Петров Петр'}, {'id': 17, 'full_name': 'Василек Иван Гаврилович'}, {'id': 19, 'full_name': 'Рыбникова Полина Антоновна'}]
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=1, date=2025-09-30 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=1, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=83
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=17, date=2025-09-30 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=17, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=84
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=19, date=2025-09-30 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=19, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=85
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Getting students for group 5
+2025-09-16 11:13:50 - database - INFO - 🔥 GET_STUDENTS_BY_GROUP CALLED: group_id=5
+2025-09-16 11:13:50 - database - INFO - 🔥 FOUND 3 STUDENTS IN GROUP 5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 Group students result: [{'id': 1, 'full_name': 'Петров Петр'}, {'id': 17, 'full_name': 'Василек Иван Гаврилович'}, {'id': 19, 'full_name': 'Рыбникова Полина Антоновна'}]
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=1, date=2025-10-07 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=1, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=86
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=17, date=2025-10-07 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=17, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=87
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 BEFORE ADD LESSON: tutor=1, student=19, date=2025-10-07 11:15:00, duration=60, price=500.0, group=5
+2025-09-16 11:13:50 - database - INFO - Добавлено занятие: student_id=19, group_id=5
+2025-09-16 11:13:50 - handlers.schedule.add_lesson.confirm_lesson - INFO - 🔥 AFTER ADD LESSON: result=88
+2025-09-16 11:14:26 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:14:26 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:15:25 - __main__ - INFO - Получен сигнал остановки
+2025-09-16 11:15:25 - __main__ - INFO - Завершение работы бота...
+2025-09-16 11:15:25 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-16 11:15:25 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-16 11:15:25 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-16 11:15:25 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-16 11:15:25 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-16 11:15:25 - __main__ - INFO - Бот успешно остановлен
+2025-09-16 11:15:30 - __main__ - INFO - Запуск приложения...
+2025-09-16 11:15:30 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-16 11:15:30 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-16 11:15:30 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #67: '2025-09-16 11:05:00' - completed
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #68: '2025-09-16 11:05:00' - completed
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #69: '2025-09-16 11:05:00' - completed
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #70: '2025-09-16 11:05:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #71: '2025-09-16 11:05:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #72: '2025-09-16 11:05:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #73: '2025-09-16 11:08:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #74: '2025-09-16 11:08:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #75: '2025-09-16 11:08:00' - planned
+2025-09-16 11:15:30 - notify.models - INFO -    Занятие #76: '2025-09-16 11:10:00' - planned
+2025-09-16 11:15:30 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-16 11:15:30 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-16 11:15:30 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-16 11:15:30 - __main__ - INFO - Бот успешно инициализирован
+2025-09-16 11:15:30 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-16 11:15:30 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-16 11:15:30 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-16 11:15:30 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-16 11:15:30 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 17
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #67: Петров Петр - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #68: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #69: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: completed - TG: 7516387188
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #70: Петров Петр - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #71: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #72: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: planned - TG: 7516387188
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #73: Петров Петр - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #74: Василек Иван Гаврилович - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #75: Рыбникова Полина Антоновна - 2025-09-16 11:08:00 - статус: planned - TG: 7516387188
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #76: Рыбникова Полина Антоновна - 2025-09-16 11:10:00 - статус: planned - TG: 7516387188
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #77: Петров Петр - 2025-09-16 11:15:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #78: Василек Иван Гаврилович - 2025-09-16 11:15:00 - статус: planned - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    📅 #79: Рыбникова Полина Антоновна - 2025-09-16 11:15:00 - статус: planned - TG: 7516387188
+2025-09-16 11:15:30 - notify.models - INFO - 👥 Ученики без telegram_id: 12
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:15:30 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:15:30 - notify.models - INFO - 📨 Уже отправленные уведомления: 4
+2025-09-16 11:15:30 - notify.models - INFO -    📤 #69 - отправлено в 2025-09-16 07:48:08
+2025-09-16 11:15:30 - notify.models - INFO -    📤 #72 - отправлено в 2025-09-16 08:03:19
+2025-09-16 11:15:30 - notify.models - INFO -    📤 #75 - отправлено в 2025-09-16 08:07:01
+2025-09-16 11:15:30 - notify.models - INFO -    📤 #76 - отправлено в 2025-09-16 08:09:19
+2025-09-16 11:15:30 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 1
+2025-09-16 11:15:30 - notify.models - INFO -    ✅ Для уведомления: #79 - Рыбникова Полина Антоновна
+2025-09-16 11:15:30 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 1
+2025-09-16 11:15:30 - notify.scheduler - INFO - 🔍 Анализ занятия #79: telegram_id=7516387188
+2025-09-16 11:15:30 - notify.scheduler - INFO - 📩 Обрабатываем занятие #79 для ученика 7516387188 (ID: 19)
+2025-09-16 11:15:30 - notify.scheduler - INFO - ⏰ Время занятия: 2025-09-16 11:15:00, время уведомления: 2025-09-15 11:15:00
+2025-09-16 11:15:30 - notify.models - INFO - 📝 Создана запись подтверждения для занятия #79, student_id: 19, ID записи: 17
+2025-09-16 11:15:30 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-16 11:15:30 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:15:30 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:15:30 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-16 11:15:30 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-16 11:15:30 - database - INFO - 🕒 UTC время в БД: 2025-09-16 08:15:30
+2025-09-16 11:15:30 - database - INFO - 🏠 Локальное время в БД: 2025-09-16 11:15:30
+2025-09-16 11:15:30 - notify.models - INFO - 📨 Уведомление отправлено ученику 7516387188 для занятия #79
+2025-09-16 11:15:30 - notify.scheduler - INFO - ✅ Уведомление отправлено успешно
+2025-09-16 11:16:21 - __main__ - INFO - Получен сигнал остановки
+2025-09-16 11:16:21 - __main__ - INFO - Завершение работы бота...
+2025-09-16 11:16:21 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-16 11:16:21 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-16 11:16:21 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-16 11:16:21 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-16 11:16:21 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-16 11:16:21 - __main__ - INFO - Бот успешно остановлен
+2025-09-16 11:16:24 - __main__ - INFO - Запуск приложения...
+2025-09-16 11:16:25 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-16 11:16:25 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-16 11:16:25 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #67: '2025-09-16 11:05:00' - completed
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #68: '2025-09-16 11:05:00' - completed
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #69: '2025-09-16 11:05:00' - completed
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #70: '2025-09-16 11:05:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #71: '2025-09-16 11:05:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #72: '2025-09-16 11:05:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #73: '2025-09-16 11:08:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #74: '2025-09-16 11:08:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #75: '2025-09-16 11:08:00' - planned
+2025-09-16 11:16:25 - notify.models - INFO -    Занятие #76: '2025-09-16 11:10:00' - planned
+2025-09-16 11:16:25 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-16 11:16:25 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-16 11:16:25 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-16 11:16:25 - __main__ - INFO - Бот успешно инициализирован
+2025-09-16 11:16:25 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-16 11:16:25 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-16 11:16:25 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-16 11:16:25 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-16 11:16:25 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 17
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #67: Петров Петр - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #68: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: completed - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #69: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: completed - TG: 7516387188
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #70: Петров Петр - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #71: Василек Иван Гаврилович - 2025-09-16 11:05:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #72: Рыбникова Полина Антоновна - 2025-09-16 11:05:00 - статус: planned - TG: 7516387188
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #73: Петров Петр - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #74: Василек Иван Гаврилович - 2025-09-16 11:08:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #75: Рыбникова Полина Антоновна - 2025-09-16 11:08:00 - статус: planned - TG: 7516387188
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #76: Рыбникова Полина Антоновна - 2025-09-16 11:10:00 - статус: planned - TG: 7516387188
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #77: Петров Петр - 2025-09-16 11:15:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #78: Василек Иван Гаврилович - 2025-09-16 11:15:00 - статус: planned - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    📅 #79: Рыбникова Полина Антоновна - 2025-09-16 11:15:00 - статус: planned - TG: 7516387188
+2025-09-16 11:16:25 - notify.models - INFO - 👥 Ученики без telegram_id: 12
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #1: Петров Петр - TG: None
+2025-09-16 11:16:25 - notify.models - INFO -    ❌ #17: Василек Иван Гаврилович - TG: None
+2025-09-16 11:16:25 - notify.models - INFO - 📨 Уже отправленные уведомления: 5
+2025-09-16 11:16:25 - notify.models - INFO -    📤 #69 - отправлено в 2025-09-16 07:48:08
+2025-09-16 11:16:25 - notify.models - INFO -    📤 #72 - отправлено в 2025-09-16 08:03:19
+2025-09-16 11:16:25 - notify.models - INFO -    📤 #75 - отправлено в 2025-09-16 08:07:01
+2025-09-16 11:16:25 - notify.models - INFO -    📤 #76 - отправлено в 2025-09-16 08:09:19
+2025-09-16 11:16:25 - notify.models - INFO -    📤 #79 - отправлено в 2025-09-16 08:15:30
+2025-09-16 11:16:25 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-16 11:16:25 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-16 11:16:25 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-16 11:16:25 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:16:25 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:16:25 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-16 11:16:25 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-16 11:16:25 - database - INFO - 🕒 UTC время в БД: 2025-09-16 08:16:25
+2025-09-16 11:16:25 - database - INFO - 🏠 Локальное время в БД: 2025-09-16 11:16:25
+2025-09-16 11:16:47 - payment.handlers - INFO - Settings handler called for user 79669142
+2025-09-16 11:16:47 - database - INFO - База данных инициализирована
+2025-09-16 11:16:47 - payment.models - INFO - DEBUG: Payment query result for user 79669142: <sqlite3.Row object at 0x00000147DB4AAEF0>
+2025-09-16 11:16:47 - payment.models - INFO - DEBUG: Valid until: 2025-10-12 18:40:22, Now: 2025-09-16 11:16:47.660610
+2025-09-16 11:16:47 - payment.handlers - INFO - Payment info for user 79669142: {'is_active': True, 'valid_until': '2025-10-12 18:40:22', 'tariff': '1 месяц'}
+2025-09-16 11:16:49 - database - INFO - База данных инициализирована
+2025-09-16 11:17:25 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:17:25 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:18:25 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-16 11:18:25 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-16 11:18:35 - __main__ - INFO - Получен сигнал остановки
+2025-09-16 11:18:35 - __main__ - INFO - Завершение работы бота...
+2025-09-16 11:18:35 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-16 11:18:35 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-16 11:18:35 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-16 11:18:35 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-16 11:18:35 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-16 11:18:35 - __main__ - INFO - Бот успешно остановлен

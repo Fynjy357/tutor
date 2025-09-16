@@ -29,7 +29,7 @@ def get_main_menu_keyboard():
     # Третий ряд
     builder.row(
         types.InlineKeyboardButton(
-            text="📞 Связь с разработчиками",
+            text="📞 Техподдержка",
             callback_data="contact_developers"
         ),
         types.InlineKeyboardButton(

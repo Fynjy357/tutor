@@ -169,7 +169,7 @@ async def handle_back_from_group_input(callback_query: types.CallbackQuery, stat
             f"👥 Количество учеников: {len(group_lessons)}\n"
             f"💰 Стоимость: {representative_lesson['price']} руб.\n"
             f"⏱️ Длительность: {representative_lesson['duration']} мин.\n\n"
-            f"⚠️ Изменения применятся ко ВСЕМ занятиям группы",
+            f"⚠️ Изменения применятся ко ученикам в группе",
             reply_markup=keyboard,
             parse_mode="HTML"
         )
@@ -210,7 +210,7 @@ async def handle_back_from_individual_input(callback_query: types.CallbackQuery,
                 f"👤 Ученик/Группа: {student_name}\n"
                 f"💰 Стоимость: {lesson['price']} руб.\n"
                 f"⏱️ Длительность: {lesson['duration']} мин.\n\n"
-                f"{'⚠️ Изменения применятся ко ВСЕМ занятиям группы' if lesson['group_id'] else ''}",
+                f"{'⚠️ Изменения применятся ко ученикам в группе' if lesson['group_id'] else ''}",
                 reply_markup=keyboard,
                 parse_mode="HTML"
             )

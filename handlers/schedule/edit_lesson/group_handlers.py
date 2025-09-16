@@ -53,8 +53,7 @@ async def show_group_edit_options(callback_query: types.CallbackQuery, state: FS
         f"⏰ Время: {selected_time}\n"
         f"👥 Количество учеников: {len(group_lessons)}\n"
         f"💰 Стоимость: {representative_lesson['price']} руб.\n"
-        f"⏱️ Длительность: {representative_lesson['duration']} мин.\n\n"
-        f"⚠️ Изменения применятся ко ВСЕМ занятиям группы",
+        f"⏱️ Длительность: {representative_lesson['duration']} мин.\n\n",
         reply_markup=keyboard,
         parse_mode="HTML"
     )
@@ -282,8 +281,7 @@ async def show_group_edit_options_after_update(message: types.Message, state: FS
             f"⏰ Время: {lesson_time}\n"
             f"👥 Количество учеников: {len(group_lessons)}\n"
             f"💰 Стоимость: {representative_lesson['price']} руб.\n"
-            f"⏱️ Длительность: {representative_lesson['duration']} мин.\n\n"
-            f"⚠️ Изменения применятся ко ВСЕМ занятиям группы",
+            f"⏱️ Длительность: {representative_lesson['duration']} мин.\n\n",
             reply_markup=keyboard,
             parse_mode="HTML"
         )
