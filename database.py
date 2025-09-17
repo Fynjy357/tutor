@@ -12,6 +12,7 @@ class Database:
     def __init__(self, db_name='tutor_bot.db'):
         self.db_name = db_name
         self.init_db()
+        self.logger = logging.getLogger(__name__)
 
     def get_connection(self):
         """Создает и возвращает соединение с базой данных"""
@@ -62,7 +63,39 @@ class Database:
                 FOREIGN KEY (tutor_id) REFERENCES tutors (id)
             )
             ''')
-            
+                    # НОВАЯ таблица основных учеников (уникальные студенты)
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS main_students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                full_name TEXT NOT NULL,
+                phone TEXT,
+                parent_phone TEXT,
+                student_telegram_id INTEGER UNIQUE,
+                parent_telegram_id INTEGER UNIQUE,
+                student_username TEXT,
+                parent_username TEXT,
+                timezone TEXT DEFAULT 'Europe/Moscow',
+                notification_time TEXT DEFAULT '09:00',
+                notification_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+                    # таблица родителей
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS main_parents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                full_name TEXT NOT NULL,
+                phone TEXT,
+                parent_telegram_id INTEGER UNIQUE,
+                parent_username TEXT,
+                timezone TEXT DEFAULT 'Europe/Moscow',
+                notification_time TEXT DEFAULT '09:00',
+                notification_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
             # Таблица занятий
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS lessons (
@@ -215,6 +248,16 @@ class Database:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (referrer_id) REFERENCES tutors (id),
                 UNIQUE(visitor_telegram_id, status)
+            )
+            ''')
+
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS student_migration_map (
+                old_id INTEGER PRIMARY KEY,
+                main_id INTEGER NOT NULL,
+                migration_status TEXT DEFAULT 'pending',
+                migrated_at TIMESTAMP,
+                FOREIGN KEY (main_id) REFERENCES main_students (id)
             )
             ''')
             
@@ -1229,7 +1272,7 @@ class Database:
             logger.error(f"Ошибка при проверке администратора: {e}")
             return False
     def get_student_unpaid_lessons(self, student_id: int):
-        """Получает неоплаченные занятия студента"""
+        """Получает неоплаченные занятия студента (ТОЛЬКО те, у которых есть отчет и они не оплачены)"""
         try:
             with self.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
@@ -1244,11 +1287,12 @@ class Database:
                     lr.lesson_held,
                     lr.lesson_paid
                 FROM lessons l
-                LEFT JOIN tutors t ON l.tutor_id = t.id
-                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND l.student_id = lr.student_id
+                INNER JOIN tutors t ON l.tutor_id = t.id
+                INNER JOIN lesson_reports lr ON l.id = lr.lesson_id
                 WHERE l.student_id = ? 
-                AND (lr.lesson_paid = FALSE OR lr.lesson_paid IS NULL)
                 AND l.status = 'completed'
+                AND lr.lesson_held = TRUE  -- занятие действительно проведено
+                AND lr.lesson_paid = FALSE -- и не оплачено
                 ORDER BY l.lesson_date DESC
                 ''', (student_id,))
                 
@@ -2004,6 +2048,442 @@ class Database:
         except Exception as e:
             logger.error(f"💥 Ошибка при получении групповых занятий для напоминания: {e}")
             return []
+    def add_student_to_main_table(self, student_id: int, full_name: str, phone: str, 
+                                    telegram_id: int, username: str, timezone: str, tutor_id: int):
+        """Добавляет студента в таблицу main_students, если его еще нет"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # ✅ ПРОВЕРЯЕМ - если студент уже есть в main_students, НИЧЕГО НЕ ДЕЛАЕМ
+                cursor.execute('''
+                    SELECT id FROM main_students 
+                    WHERE student_telegram_id = ? OR parent_telegram_id = ?
+                ''', (telegram_id, telegram_id))
+                
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # ✅ Студент уже есть в main_students - пропускаем добавление
+                    return True
+                else:
+                    # ✅ Создаем новую запись только если студента еще нет
+                    cursor.execute('''
+                        INSERT INTO main_students 
+                        (full_name, phone, student_telegram_id, 
+                        student_username, timezone, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    ''', (full_name, phone, telegram_id, username, timezone))
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Ошибка при работе с main_students: {e}")
+            return False
+
+    def get_main_student_by_telegram_id(self, telegram_id: int):
+        """Получает основного студента по telegram_id (ученика или родителя)"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT * FROM main_students 
+                    WHERE student_telegram_id = ? OR parent_telegram_id = ?
+                ''', (telegram_id, telegram_id))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            self.logger.error(f"Ошибка при получении основного студента: {e}")
+            return None
+
+    def get_tutors_for_main_student(self, main_student_id: int):
+        """Получает всех репетиторов, прикрепленных к студенту из main_students (только active и paused)"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT DISTINCT t.* 
+                    FROM tutors t
+                    JOIN students s ON t.id = s.tutor_id
+                    JOIN main_students ms ON (s.student_telegram_id = ms.student_telegram_id 
+                                        OR s.parent_telegram_id = ms.parent_telegram_id)
+                    WHERE ms.id = ? AND t.status IN ('active', 'paused')
+                    ORDER BY t.full_name
+                ''', (main_student_id,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            self.logger.error(f"Ошибка при получении репетиторов для студента: {e}")
+            return []
+
+    def get_all_students_for_main_student(self, main_student_id: int):
+        """Получает все записи студентов из разных репетиторов для основного студента"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT s.*, t.full_name as tutor_name, t.phone as tutor_phone
+                    FROM students s
+                    JOIN tutors t ON s.tutor_id = t.id
+                    JOIN main_students ms ON (s.student_telegram_id = ms.student_telegram_id 
+                                        OR s.parent_telegram_id = ms.parent_telegram_id)
+                    WHERE ms.id = ?
+                    ORDER BY t.full_name
+                ''', (main_student_id,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            self.logger.error(f"Ошибка при получении всех записей студента: {e}")
+            return []
+        
+    def get_student_undone_homeworks_from_reports(self, student_id):
+        """Получает невыполненные домашние задания для студента"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    t.full_name as tutor_name,
+                    lr.homework_done,
+                    lr.student_performance
+                FROM lessons l
+                JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id
+                WHERE l.student_id = ?
+                AND l.status = 'completed'
+                AND (lr.homework_done = FALSE OR lr.homework_done IS NULL)
+                ORDER BY l.lesson_date DESC
+                ''', (student_id,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            self.logger.error(f"❌ Ошибка в get_student_undone_homeworks_from_reports: {e}")
+            return []
+    def get_unpaid_lessons_for_student(self, student_id):
+        """Получает неоплаченные занятия для студента"""
+        try:
+            query = """
+                SELECT lr.*, l.lesson_date, l.duration, l.price
+                FROM lesson_reports lr
+                JOIN lessons l ON lr.lesson_id = l.id
+                WHERE l.student_id = ?
+                AND (lr.lesson_paid = 0 OR lr.lesson_paid IS NULL)
+                ORDER BY l.lesson_date DESC
+            """
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (student_id,))
+                results = cursor.fetchall()
+                
+                # Преобразуем sqlite3.Row в словари
+                unpaid_lessons = []
+                for row in results:
+                    unpaid_lessons.append(dict(row))
+                
+                return unpaid_lessons
+                
+        except Exception as e:
+            self.logger.error(f"❌ Ошибка в get_unpaid_lessons_for_student: {e}")
+            return []
+        
+    def add_parent_to_main_table(self, full_name: str, phone: str, 
+                            telegram_id: int, username: str, timezone: str) -> bool:
+        """Добавляет родителя в таблицу main_parents, если его еще нет"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Проверяем - если родитель уже есть в main_parents, НИЧЕГО НЕ ДЕЛАЕМ
+                cursor.execute('SELECT id FROM main_parents WHERE parent_telegram_id = ?', (telegram_id,))
+                
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Родитель уже есть в main_parents - пропускаем добавление
+                    return True
+                else:
+                    # Создаем новую запись только если родителя еще нет
+                    cursor.execute('''
+                        INSERT INTO main_parents 
+                        (full_name, phone, parent_telegram_id, 
+                        parent_username, timezone, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    ''', (full_name, phone, telegram_id, username, timezone))
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Ошибка при работе с main_parents: {e}")
+            return False
+
+    def get_main_parent_by_telegram_id(self, telegram_id: int):
+        """Получает основного родителя по telegram_id"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM main_parents WHERE parent_telegram_id = ?', (telegram_id,))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            self.logger.error(f"Ошибка при получении основного родителя: {e}")
+            return None
+    def get_students_by_parent_telegram_id(self, parent_telegram_id: int):
+        """Получает всех учеников по parent_telegram_id"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM students WHERE parent_telegram_id = ?', (parent_telegram_id,))
+                results = cursor.fetchall()
+                return [dict(row) for row in results] if results else []
+        except Exception as e:
+            self.logger.error(f"Ошибка при получении учеников родителя: {e}")
+            return []
+    def get_tutors_for_parent(self, parent_telegram_id: int):
+        """Получает всех репетиторов родителя - ЕДИНЫЙ СТАНДАРТ"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                # ИСПРАВЛЕНО: используем ТОТ ЖЕ стандарт, что и в get_parent_homeworks
+                cursor.execute('''
+                SELECT DISTINCT 
+                    t.id, 
+                    t.full_name, 
+                    t.telegram_id,
+                    t.status,
+                    t.phone
+                FROM tutors t
+                JOIN students s ON t.id = s.tutor_id
+                WHERE s.parent_telegram_id = ?
+                AND t.status IN ('active', 'paused')
+                ORDER BY t.full_name
+                ''', (parent_telegram_id,))
+                
+                results = [dict(row) for row in cursor.fetchall()]
+                logger.info(f"👨‍🏫 Найдено репетиторов для родителя {parent_telegram_id}: {len(results)}")
+                return results
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка при получении репетиторов родителя: {e}")
+            return []
+
+    def get_parent_unpaid_lessons(self, parent_telegram_id: int):
+        """Получает неоплаченные занятия родителя - ИСПРАВЛЕННАЯ ВЕРСИЯ"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    l.price,
+                    s.full_name as student_name,
+                    t.full_name as tutor_name,
+                    COALESCE(lr.lesson_held, 1) as lesson_held,
+                    COALESCE(lr.lesson_paid, 0) as lesson_paid
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND lr.student_id = s.id
+                WHERE s.parent_telegram_id = ?
+                AND l.status = 'completed'
+                AND lr.id IS NOT NULL  -- ДОБАВЛЕНО: должен быть отчет
+                AND lr.lesson_paid = 0  -- ИЗМЕНЕНО: только явно неоплаченные
+                ORDER BY l.lesson_date DESC
+                ''', (parent_telegram_id,))
+                
+                results = [dict(row) for row in cursor.fetchall()]
+                logger.info(f"💰 Найдено неоплаченных занятий для родителя {parent_telegram_id}: {len(results)}")
+                return results
+                
+        except Exception as e:
+            logger.error(f"Ошибка при получении неоплаченных занятий родителя: {e}")
+            return []
+        
+        
+    def get_parent_homeworks(self, parent_telegram_id: int):
+        """Получает домашние задания родителя"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.duration,
+                    s.full_name as student_name,
+                    t.full_name as tutor_name,
+                    lr.homework_done,
+                    lr.student_performance
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id
+                WHERE s.parent_telegram_id = ?
+                AND l.status = 'completed'
+                AND (lr.homework_done = FALSE OR lr.homework_done IS NULL)
+                ORDER BY l.lesson_date DESC
+                ''', (parent_telegram_id,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при получении домашних заданий родителя: {e}")
+            return []
+    def get_parent_students(self, parent_telegram_id: int):
+        """Получает всех учеников родителя"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT s.*, t.full_name as tutor_name
+                FROM students s
+                LEFT JOIN tutors t ON s.tutor_id = t.id
+                WHERE s.parent_telegram_id = ?
+                ORDER BY s.full_name
+                ''', (parent_telegram_id,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при получении учеников родителя: {e}")
+            return []
+    def debug_parent_connections(self, parent_telegram_id: int):
+        """Отладочный метод для проверки связей родителя"""
+        try:
+            with self.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                debug_info = {
+                    'parent_telegram_id': parent_telegram_id,
+                    'found_in_students': False,
+                    'found_in_main_parents': False,
+                    'students_count': 0,
+                    'tutors_count': 0,
+                    'students_details': [],
+                    'tutors_details': [],
+                    'unpaid_lessons_count': 0,
+                    'unpaid_lessons_details': []
+                }
+                
+                # 1. Проверяем, есть ли родитель в students
+                cursor.execute('''
+                SELECT id, full_name, parent_telegram_id, student_telegram_id, tutor_id
+                FROM students 
+                WHERE parent_telegram_id = ?
+                ''', (parent_telegram_id,))
+                
+                students = cursor.fetchall()
+                debug_info['students_count'] = len(students)
+                debug_info['found_in_students'] = len(students) > 0
+                
+                for student in students:
+                    student_info = dict(student)
+                    debug_info['students_details'].append(student_info)
+                
+                # 2. Проверяем, есть ли родитель в main_parents
+                cursor.execute('''
+                SELECT id, full_name, parent_telegram_id, parent_username
+                FROM main_parents 
+                WHERE parent_telegram_id = ?
+                ''', (parent_telegram_id,))
+                
+                main_parent = cursor.fetchone()
+                debug_info['found_in_main_parents'] = main_parent is not None
+                if main_parent:
+                    debug_info['main_parent_info'] = dict(main_parent)
+                
+                # 3. Проверяем репетиторов через students
+                cursor.execute('''
+                SELECT DISTINCT t.id, t.full_name, t.telegram_id, t.status
+                FROM tutors t
+                JOIN students s ON t.id = s.tutor_id
+                WHERE s.parent_telegram_id = ?
+                ''', (parent_telegram_id,))
+                
+                tutors = cursor.fetchall()
+                debug_info['tutors_count'] = len(tutors)
+                
+                for tutor in tutors:
+                    tutor_info = dict(tutor)
+                    debug_info['tutors_details'].append(tutor_info)
+                
+                # 4. Проверяем неоплаченные занятия (двумя способами)
+                # Способ 1: через lesson_reports
+                cursor.execute('''
+                SELECT COUNT(*) as count
+                FROM lesson_reports lr
+                JOIN lessons l ON lr.lesson_id = l.id
+                JOIN students s ON l.student_id = s.id
+                WHERE s.parent_telegram_id = ?
+                AND l.status = 'completed'
+                AND lr.lesson_held = 1
+                AND (lr.lesson_paid = 0 OR lr.lesson_paid IS NULL)
+                ''', (parent_telegram_id,))
+                
+                unpaid_count_1 = cursor.fetchone()
+                debug_info['unpaid_via_reports'] = unpaid_count_1['count'] if unpaid_count_1 else 0
+                
+                # Способ 2: напрямую через lessons (если нет отчетов)
+                cursor.execute('''
+                SELECT COUNT(*) as count
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                WHERE s.parent_telegram_id = ?
+                AND l.status = 'completed'
+                AND NOT EXISTS (
+                    SELECT 1 FROM lesson_reports lr 
+                    WHERE lr.lesson_id = l.id 
+                    AND lr.lesson_paid = 1
+                )
+                ''', (parent_telegram_id,))
+                
+                unpaid_count_2 = cursor.fetchone()
+                debug_info['unpaid_via_lessons'] = unpaid_count_2['count'] if unpaid_count_2 else 0
+                
+                # Детали неоплаченных занятий
+                cursor.execute('''
+                SELECT 
+                    l.id as lesson_id,
+                    l.lesson_date,
+                    l.price,
+                    s.full_name as student_name,
+                    t.full_name as tutor_name,
+                    lr.lesson_paid,
+                    lr.lesson_held
+                FROM lessons l
+                JOIN students s ON l.student_id = s.id
+                JOIN tutors t ON l.tutor_id = t.id
+                LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND lr.student_id = s.id
+                WHERE s.parent_telegram_id = ?
+                AND l.status = 'completed'
+                ORDER BY l.lesson_date DESC
+                ''', (parent_telegram_id,))
+                
+                all_lessons = cursor.fetchall()
+                debug_info['all_lessons_count'] = len(all_lessons)
+                
+                for lesson in all_lessons:
+                    lesson_info = dict(lesson)
+                    debug_info['unpaid_lessons_details'].append(lesson_info)
+                
+                return debug_info
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка в debug_parent_connections: {e}")
+            return {'error': str(e)}
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

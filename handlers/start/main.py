@@ -16,7 +16,9 @@ async def handle_start(message: Message):
     
     if len(message.text.split()) > 1:
         # Это deep link - обрабатываем приглашения
-        await handle_deep_link(message)
-    else:
-        # Обычная команда /start
-        await show_welcome_message(message)
+        is_deep_link_processed = await handle_deep_link(message)
+        if is_deep_link_processed:
+            return  # ⬅️ ВАЖНО: завершаем выполнение если deep link обработан
+    
+    # Обычная команда /start (или нераспознанный deep link)
+    await show_welcome_message(message)

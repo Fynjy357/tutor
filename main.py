@@ -97,7 +97,7 @@ class BotApp:
         self.dp = None
         self.notification_manager = None
         self.lesson_report_handlers = None
-        self.reminder_scheduler = None  # ← ДОБАВЛЕНО
+        self.reminder_scheduler = None
         self.tasks = []
         self.is_running = False
 

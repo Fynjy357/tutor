@@ -73,7 +73,7 @@ async def handle_deep_link(message: types.Message):
     
     if len(args) < 2:
         await show_welcome_message(message)
-        return
+        return False
         
     deep_link_args = args[1]
     
@@ -83,12 +83,15 @@ async def handle_deep_link(message: types.Message):
     # Обрабатываем пригласительные ссылки
     if deep_link_args.startswith(('student_', 'parent_')):
         await process_invitation_link(message, deep_link_args)
+        return True
    # Обрабатываем реферальные ссылки
     elif deep_link_args.startswith('ref_'):
         await process_referral_link(message, deep_link_args)
+        return True
     else:
         logger.info("Неизвестный формат deep link")
         await show_welcome_message(message)
+        return False
 
 async def process_invitation_link(message: types.Message, deep_link_args: str):
     """Обработка пригласительной ссылки"""
@@ -114,7 +117,7 @@ async def process_invitation_link(message: types.Message, deep_link_args: str):
             await message.answer("❌ Неверная ссылка приглашения.")
             return
         
-        # Находим ученика по токену (с проверкой, что токен еще действителен)
+        # Находим ученика по токену
         student = db.get_student_by_token(token, invite_type)
         if not student:
             await message.answer(
@@ -123,7 +126,7 @@ async def process_invitation_link(message: types.Message, deep_link_args: str):
             )
             return
         
-        # Проверяем, не привязан ли уже аккаунт этого типа
+        # ПРАВИЛЬНАЯ ПРОВЕРКА: используем фактические названия полей из таблицы students
         if invite_type == 'student' and student.get('student_telegram_id'):
             await message.answer(
                 "❌ У ученика уже привязан Telegram аккаунт!\n"
@@ -137,7 +140,7 @@ async def process_invitation_link(message: types.Message, deep_link_args: str):
             )
             return
         
-        # Привязываем Telegram аккаунт с определением часового пояса
+        # Привязываем Telegram аккаунт
         success, role, tutor_message, user_timezone = await link_telegram_account(
             message, student, invite_type
         )
@@ -145,12 +148,15 @@ async def process_invitation_link(message: types.Message, deep_link_args: str):
         if success:
             await send_success_response(message, student, role, user_timezone)
             await notify_tutor(message, student, tutor_message)
+            return  # ✅ ВАЖНО: завершаем после успешной обработки
         else:
             await send_error_response(message)
+            return
             
     except Exception as e:
         logger.error(f"Ошибка в обработке deep link: {e}")
         await message.answer("❌ Произошла ошибка при обработке приглашения.")
+        return
 
 async def link_telegram_account(message: types.Message, student: dict, invite_type: str):
     """Привязка Telegram аккаунта к ученику с определением часового пояса"""
@@ -170,6 +176,19 @@ async def link_telegram_account(message: types.Message, student: dict, invite_ty
             'student',
             user_timezone
         )
+        
+        # ✅ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ В MAIN_STUDENTS
+        if success:
+            db.add_student_to_main_table(
+                student_id=student['id'],
+                full_name=student['full_name'],
+                phone=student.get('phone', ''),
+                telegram_id=message.from_user.id,
+                username=username,
+                timezone=user_timezone,
+                tutor_id=student['tutor_id']
+            )
+        
         role = "ученик"
         tutor_message = f"✅ Ученик {student['full_name']} привязал свой Telegram аккаунт!\nЧасовой пояс: {timezone_name}"
     else:
@@ -180,6 +199,17 @@ async def link_telegram_account(message: types.Message, student: dict, invite_ty
             'parent',
             user_timezone
         )
+        
+        # ✅ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ В MAIN_PARENTS
+        if success:
+            db.add_parent_to_main_table(
+                full_name=student['full_name'],
+                phone=student.get('parent_phone', student.get('phone', '')),
+                telegram_id=message.from_user.id,
+                username=username,
+                timezone=user_timezone
+            )
+        
         role = "родитель"
         tutor_message = f"✅ Родитель ученика {student['full_name']} привязал свой Telegram аккаунт!\nЧасовой пояс: {timezone_name}"
     

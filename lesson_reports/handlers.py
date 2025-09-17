@@ -335,31 +335,30 @@ class LessonReportHandlers:
             await callback.message.edit_text("❌ Групповое занятие не найдено")
             return
         
-        # Получаем учеников группы из таблицы lessons
+        # Получаем ВСЕ уроки этой группы на эту дату с их ID
         with self.db.get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('''
-            SELECT DISTINCT s.id, s.full_name 
+            SELECT l.id as lesson_id, s.id as student_id, s.full_name 
             FROM lessons l
             JOIN students s ON l.student_id = s.id
             WHERE l.group_id = ? AND l.lesson_date = ?
             ''', (lesson['group_id'], lesson['lesson_date']))
-            students = [dict(row) for row in cursor.fetchall()]
+            student_lessons = [dict(row) for row in cursor.fetchall()]
         
-        logger.info(f"👥 Учеников в группе: {len(students)}")
+        logger.info(f"👥 Уроков в группе: {len(student_lessons)}")
         
-        if not students:
+        if not student_lessons:
             await callback.message.edit_text("❌ В группе нет учеников")
             return
         
         await state.update_data(
-            report_lesson_id=lesson_id,
             report_group_id=lesson['group_id'],
-            report_lesson_date=lesson['lesson_date'],  # Добавляем дату занятия
+            report_lesson_date=lesson['lesson_date'],
             report_type='group',
             current_student_index=0,
-            group_students=students
+            group_student_lessons=student_lessons  # Теперь храним список уроков с их ID
         )
         
         keyboard = InlineKeyboardBuilder()
@@ -368,7 +367,7 @@ class LessonReportHandlers:
         
         await callback.message.edit_text(
             f"📝 Отчет по групповому занятию '{lesson.get('group_name', 'Группа')}'\n\n"
-            f"👥 Учеников: {len(students)}\n\n"
+            f"👥 Учеников: {len(student_lessons)}\n\n"
             "1. Занятие состоялось?",
             reply_markup=keyboard.as_markup()
         )
@@ -379,12 +378,16 @@ class LessonReportHandlers:
         """Обрабатывает ответ о проведении группового занятия"""
         lesson_held = callback.data == "group_held_yes"
         data = await state.get_data()
-        lesson_id = data['report_lesson_id']
-        students = data['group_students']
+        student_lessons = data['group_student_lessons']
         
         if not lesson_held:
-            for student in students:
-                self.db.save_lesson_report(lesson_id, student['id'], lesson_held=False)
+            # Для всех уроков группы сохраняем, что занятие не состоялось
+            for student_lesson in student_lessons:
+                self.db.save_lesson_report(
+                    student_lesson['lesson_id'],  # Используем индивидуальный lesson_id
+                    student_lesson['student_id'], 
+                    lesson_held=False
+                )
             
             await callback.message.edit_text(
                 "✅ Отчет сохранен: Занятие не состоялось"
@@ -392,20 +395,20 @@ class LessonReportHandlers:
             await state.clear()
             return
         
-        if not students:
+        if not student_lessons:
             await callback.message.edit_text("❌ В группе нет учеников")
             await state.clear()
             return
         
         await state.update_data(current_student_index=0)
-        student = students[0]
+        student_lesson = student_lessons[0]
         
         keyboard = InlineKeyboardBuilder()
-        keyboard.button(text="✅ Был", callback_data=f"attend_yes:{student['id']}")
-        keyboard.button(text="❌ Не был", callback_data=f"attend_no:{student['id']}")
+        keyboard.button(text="✅ Был", callback_data=f"attend_yes:{student_lesson['student_id']}:{student_lesson['lesson_id']}")
+        keyboard.button(text="❌ Не был", callback_data=f"attend_no:{student_lesson['student_id']}:{student_lesson['lesson_id']}")
         
         await callback.message.edit_text(
-            f"👤 Ученик 1: {student['full_name']}\n\n"
+            f"👤 Ученик 1: {student_lesson['full_name']}\n\n"
             "2. Был на занятии?",
             reply_markup=keyboard.as_markup()
         )
@@ -417,9 +420,7 @@ class LessonReportHandlers:
         data_parts = callback.data.split(':')
         attended = data_parts[0] == "attend_yes"
         student_id = int(data_parts[1])
-        
-        state_data = await state.get_data()
-        lesson_id = state_data['report_lesson_id']
+        lesson_id = int(data_parts[2])  # Получаем индивидуальный lesson_id
         
         self.db.save_lesson_report(lesson_id, student_id, lesson_held=attended)
         
@@ -427,19 +428,21 @@ class LessonReportHandlers:
             await self.next_group_student(callback, state)
             return
         
-        students = state_data['group_students']
-        student = next((s for s in students if s['id'] == student_id), None)
-        if not student:
+        state_data = await state.get_data()
+        student_lessons = state_data['group_student_lessons']
+        student_lesson = next((s for s in student_lessons if s['student_id'] == student_id), None)
+        
+        if not student_lesson:
             await callback.message.edit_text("❌ Ошибка: ученик не найден")
             await state.clear()
             return
         
         keyboard = InlineKeyboardBuilder()
-        keyboard.button(text="✅ Оплачено", callback_data=f"paid_yes:{student_id}")
-        keyboard.button(text="❌ Не оплачено", callback_data=f"paid_no:{student_id}")
+        keyboard.button(text="✅ Оплачено", callback_data=f"paid_yes:{student_id}:{lesson_id}")
+        keyboard.button(text="❌ Не оплачено", callback_data=f"paid_no:{student_id}:{lesson_id}")
         
         await callback.message.edit_text(
-            f"👤 {student['full_name']}\n\n"
+            f"👤 {student_lesson['full_name']}\n\n"
             "3. Занятие оплачено?",
             reply_markup=keyboard.as_markup()
         )
@@ -451,25 +454,25 @@ class LessonReportHandlers:
         data_parts = callback.data.split(':')
         paid = data_parts[0] == "paid_yes"
         student_id = int(data_parts[1])
-        
-        state_data = await state.get_data()
-        lesson_id = state_data['report_lesson_id']
+        lesson_id = int(data_parts[2])  # Получаем индивидуальный lesson_id
         
         self.db.save_lesson_report(lesson_id, student_id, lesson_paid=paid)
         
-        students = state_data['group_students']
-        student = next((s for s in students if s['id'] == student_id), None)
-        if not student:
+        state_data = await state.get_data()
+        student_lessons = state_data['group_student_lessons']
+        student_lesson = next((s for s in student_lessons if s['student_id'] == student_id), None)
+        
+        if not student_lesson:
             await callback.message.edit_text("❌ Ошибка: ученик не найден")
             await state.clear()
             return
         
         keyboard = InlineKeyboardBuilder()
-        keyboard.button(text="✅ Выполнена", callback_data=f"homework_yes:{student_id}")
-        keyboard.button(text="❌ Не выполнена", callback_data=f"homework_no:{student_id}")
+        keyboard.button(text="✅ Выполнена", callback_data=f"homework_yes:{student_id}:{lesson_id}")
+        keyboard.button(text="❌ Не выполнена", callback_data=f"homework_no:{student_id}:{lesson_id}")
         
         await callback.message.edit_text(
-            f"👤 {student['full_name']}\n\n"
+            f"👤 {student_lesson['full_name']}\n\n"
             "4. Домашняя работа выполнена?",
             reply_markup=keyboard.as_markup()
         )
@@ -481,23 +484,26 @@ class LessonReportHandlers:
         data_parts = callback.data.split(':')
         homework_done = data_parts[0] == "homework_yes"
         student_id = int(data_parts[1])
-        
-        state_data = await state.get_data()
-        lesson_id = state_data['report_lesson_id']
+        lesson_id = int(data_parts[2])  # Получаем индивидуальный lesson_id
         
         self.db.save_lesson_report(lesson_id, student_id, homework_done=homework_done)
         
-        await state.update_data(current_student_id=student_id)
+        await state.update_data(
+            current_student_id=student_id,
+            current_lesson_id=lesson_id  # Сохраняем lesson_id для использования в performance
+        )
         
-        students = state_data['group_students']
-        student = next((s for s in students if s['id'] == student_id), None)
-        if not student:
+        state_data = await state.get_data()
+        student_lessons = state_data['group_student_lessons']
+        student_lesson = next((s for s in student_lessons if s['student_id'] == student_id), None)
+        
+        if not student_lesson:
             await callback.message.edit_text("❌ Ошибка: ученик не найден")
             await state.clear()
             return
         
         await callback.message.edit_text(
-            f"👤 {student['full_name']}\n\n"
+            f"👤 {student_lesson['full_name']}\n\n"
             "5. Как ученик работал на занятии?\n\n"
             "Опишите работу ученика:"
         )
@@ -509,7 +515,7 @@ class LessonReportHandlers:
         performance = message.text
         state_data = await state.get_data()
         student_id = state_data['current_student_id']
-        lesson_id = state_data['report_lesson_id']
+        lesson_id = state_data['current_lesson_id']  # Используем сохраненный lesson_id
         
         self.db.save_lesson_report(lesson_id, student_id, student_performance=performance)
         
@@ -518,56 +524,68 @@ class LessonReportHandlers:
     async def next_group_student(self, update, state: FSMContext):
         """Переходит к следующему ученику"""
         state_data = await state.get_data()
-        students = state_data['group_students']
+        student_lessons = state_data['group_student_lessons']
         current_index = state_data['current_student_index']
         
         current_index += 1
         await state.update_data(current_student_index=current_index)
         
-        if current_index >= len(students):
-            lesson = self.db.get_lesson_by_id(state_data['report_lesson_id'])
-            group_name = lesson.get('group_name', 'Группа') if lesson else 'Группа'
+        if current_index >= len(student_lessons):
+            # Получаем информацию о группе для завершающего сообщения
+            with self.db.get_connection() as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT g.name FROM groups g WHERE g.id = ?
+                ''', (state_data['report_group_id'],))
+                group_info = cursor.fetchone()
+            
+            group_name = group_info['name'] if group_info else 'Группа'
             
             if isinstance(update, Message):
                 await update.answer(
                     f"✅ Отчет по групповому занятию '{group_name}' завершен!\n\n"
-                    f"Отчеты сохранены для всех {len(students)} учеников"
+                    f"Отчеты сохранены для всех {len(student_lessons)} учеников"
                 )
             else:
                 await update.message.edit_text(
                     f"✅ Отчет по групповому занятию '{group_name}' завершен!\n\n"
-                    f"Отчеты сохранены для всех {len(students)} учеников"
+                    f"Отчеты сохранены для всех {len(student_lessons)} учеников"
                 )
 
-            # Отправляем отчеты всем родителям через отдельный модуль
-            student_ids = [student['id'] for student in students]
-            await self.parent_reports.send_reports_to_all_parents(
-                update.bot, state_data['report_lesson_id'], student_ids
-            )
+            # Отправляем отчеты всем родителям по одному
+            for student_lesson in student_lessons:
+                try:
+                    await self.parent_reports.send_report_to_parent(
+                        update.bot, student_lesson['lesson_id'], student_lesson['student_id']
+                    )
+                except Exception as e:
+                    logger.error(f"❌ Ошибка при отправке отчета для ученика {student_lesson['student_id']}: {e}")
             
             await state.clear()
             return
         
-        student = students[current_index]
+        student_lesson = student_lessons[current_index]
         
         keyboard = InlineKeyboardBuilder()
-        keyboard.button(text="✅ Был", callback_data=f"attend_yes:{student['id']}")
-        keyboard.button(text="❌ Не был", callback_data=f"attend_no:{student['id']}")
+        keyboard.button(text="✅ Был", callback_data=f"attend_yes:{student_lesson['student_id']}:{student_lesson['lesson_id']}")
+        keyboard.button(text="❌ Не был", callback_data=f"attend_no:{student_lesson['student_id']}:{student_lesson['lesson_id']}")
         
         if isinstance(update, Message):
             await update.answer(
-                f"👤 Ученик {current_index + 1}: {student['full_name']}\n\n"
+                f"👤 Ученик {current_index + 1}: {student_lesson['full_name']}\n\n"
                 "2. Был на занятии?",
                 reply_markup=keyboard.as_markup()
             )
         else:
             await update.message.edit_text(
-                f"👤 Ученик {current_index + 1}: {student['full_name']}\n\n"
+                f"👤 Ученик {current_index + 1}: {student_lesson['full_name']}\n\n"
                 "2. Был на занятии?",
                 reply_markup=keyboard.as_markup()
             )
         
         await state.set_state(GroupLessonStates.STUDENT_ATTENDANCE)
+
 
     async def cancel_report(self, message: Message, state: FSMContext):
         """Отменяет заполнение отчета"""
