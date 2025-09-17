@@ -25282,3 +25282,807 @@ AttributeError: 'Database' object has no attribute 'get_tutors_for_student'
 2025-09-17 17:23:43 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
 2025-09-17 17:23:43 - __main__ - INFO - Планировщик напоминаний остановлен
 2025-09-17 17:23:43 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 22:50:51 - __main__ - INFO - Запуск приложения...
+2025-09-17 22:50:51 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 22:50:51 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 22:50:51 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 22:50:51 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 22:50:51 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 22:50:51 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 22:50:52 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 22:50:52 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 22:50:52 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 22:50:52 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 22:50:52 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 22:50:52 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 22:50:52 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 22:50:52 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 22:50:52 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 22:50:52 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 22:50:52 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 22:50:52 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 22:50:52 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 22:50:52 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 22:50:52 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 22:50:52 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 22:50:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:50:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:50:52 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 22:50:52 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 4 напоминаний для прошедших занятий
+2025-09-17 22:50:52 - database - INFO - 🕒 UTC время в БД: 2025-09-17 19:50:52
+2025-09-17 22:50:52 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 22:50:52
+2025-09-17 22:51:14 - handlers.start.main - INFO - Обработчик /start вызван для пользователя 7516387188
+2025-09-17 22:51:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:51:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:52:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:52:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - === ОБРАБОТЧИК КОНТАКТА ВЫЗВАН ===
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Текущее состояние: RegistrationStates:waiting_for_phone
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Контакт получен: phone_number='79183567075' first_name='Ivan' last_name=None user_id=7516387188 vcard=None
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Номер телефона: 79183567075
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Исходный номер: '79183567075'
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Очищенный номер: '79183567075'
+2025-09-17 22:53:10 - handlers.registration.messages - INFO - Форматированный номер: '+79183567075'
+2025-09-17 22:53:10 - handlers.registration.utils - INFO - Валидация номера: '+79183567075'
+2025-09-17 22:53:10 - handlers.registration.utils - INFO - Цифры номера: 79183567075 (длина: 11)
+2025-09-17 22:53:10 - handlers.registration.utils - INFO - Номер прошел валидацию: 79183567075
+2025-09-17 22:53:11 - handlers.registration.messages - INFO - === УСПЕШНО ОБРАБОТАН КОНТАКТ ===
+2025-09-17 22:53:16 - handlers.registration.callbacks - INFO - Текущее состояние: RegistrationStates:confirmation
+2025-09-17 22:53:16 - handlers.registration.callbacks - INFO - Данные состояния: {'registration_messages': [2294], 'name': 'Рыбникова Ольга Юрьевна', 'phone': '+79183567075'}
+2025-09-17 22:53:16 - database - INFO - Добавлен репетитор: Рыбникова Ольга Юрьевна
+2025-09-17 22:53:16 - handlers.registration.callbacks - INFO - Репетитор добавлен с ID: 14
+2025-09-17 22:53:16 - database - INFO - База данных инициализирована
+2025-09-17 22:53:16 - payment.models - INFO - Создан бесплатный пробный период для пользователя 7516387188
+2025-09-17 22:53:16 - handlers.registration.callbacks - INFO - Бесплатный пробный период создан для пользователя 7516387188
+2025-09-17 22:53:25 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 ADD_LESSON START: User 7516387188, data: add_lesson
+2025-09-17 22:53:25 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Current state before: None
+2025-09-17 22:53:25 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 State set to: AddLessonStates:choosing_lesson_type
+2025-09-17 22:53:26 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 ADD_LESSON screen shown successfully
+2025-09-17 22:53:28 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 INDIVIDUAL LESSON TYPE: User 7516387188, data: lesson_type_individual
+2025-09-17 22:53:28 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Current state: AddLessonStates:choosing_lesson_type
+2025-09-17 22:53:28 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 Lesson type set to: individual
+2025-09-17 22:53:28 - handlers.schedule.add_lesson.type_lesson - INFO - 🔥 State changed to: AddLessonStates:choosing_frequency
+2025-09-17 22:53:30 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 FREQUENCY SELECTED: User 7516387188, data: frequency_regular
+2025-09-17 22:53:30 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 Current state: AddLessonStates:choosing_frequency
+2025-09-17 22:53:30 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - 🔥 Frequency set to: regular
+2025-09-17 22:53:38 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - Processing time. Lesson type: individual, Frequency: regular
+2025-09-17 22:53:38 - handlers.schedule.add_lesson.frequency_of_lesson - INFO - Time processed: 12:00
+2025-09-17 22:53:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:53:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:54:15 - database - INFO - Добавлен ученик: Юля
+2025-09-17 22:54:33 - database - INFO - База данных инициализирована
+2025-09-17 22:54:33 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000001A4D9A722C0>
+2025-09-17 22:54:33 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 22:54:33.650719
+2025-09-17 22:54:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:54:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:55:52 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 22:55:52 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 22:55:52 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 22:55:52 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 22:55:52 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 22:55:52 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 22:55:52 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 22:55:52 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 22:55:52 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 22:55:52 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 22:55:52 - database - INFO - 🕒 UTC время в БД: 2025-09-17 19:55:52
+2025-09-17 22:55:52 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 22:55:52
+2025-09-17 22:55:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:55:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:56:52 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:56:52 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:57:16 - aiogram.event - ERROR - Cause exception while process update id=819305520 by bot id=7894609390
+TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\payment\middleware.py", line 53, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\handlers\students\handlers.py", line 51, in students_list
+    await callback_query.answer()
+  File "D:\tutor\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 185, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+2025-09-17 22:57:36 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 22:57:36 - __main__ - INFO - Завершение работы бота...
+2025-09-17 22:57:36 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 22:57:36 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 22:57:36 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 22:57:36 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 22:57:36 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 22:57:36 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 22:57:39 - __main__ - INFO - Запуск приложения...
+2025-09-17 22:57:39 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 22:57:39 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 22:57:39 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 22:57:39 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 22:57:39 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 22:57:39 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 22:57:39 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 22:57:39 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 22:57:39 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 22:57:39 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 22:57:39 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 22:57:39 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 22:57:39 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 22:57:39 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 22:57:39 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 22:57:39 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 22:57:39 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 22:57:39 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 22:57:39 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 22:57:39 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 22:57:39 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 22:57:39 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 22:57:39 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:57:39 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:57:39 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 22:57:39 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 22:57:39 - database - INFO - 🕒 UTC время в БД: 2025-09-17 19:57:39
+2025-09-17 22:57:39 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 22:57:39
+2025-09-17 22:57:50 - handlers.start.main - INFO - Обработчик /start вызван для пользователя 7516387188
+2025-09-17 22:58:00 - aiogram.event - ERROR - Cause exception while process update id=819305521 by bot id=7894609390
+TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\payment\middleware.py", line 53, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\handlers\students\handlers.py", line 51, in students_list
+    await callback_query.answer()
+  File "D:\tutor\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 185, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+2025-09-17 22:58:03 - aiogram.event - ERROR - Cause exception while process update id=819305524 by bot id=7894609390
+TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\payment\middleware.py", line 53, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\handlers\students\handlers.py", line 51, in students_list
+    await callback_query.answer()
+  File "D:\tutor\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 185, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+2025-09-17 22:58:03 - aiogram.event - ERROR - Cause exception while process update id=819305523 by bot id=7894609390
+TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\payment\middleware.py", line 53, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\handlers\students\handlers.py", line 51, in students_list
+    await callback_query.answer()
+  File "D:\tutor\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 185, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+2025-09-17 22:58:29 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 22:58:29 - database - INFO - База данных инициализирована
+2025-09-17 22:58:29 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000001FF27964100>
+2025-09-17 22:58:29 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 22:58:29.307011
+2025-09-17 22:58:29 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 22:58:39 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:58:39 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 22:58:47 - database - INFO - База данных инициализирована
+2025-09-17 22:59:39 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 22:59:39 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:00:02 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:00:02 - database - INFO - База данных инициализирована
+2025-09-17 23:00:02 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000001FF27966140>
+2025-09-17 23:00:02 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:00:02.384762
+2025-09-17 23:00:02 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:00:06 - database - INFO - База данных инициализирована
+2025-09-17 23:00:08 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:00:08 - database - INFO - База данных инициализирована
+2025-09-17 23:00:08 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000001FF27966B60>
+2025-09-17 23:00:08 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:00:08.219082
+2025-09-17 23:00:08 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:00:14 - database - INFO - База данных инициализирована
+2025-09-17 23:00:15 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:00:15 - database - INFO - База данных инициализирована
+2025-09-17 23:00:15 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000001FF27964100>
+2025-09-17 23:00:15 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:00:15.686696
+2025-09-17 23:00:15 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:00:34 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 23:00:34 - __main__ - INFO - Завершение работы бота...
+2025-09-17 23:00:34 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 23:00:34 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 23:00:34 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 23:00:34 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 23:00:34 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 23:00:34 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 23:00:37 - __main__ - INFO - Запуск приложения...
+2025-09-17 23:00:37 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 23:00:37 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 23:00:37 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 23:00:37 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 23:00:37 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 23:00:37 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 23:00:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 23:00:37 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 23:00:37 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 23:00:37 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 23:00:37 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 23:00:37 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 23:00:37 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 23:00:37 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 23:00:37 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 23:00:37 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 23:00:37 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 23:00:37 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 23:00:37 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 23:00:37 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 23:00:37 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 23:00:37 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 23:00:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:00:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:00:37 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 23:00:37 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 23:00:37 - database - INFO - 🕒 UTC время в БД: 2025-09-17 20:00:37
+2025-09-17 23:00:37 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 23:00:37
+2025-09-17 23:00:49 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:00:50 - database - INFO - База данных инициализирована
+2025-09-17 23:00:50 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x00000263702A7640>
+2025-09-17 23:00:50 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:00:50.003865
+2025-09-17 23:00:50 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:00:51 - database - INFO - База данных инициализирована
+2025-09-17 23:01:20 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 23:01:20 - __main__ - INFO - Завершение работы бота...
+2025-09-17 23:01:20 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 23:01:20 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 23:01:20 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 23:01:20 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 23:01:20 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 23:01:20 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 23:01:23 - __main__ - INFO - Запуск приложения...
+2025-09-17 23:01:24 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 23:01:24 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 23:01:24 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 23:01:24 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 23:01:24 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 23:01:24 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 23:01:24 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 23:01:24 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 23:01:24 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 23:01:24 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 23:01:24 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 23:01:24 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 23:01:24 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 23:01:24 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 23:01:24 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 23:01:24 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 23:01:24 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 23:01:24 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 23:01:24 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 23:01:24 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 23:01:24 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 23:01:24 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 23:01:24 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:01:24 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:01:24 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 23:01:24 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 23:01:24 - database - INFO - 🕒 UTC время в БД: 2025-09-17 20:01:24
+2025-09-17 23:01:24 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 23:01:24
+2025-09-17 23:01:57 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:01:57 - database - INFO - База данных инициализирована
+2025-09-17 23:01:57 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000017BBF093670>
+2025-09-17 23:01:57 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:01:57.779601
+2025-09-17 23:01:57 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:02:04 - database - INFO - База данных инициализирована
+2025-09-17 23:02:24 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:02:24 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:03:05 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:03:05 - database - INFO - База данных инициализирована
+2025-09-17 23:03:05 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000017BBF158A60>
+2025-09-17 23:03:05 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:03:05.098424
+2025-09-17 23:03:05 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:03:24 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:03:24 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:03:33 - database - INFO - База данных инициализирована
+2025-09-17 23:04:24 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:04:24 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:04:38 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:04:38 - database - INFO - База данных инициализирована
+2025-09-17 23:04:38 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000017BBF159A50>
+2025-09-17 23:04:38 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:04:38.140334
+2025-09-17 23:04:38 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:04:50 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 23:04:50 - __main__ - INFO - Завершение работы бота...
+2025-09-17 23:04:50 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 23:04:50 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 23:04:50 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 23:04:50 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 23:04:50 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 23:04:50 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 23:04:54 - __main__ - INFO - Запуск приложения...
+2025-09-17 23:04:54 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 23:04:54 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 23:04:54 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 23:04:54 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 23:04:54 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 23:04:54 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 23:04:54 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 23:04:54 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 23:04:54 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 23:04:54 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 23:04:54 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 23:04:54 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 23:04:54 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 23:04:54 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 23:04:54 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 23:04:54 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 23:04:54 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 23:04:54 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 23:04:54 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 23:04:54 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 23:04:54 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 23:04:54 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 23:04:54 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:04:54 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:04:54 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 23:04:54 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 23:04:54 - database - INFO - 🕒 UTC время в БД: 2025-09-17 20:04:54
+2025-09-17 23:04:54 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 23:04:54
+2025-09-17 23:04:55 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:04:55 - database - INFO - База данных инициализирована
+2025-09-17 23:04:55 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000015B364B3A60>
+2025-09-17 23:04:55 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:04:55.117089
+2025-09-17 23:04:55 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:04:56 - database - INFO - База данных инициализирована
+2025-09-17 23:05:18 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 23:05:18 - __main__ - INFO - Завершение работы бота...
+2025-09-17 23:05:18 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 23:05:18 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 23:05:18 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 23:05:18 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 23:05:18 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 23:05:18 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 23:05:22 - __main__ - INFO - Запуск приложения...
+2025-09-17 23:05:22 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 23:05:22 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 23:05:22 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-17 23:05:22 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-17 23:05:22 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 23:05:22 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 23:05:22 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 23:05:22 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 23:05:22 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 23:05:22 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 23:05:22 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 23:05:22 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 23:05:22 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 23:05:22 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 23:05:22 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 23:05:22 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 23:05:22 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 23:05:22 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 23:05:22 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 23:05:22 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 23:05:22 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 23:05:22 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 23:05:22 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 23:05:22 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 23:05:22 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 23:05:22 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 23:05:22 - database - INFO - 🕒 UTC время в БД: 2025-09-17 20:05:22
+2025-09-17 23:05:22 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 23:05:22
+2025-09-17 23:05:23 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 23:05:23 - database - INFO - База данных инициализирована
+2025-09-17 23:05:23 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x000002739609A020>
+2025-09-17 23:05:23 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 22:53:16, Now: 2025-09-17 23:05:23.509241
+2025-09-17 23:05:23 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 22:53:16', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 23:05:25 - database - INFO - База данных инициализирована
+2025-09-17 23:05:32 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 23:05:32 - __main__ - INFO - Завершение работы бота...
+2025-09-17 23:05:32 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 23:05:32 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 23:05:32 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 23:05:32 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 23:05:32 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 23:05:32 - __main__ - INFO - Бот успешно остановлен

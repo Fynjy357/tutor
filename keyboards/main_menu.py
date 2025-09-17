@@ -33,7 +33,7 @@ def get_main_menu_keyboard():
             callback_data="contact_developers"
         ),
         types.InlineKeyboardButton(
-            text="⚙️ Настройки",
+            text="💎 Премиум",
             callback_data="settings"
         )
     )
