@@ -15,6 +15,9 @@ from keyboards.main_menu import get_main_menu_keyboard
 from handlers.registration.utils import validate_phone_number, handle_invalid_phone
 from database import db
 
+from payment.models import PaymentManager  # Добавьте эту строку
+import time  # Добавьте эту строку для генерации payment_id
+
 router = Router()
 logger = logging.getLogger(__name__)
 
@@ -68,6 +71,15 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, b
         
         logger.info(f"Репетитор добавлен с ID: {tutor_id}")
         
+        # ✅ СОЗДАЕМ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ПОСЛЕ РЕГИСТРАЦИИ
+        user_id = callback_query.from_user.id
+        trial_created = await PaymentManager.create_free_trial(user_id)
+        
+        if trial_created:
+            logger.info(f"Бесплатный пробный период создан для пользователя {user_id}")
+        else:
+            logger.info(f"Пробный период не создан для пользователя {user_id} (уже есть подписка или использован ранее)")
+        
         # Получаем данные репетитора из базы
         tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
         
@@ -77,6 +89,7 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, b
             )
             await state.clear()
             return
+       
         
         # Получаем расписание на сегодня
         schedule_text = await get_today_schedule_text(tutor_id)
@@ -86,6 +99,11 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, b
             tutor_name=tutor[2],  # Имя репетитора
             schedule_text=schedule_text
         )
+
+        # ✅ ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ПРОБНОМ ПЕРИОДЕ ЕСЛИ ОН АКТИВИРОВАН
+        if trial_created:
+            welcome_text += "\n\n🎁 <b>Вам активирован бесплатный пробный период на 7 дней!</b>"
+
         
         # Удаляем сообщение с подтверждением
         try:

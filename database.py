@@ -1673,7 +1673,20 @@ class Database:
                 INSERT INTO payments (user_id, payment_id, tariff_name, amount)
                 VALUES (?, ?, ?, ?)
                 ''', (user_id, payment_id, tariff_name, amount))
-                
+                                # Создаем таблицу для платежей если ее нет
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS payments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    payment_id TEXT UNIQUE NOT NULL,
+                    tariff_name TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    status TEXT DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES tutors (telegram_id)
+                )
+                ''')
                 conn.commit()
                 logger.info(f"Payment saved: user_id={user_id}, payment_id={payment_id}")
                 return True

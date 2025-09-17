@@ -25084,3 +25084,201 @@ AttributeError: 'Database' object has no attribute 'get_tutors_for_student'
 2025-09-17 16:54:31 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
 2025-09-17 16:54:31 - __main__ - INFO - Планировщик напоминаний остановлен
 2025-09-17 16:54:31 - __main__ - INFO - Бот успешно остановлен
+2025-09-17 17:19:51 - __main__ - INFO - Запуск приложения...
+2025-09-17 17:19:51 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-17 17:19:51 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-17 17:19:51 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #34: '2025-09-17 18:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #35: '2025-09-17 18:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #36: '2025-09-17 18:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #37: '2025-09-17 18:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #21: '2025-09-19 16:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #22: '2025-09-19 16:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #23: '2025-09-19 16:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #31: '2025-09-19 20:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-17 17:19:51 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-17 17:19:51 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-17 17:19:51 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-17 17:19:51 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-17 17:19:51 - __main__ - INFO - Бот успешно инициализирован
+2025-09-17 17:19:51 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-17 17:19:51 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-17 17:19:51 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-17 17:19:51 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-17 17:19:51 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-17 17:19:51 - notify.models - INFO -    📅 #34: Таисия - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    📅 #35: Василиса - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    📅 #36: Лиза - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    📅 #37: Катя - 2025-09-17 18:00:00 - статус: planned - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    📅 #110: Даша Т. - 2025-09-17 13:33:00 - статус: completed - TG: 
+2025-09-17 17:19:51 - notify.models - INFO - 👥 Ученики без telegram_id: 5
+2025-09-17 17:19:51 - notify.models - INFO -    ❌ #12: Таисия - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    ❌ #13: Василиса - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    ❌ #14: Лиза - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    ❌ #15: Катя - TG: None
+2025-09-17 17:19:51 - notify.models - INFO -    ❌ #8: Даша Т. - TG: 
+2025-09-17 17:19:51 - notify.models - INFO - 📨 Уже отправленные уведомления: 1
+2025-09-17 17:19:51 - notify.models - INFO -    📤 #110 - отправлено в 2025-09-17 10:31:35
+2025-09-17 17:19:51 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-17 17:19:51 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-17 17:19:51 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-17 17:19:51 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 17:19:51 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-17 17:19:51 - database - INFO - 🕒 UTC время в БД: 2025-09-17 14:19:51
+2025-09-17 17:19:51 - database - INFO - 🏠 Локальное время в БД: 2025-09-17 17:19:51
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - Найдено 4 занятий для напоминания
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - ✅ Групповое напоминание отправлено репетитору 1268260784 для группы #3
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - Помечено 16 занятий группы #3 как отправленные
+2025-09-17 17:19:51 - notify.notify_tutors.reminder_scheduler - INFO - ✅ Групповое напоминание отправлено для группы #3
+2025-09-17 17:19:51 - handlers.start.main - INFO - Обработчик /start вызван для пользователя 7516387188
+2025-09-17 17:20:32 - handlers.start.main - INFO - Обработчик /start вызван для пользователя 7516387188
+2025-09-17 17:20:51 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 17:20:51 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - === ОБРАБОТЧИК КОНТАКТА ВЫЗВАН ===
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Текущее состояние: RegistrationStates:waiting_for_phone
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Контакт получен: phone_number='79183567075' first_name='Ivan' last_name=None user_id=7516387188 vcard=None
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Номер телефона: 79183567075
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Исходный номер: '79183567075'
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Очищенный номер: '79183567075'
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - Форматированный номер: '+79183567075'
+2025-09-17 17:20:54 - handlers.registration.utils - INFO - Валидация номера: '+79183567075'
+2025-09-17 17:20:54 - handlers.registration.utils - INFO - Цифры номера: 79183567075 (длина: 11)
+2025-09-17 17:20:54 - handlers.registration.utils - INFO - Номер прошел валидацию: 79183567075
+2025-09-17 17:20:54 - handlers.registration.messages - INFO - === УСПЕШНО ОБРАБОТАН КОНТАКТ ===
+2025-09-17 17:20:56 - handlers.registration.callbacks - INFO - Текущее состояние: RegistrationStates:confirmation
+2025-09-17 17:20:56 - handlers.registration.callbacks - INFO - Данные состояния: {'registration_messages': [2286], 'name': 'Рыбникова ПА', 'phone': '+79183567075'}
+2025-09-17 17:20:56 - database - INFO - Добавлен репетитор: Рыбникова ПА
+2025-09-17 17:20:56 - handlers.registration.callbacks - INFO - Репетитор добавлен с ID: 13
+2025-09-17 17:20:56 - database - INFO - База данных инициализирована
+2025-09-17 17:20:56 - payment.models - INFO - Создан бесплатный пробный период для пользователя 7516387188
+2025-09-17 17:20:56 - handlers.registration.callbacks - INFO - Бесплатный пробный период создан для пользователя 7516387188
+2025-09-17 17:21:44 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 17:21:44 - database - INFO - База данных инициализирована
+2025-09-17 17:21:44 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000019CB0D597B0>
+2025-09-17 17:21:44 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 17:20:56, Now: 2025-09-17 17:21:44.729854
+2025-09-17 17:21:44 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 17:20:56', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 17:21:51 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 17:21:51 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 17:21:53 - database - INFO - База данных инициализирована
+2025-09-17 17:22:16 - payment.handlers - INFO - Settings handler called for user 7516387188
+2025-09-17 17:22:16 - database - INFO - База данных инициализирована
+2025-09-17 17:22:16 - payment.models - INFO - DEBUG: Payment query result for user 7516387188: <sqlite3.Row object at 0x0000019CB0D59150>
+2025-09-17 17:22:16 - payment.models - INFO - DEBUG: Valid until: 2025-09-24 17:20:56, Now: 2025-09-17 17:22:16.239877
+2025-09-17 17:22:16 - payment.handlers - INFO - Payment info for user 7516387188: {'is_active': True, 'valid_until': '2025-09-24 17:20:56', 'tariff': 'Бесплатный пробный период'}
+2025-09-17 17:22:51 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-17 17:22:51 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Начало создания платежа: user_id=7516387188, amount=120, tariff=1 месяц
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Форматированный телефон пользователя: +79183567075
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Сгенерирован Idempotence-Key: 7516387188_1 месяц_120_1758118980_9a7f7b86
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Данные для платежа: {
+  "amount": {
+    "value": "120.00",
+    "currency": "RUB"
+  },
+  "confirmation": {
+    "type": "redirect",
+    "return_url": "https://t.me/TutorPlanetBot"
+  },
+  "capture": true,
+  "description": "Оплата доступа к полному коду функционала в чат-боте @TutorPlanetBot на 1 месяц для пользователя 7516387188",
+  "receipt": {
+    "customer": {
+      "phone": "+79183567075"
+    },
+    "items": [
+      {
+        "description": "Доступ к функционалу бота (1 месяц)",
+        "quantity": "1.00",
+        "amount": {
+          "value": "120.00",
+          "currency": "RUB"
+        },
+        "vat_code": 1,
+        "payment_mode": "full_prepayment",
+        "payment_subject": "service"
+      }
+    ]
+  },
+  "metadata": {
+    "user_id": 7516387188,
+    "tariff": "1 месяц",
+    "days": 30
+  }
+}
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Заголовки: {'Content-Type': 'application/json', 'Authorization': 'Basic MTE2MzY1Mjp0ZXN0X2E5LTAyNzRKVDgwSmxFUkpzX19LQklaSGQ2czlvcWM0RTJjTXJ5SGVVQVk=', 'Idempotence-Key': '7516387188_1 месяц_120_1758118980_9a7f7b86'}
+2025-09-17 17:23:00 - payment.yookassa_integration - INFO - Отправка запроса к API ЮKassa...
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Статус ответа: 200
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Заголовки ответа: {'Server': 'Angie', 'Date': 'Wed, 17 Sep 2025 14:23:01 GMT', 'Content-Type': 'application/json;charset=UTF-8', 'Content-Length': '797', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=12', 'Signature': 'v1 305cd805 1 MGUCMDFEK49aBpuiX90MbM/882QWISz0HwULarNO65UUs/ER5ovCmJNby1N6htqbHEZU6QIxAIyGX6Ww2oue2UB8FHeH+1WYCWGjQcO85ZNB84ctjIHaDqid1Bl+DU4w9a1QDpoO+Q==', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'}
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Текст ответа: {
+  "id" : "305cd805-000f-5001-8000-175d2b12062f",
+  "status" : "pending",
+  "amount" : {
+    "value" : "120.00",
+    "currency" : "RUB"
+  },
+  "description" : "Оплата доступа к полному коду функционала в чат-боте @TutorPlanetBot на 1 месяц для пользователя 7516387188",
+  "recipient" : {
+    "account_id" : "1163652",
+    "gateway_id" : "2533617"
+  },
+  "created_at" : "2025-09-17T14:23:01.153Z",
+  "confirmation" : {
+    "type" : "redirect",
+    "confirmation_url" : "https://yoomoney.ru/checkout/payments/v2/contract?orderId=305cd805-000f-5001-8000-175d2b12062f"
+  },
+  "test" : true,
+  "paid" : false,
+  "refundable" : false,
+  "metadata" : {
+    "days" : "30",
+    "user_id" : "7516387188",
+    "tariff" : "1 месяц"
+  }
+}
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - JSON ответ: {
+  "id": "305cd805-000f-5001-8000-175d2b12062f",
+  "status": "pending",
+  "amount": {
+    "value": "120.00",
+    "currency": "RUB"
+  },
+  "description": "Оплата доступа к полному коду функционала в чат-боте @TutorPlanetBot на 1 месяц для пользователя 7516387188",
+  "recipient": {
+    "account_id": "1163652",
+    "gateway_id": "2533617"
+  },
+  "created_at": "2025-09-17T14:23:01.153Z",
+  "confirmation": {
+    "type": "redirect",
+    "confirmation_url": "https://yoomoney.ru/checkout/payments/v2/contract?orderId=305cd805-000f-5001-8000-175d2b12062f"
+  },
+  "test": true,
+  "paid": false,
+  "refundable": false,
+  "metadata": {
+    "days": "30",
+    "user_id": "7516387188",
+    "tariff": "1 месяц"
+  }
+}
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Confirmation URL: https://yoomoney.ru/checkout/payments/v2/contract?orderId=305cd805-000f-5001-8000-175d2b12062f
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Payment ID: 305cd805-000f-5001-8000-175d2b12062f
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Сохранение payment_id в базу данных...
+2025-09-17 17:23:01 - database - INFO - Payment saved: user_id=7516387188, payment_id=305cd805-000f-5001-8000-175d2b12062f
+2025-09-17 17:23:01 - payment.yookassa_integration - INFO - Результат сохранения: True
+2025-09-17 17:23:43 - __main__ - INFO - Получен сигнал остановки
+2025-09-17 17:23:43 - __main__ - INFO - Завершение работы бота...
+2025-09-17 17:23:43 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-17 17:23:43 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-17 17:23:43 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-17 17:23:43 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-17 17:23:43 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-17 17:23:43 - __main__ - INFO - Бот успешно остановлен

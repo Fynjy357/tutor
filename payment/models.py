@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import time
 from typing import Optional
 from database import Database
 import logging
@@ -177,3 +178,57 @@ class PaymentManager:
                     
         except Exception as e:
             logger.error(f"Debug error: {e}")
+
+    @staticmethod
+    async def create_free_trial(user_id: int) -> bool:
+        """Создает бесплатную пробную подписку на 7 дней"""
+        try:
+            db = Database()
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Проверяем, нет ли уже активной подписки
+                cursor.execute(
+                    """SELECT id FROM payments 
+                    WHERE user_id = ? AND status = 'succeeded' 
+                    AND valid_until > datetime('now')""",
+                    (user_id,)
+                )
+                existing_active = cursor.fetchone()
+                
+                if existing_active:
+                    logger.info(f"У пользователя {user_id} уже есть активная подписка, пробный период не создается")
+                    return False
+                
+                # Проверяем, не использовал ли уже пользователь пробный период
+                cursor.execute(
+                    """SELECT id FROM payments 
+                    WHERE user_id = ? AND tariff_name = 'Бесплатный пробный период'""",
+                    (user_id,)
+                )
+                existing_trial = cursor.fetchone()
+                
+                if existing_trial:
+                    logger.info(f"Пользователь {user_id} уже использовал пробный период")
+                    return False
+                
+                # Создаем запись о бесплатной подписке
+                valid_until = datetime.now() + timedelta(days=7)
+                payment_id = f"free_trial_{user_id}_{int(time.time())}"
+                
+                cursor.execute(
+                    """INSERT INTO payments 
+                    (user_id, payment_id, tariff_name, amount, status, 
+                    created_at, updated_at, valid_until)
+                    VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?)""",
+                    (user_id, payment_id, 'Бесплатный пробный период', 0, 'succeeded', 
+                    valid_until.strftime('%Y-%m-%d %H:%M:%S'))
+                )
+                
+                conn.commit()
+                logger.info(f"Создан бесплатный пробный период для пользователя {user_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Ошибка создания бесплатной подписки: {e}")
+            return False
