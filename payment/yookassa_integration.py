@@ -13,12 +13,9 @@ logger = logging.getLogger(__name__)
 
 class YooKassaManager:
     def __init__(self):
-        logger.info(f"Инициализация YooKassaManager: ShopID={YOOKASSA_SHOP_ID}")
         try:
             auth_string = f"{YOOKASSA_SHOP_ID}:{YOOKASSA_SECRET_KEY}"
-            logger.info(f"Auth string: {auth_string}")
             self.auth = base64.b64encode(auth_string.encode()).decode()
-            logger.info(f"Base64 auth: {self.auth}")
         except Exception as e:
             logger.error(f"Ошибка инициализации авторизации: {e}")
             raise
