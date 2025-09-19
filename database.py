@@ -26,6 +26,22 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
+            # соглашение о конфиденциальности и соглашение пользователя
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_consents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                telegram_id INTEGER NOT NULL,
+                ip_address TEXT NOT NULL,
+                document_type VARCHAR(50) NOT NULL,
+                document_version VARCHAR(20) NOT NULL,
+                accepted BOOLEAN NOT NULL DEFAULT FALSE,
+                accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (telegram_id) REFERENCES tutors (telegram_id)
+            )
+            ''')
+
+
             # Таблица пользователей (репетиторов)
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS tutors (
@@ -2497,6 +2513,7 @@ class Database:
         except Exception as e:
             logger.error(f"❌ Ошибка в debug_parent_connections: {e}")
             return {'error': str(e)}
+            
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

@@ -38,6 +38,8 @@ from commands.payments.admin_payments import router as admin_payments
 from commands.logs.logs import router as logs
 from commands.backup.backup import router as backup
 from commands.system_info.system_info import router as system_help
+from important_doc.handlers import consent_router, ConsentMiddleware
+from important_doc.models import consent_manager
 
 
 # Настройка логирования
@@ -167,6 +169,11 @@ class BotApp:
             # Роутер ЮКасса
             self.dp.update.middleware(SubscriptionMiddleware()) # Middleware для проверки подписки
             self.dp.include_router(payment_router)  # Роутер оплаты
+
+            # Добавляем middleware для проверки согласий
+            self.dp.include_router(consent_router)
+            self.dp.message.middleware(ConsentMiddleware())
+            self.dp.callback_query.middleware(ConsentMiddleware())
 
             #Роутер ролей
             self.dp.include_router(admin_router)
