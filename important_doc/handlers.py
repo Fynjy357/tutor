@@ -28,11 +28,12 @@ async def consent_status_command(message: types.Message):
         await message.answer("❌ Произошла ошибка при получении статуса согласий.")
 
 async def request_consents(message: types.Message, user_id: int):
-    """Запрос согласий у пользователя с динамическими кнопками"""
+    """Запрос согласий у пользователя с тремя основными кнопками"""
     try:
         # Получаем текущий статус согласий пользователя
         status = consent_manager.get_user_consent_status(user_id)
         
+        # Создаем клавиатуру только с тремя кнопками
         keyboard = []
         
         # Проверяем, принято ли пользовательское соглашение
@@ -46,20 +47,17 @@ async def request_consents(message: types.Message, user_id: int):
             keyboard.append([InlineKeyboardButton(text="✅ Принять политику конфиденциальности", callback_data="accept_privacy")])
         
         # Всегда показываем кнопку отказа
-        keyboard.append([InlineKeyboardButton(text="❌ Не соглашаюсь", callback_data="reject_all")])
-        
-        # Кнопки для чтения документов
-        keyboard.append([InlineKeyboardButton(text="📖 Прочитать пользовательское соглашение", callback_data="read_agreement")])
-        keyboard.append([InlineKeyboardButton(text="📖 Прочитать политику конфиденциальности", callback_data="read_privacy")])
+        keyboard.append([InlineKeyboardButton(text="❌ Не принимаю", callback_data="reject_all")])
         
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         
         message_text = (
             "📋 <b>Для использования функционала бота</b>\n"
-            "<b>необходимо ваше согласие со следующими документами:</b>\n\n"
+            "<b>необходимо ваше согласие со следующими документами:</b>\n"
+            "▪️ <a href='https://gist.githubusercontent.com/Fynjy357/38503ed0bf1ae571965d33e48a130d47/raw/94785d814d5521c3aa104b386a1cae81e783fb41/privacy_policy.txt'>Политика конфиденциальности</a>\n"
+            "▪️ <a href='https://gist.githubusercontent.com/Fynjy357/ccfc2f6130575fe43d4210e23aac98e9/raw/73e9496d391991c4ac570ba91eed79f2141a94b1/gistfile1.txt'>Пользовательское соглашение</a>\n\n"
         )
         
-        # Добавляем статус каждого соглашения
         if agreement_accepted:
             message_text += "✅ <b>Пользовательское соглашение</b> - принято\n"
         else:
@@ -70,13 +68,62 @@ async def request_consents(message: types.Message, user_id: int):
         else:
             message_text += "🔒 <b>Политика конфиденциальности</b> - ожидает принятия\n"
         
-        message_text += "\nНажмите на соответствующие кнопки для принятия соглашений."
+        message_text += "\nВыберите действие:"
         
         await message.answer(message_text, reply_markup=reply_markup, parse_mode='HTML')
         
     except Exception as e:
         logger.error(f"Error in request_consents: {e}")
         await message.answer("❌ Не удалось загрузить соглашения. Пожалуйста, попробуйте позже.")
+
+async def update_consent_message(message: types.Message, user_id: int):
+    """Обновление сообщения с соглашениями после принятия"""
+    try:
+        # Получаем текущий статус согласий пользователя
+        status = consent_manager.get_user_consent_status(user_id)
+        
+        # Создаем клавиатуру только с оставшимися кнопками
+        keyboard = []
+        
+        # Проверяем, принято ли пользовательское соглашение
+        agreement_accepted = any(doc_type == 'user_agreement' and accepted for doc_type, accepted, _, _ in status)
+        if not agreement_accepted:
+            keyboard.append([InlineKeyboardButton(text="✅ Принять пользовательское соглашение", callback_data="accept_agreement")])
+        
+        # Проверяем, принята ли политика конфиденциальности
+        privacy_accepted = any(doc_type == 'privacy_policy' and accepted for doc_type, accepted, _, _ in status)
+        if not privacy_accepted:
+            keyboard.append([InlineKeyboardButton(text="✅ Принять политику конфиденциальности", callback_data="accept_privacy")])
+        
+        # Всегда показываем кнопку отказа
+        keyboard.append([InlineKeyboardButton(text="❌ Не принимаю", callback_data="reject_all")])
+        
+        reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
+        
+        message_text = (
+            "📋 <b>Для использования функционала бота</b>\n"
+            "<b>необходимо ваше согласие со следующими документами:</b>\n\n"
+        )
+        
+        if agreement_accepted:
+            message_text += "✅ <b>Пользовательское соглашение</b> - принято\n"
+        else:
+            message_text += "📄 <b>Пользовательское соглашение</b> - ожидает принятия\n"
+        
+        if privacy_accepted:
+            message_text += "✅ <b>Политика конфиденциальности</b> - принята\n"
+        else:
+            message_text += "🔒 <b>Политика конфиденциальности</b> - ожидает принятия\n"
+        
+        message_text += "\nВыберите действие:"
+        
+        # Редактируем существующее сообщение
+        await message.edit_text(message_text, reply_markup=reply_markup, parse_mode='HTML')
+        
+    except Exception as e:
+        logger.error(f"Error in update_consent_message: {e}")
+        # Если не удалось отредактировать, отправляем новое сообщение
+        await request_consents(message, user_id)
 
 async def show_consent_status(message: types.Message):
     """Показать статус согласий пользователя"""
@@ -140,46 +187,14 @@ async def start_registration_process(message: types.Message, state: FSMContext, 
         logger.error(f"Error in start_registration_process: {e}")
         await message.answer("❌ Ошибка при запуске регистрации")
 
-@consent_router.callback_query(F.data.in_(["accept_agreement", "accept_privacy", "reject_all", "read_agreement", "read_privacy"]))
+@consent_router.callback_query(F.data.in_(["accept_agreement", "accept_privacy", "reject_all"]))
 async def consent_callback_handler(callback_query: CallbackQuery, state: FSMContext, bot: Bot):
-    """Обработчик кнопок согласий"""
+    """Обработчик кнопок согласий (только три основные кнопки)"""
     try:
         user_id = callback_query.from_user.id
         ip_address = get_user_ip(callback_query) or "unknown"
         
-        if callback_query.data == "read_agreement":
-            text = consent_manager.read_document("user_agreement.txt")
-            if len(text) > 4000:
-                parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
-                for i, part in enumerate(parts, 1):
-                    await callback_query.message.answer(
-                        f"📄 <b>Пользовательское соглашение (часть {i}):</b>\n\n{part}", 
-                        parse_mode='HTML'
-                    )
-            else:
-                await callback_query.message.answer(
-                    f"📄 <b>Пользовательское соглашение:</b>\n\n{text}", 
-                    parse_mode='HTML'
-                )
-            await callback_query.answer()
-            
-        elif callback_query.data == "read_privacy":
-            text = consent_manager.read_document("privacy_policy.txt")
-            if len(text) > 4000:
-                parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
-                for i, part in enumerate(parts, 1):
-                    await callback_query.message.answer(
-                        f"🔒 <b>Политика конфиденциальности (часть {i}):</b>\n\n{part}", 
-                        parse_mode='HTML'
-                    )
-            else:
-                await callback_query.message.answer(
-                    f"🔒 <b>Политика конфиденциальности:</b>\n\n{text}", 
-                    parse_mode='HTML'
-                )
-            await callback_query.answer()
-            
-        elif callback_query.data == "accept_agreement":
+        if callback_query.data == "accept_agreement":
             # Сохраняем принятие пользовательского соглашения
             success = consent_manager.save_consent(user_id, ip_address, "user_agreement", "1.0", True)
             
@@ -214,7 +229,7 @@ async def consent_callback_handler(callback_query: CallbackQuery, state: FSMCont
                         await state.clear()
                 else:
                     # Обновляем сообщение с убранной кнопкой
-                    await request_consents(callback_query.message, user_id)
+                    await update_consent_message(callback_query.message, user_id)
             else:
                 await callback_query.answer("❌ Ошибка при сохранении согласия")
             
@@ -253,7 +268,7 @@ async def consent_callback_handler(callback_query: CallbackQuery, state: FSMCont
                         await state.clear()
                 else:
                     # Обновляем сообщение с убранной кнопкой
-                    await request_consents(callback_query.message, user_id)
+                    await update_consent_message(callback_query.message, user_id)
             else:
                 await callback_query.answer("❌ Ошибка при сохранении согласия")
             
@@ -292,7 +307,7 @@ class ConsentMiddleware:
     async def __call__(self, handler, event, data):
         # Проверяем, является ли это колбэком start_registration
         is_start_registration = False
-        
+            
         if hasattr(event, 'data') and event.data:
             if event.data == 'start_registration':
                 is_start_registration = True
@@ -314,27 +329,9 @@ class ConsentMiddleware:
             # Сохраняем информацию о том, что пользователь хотел зарегистрироваться
             await state.update_data(wants_registration=True)
         
-        # Если согласия не приняты - блокируем колбэк и предлагаем принять
-        keyboard = [
-            [InlineKeyboardButton(text="📋 Принять соглашения", callback_data="show_consents")]
-        ]
-        reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
-        
-        # Отвечаем на колбэк
-        if hasattr(event, 'answer'):
-            await event.answer(
-                "⚠️ Для регистрации необходимо принять соглашения",
-                show_alert=True
-            )
-        
-        # Отправляем сообщение с предложением принять соглашения
+        # Сразу показываем экран с тремя кнопками соглашений
         if hasattr(event, 'message'):
-            await event.message.answer(
-                "⚠️ <b>Для регистрации необходимо принять соглашения.</b>\n\n"
-                "Используйте кнопку ниже для принятия соглашений.",
-                reply_markup=reply_markup,
-                parse_mode='HTML'
-            )
+            await request_consents(event.message, user_id)
         
         # Не вызываем оригинальный handler, так как колбэк заблокирован
         return

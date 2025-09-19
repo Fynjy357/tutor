@@ -22,6 +22,7 @@ class ConsentManager:
     
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
+        
     
     def read_document(self, filename: str) -> str:
         """Чтение документа из текущей папки"""
