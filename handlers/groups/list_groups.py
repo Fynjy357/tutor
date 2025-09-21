@@ -44,16 +44,21 @@ async def group_management(callback_query: CallbackQuery):
         return
     
     students = db.get_students_in_group(group_id)
-    student_count = len(students)
     
-    students_list = "\n".join([f"• {s['full_name']}" for s in students[:3]])
-    if student_count > 3:
-        students_list += f"\n• ... и еще {student_count - 3} учеников"
+    # Фильтруем только активных учеников
+    active_students = [s for s in students if s.get('status') != 'inactive']
+    active_count = len(active_students)
+    
+    # Формируем список ВСЕХ активных учеников
+    if active_count > 0:
+        students_list = "\n".join([f"• {s['full_name']}" for s in active_students])
+    else:
+        students_list = "Нет активных учеников"
     
     await callback_query.message.edit_text(
         f"👥 <b>Группа: {group['name']}</b>\n\n"
-        f"Учеников: {student_count}\n\n"
-        f"Ученики:\n{students_list if students_list else 'Нет учеников'}",
+        f"Активных учеников: {active_count}\n\n"
+        f"Ученики:\n{students_list}",
         reply_markup=get_group_management_keyboard(group_id),
         parse_mode="HTML"
     )

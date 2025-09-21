@@ -52,10 +52,18 @@ def get_group_management_keyboard(group_id):
     ])
 
 def get_students_list_keyboard(students, prefix, group_id):
-    """Клавиатура со списком учеников"""
+    """Клавиатура со списком учеников (исключая неактивных)"""
     builder = InlineKeyboardBuilder()
     
+    active_students = []
+    
+    # Сначала фильтруем активных учеников
     for student in students:
+        if student and student.get('status') != 'inactive':
+            active_students.append(student)
+    
+    # Добавляем кнопки только для активных учеников
+    for student in active_students:
         builder.row(
             InlineKeyboardButton(
                 text=f"👤 {student['full_name']}",
@@ -63,6 +71,7 @@ def get_students_list_keyboard(students, prefix, group_id):
             )
         )
     
+    # Всегда добавляем кнопку назад, даже если нет активных учеников
     builder.row(
         InlineKeyboardButton(text="🔙 Назад", callback_data=f"group_{group_id}")
     )

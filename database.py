@@ -1820,6 +1820,23 @@ class Database:
             logger.error(f"Ошибка при получении количества учеников: {e}")
             return 0
         
+    def get_active_students_count(self, tutor_id: int) -> int:
+        """Возвращает количество активных учеников у репетитора"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT COUNT(DISTINCT s.id) 
+                FROM students s
+                WHERE s.tutor_id = ? AND s.status != 'inactive'
+                ''', (tutor_id,))
+                
+                result = cursor.fetchone()
+                return result[0] if result else 0
+        except Exception as e:
+            logger.error(f"Ошибка при получении количества активных учеников: {e}")
+            return 0
+        
     def get_tutor_phone(self, telegram_id: int) -> Optional[str]:
         """Получить телефон репетитора по его telegram_id"""
         with self.get_connection() as conn:

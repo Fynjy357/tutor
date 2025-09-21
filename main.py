@@ -41,6 +41,7 @@ from commands.system_info.system_info import router as system_help
 from important_doc.handlers import consent_router, ConsentMiddleware
 from important_doc.models import consent_manager
 from commands.message.message import message_router
+from payment.notifications.trial_notification_task import start_trial_notification_task
 
 
 # Настройка логирования
@@ -254,10 +255,14 @@ class BotApp:
             self.tasks.append(asyncio.create_task(lesson_notification_scheduler(self.bot, self.notification_manager)))
             self.tasks.append(asyncio.create_task(self.lesson_report_handlers.notify_tutor_about_lesson_end(self.bot)))
             
-            # Запуск планировщика напоминаний  # ← ДОБАВЛЕНО
-            if self.reminder_scheduler:  # ← ДОБАВЛЕНО
-                self.tasks.append(asyncio.create_task(self.reminder_scheduler.start()))  # ← ДОБАВЛЕНО
-                logger.info("Планировщик напоминаний запущен")  # ← ДОБАВЛЕНО
+            # Запуск планировщика напоминаний 
+            if self.reminder_scheduler: 
+                self.tasks.append(asyncio.create_task(self.reminder_scheduler.start()))
+                logger.info("Планировщик напоминаний запущен") 
+
+            # ЗАПУСК ЗАДАЧИ УВЕДОМЛЕНИЙ О ПРОБНОМ ПЕРИОДЕ ← ДОБАВЬТЕ ЭТО
+            self.tasks.append(asyncio.create_task(start_trial_notification_task(self.bot)))
+            logger.info("Задача уведомлений о пробном периоде запущена")
 
             logger.info("Бот запущен и готов к работе")
             await self.dp.start_polling(self.bot)

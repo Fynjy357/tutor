@@ -120,14 +120,14 @@ async def get_today_schedule_text(tutor_id: int) -> str:
         date(prev_year, prev_month, 1).replace(day=28) + timedelta(days=4)  # последний день месяца
     )
     
-    # Получаем общее количество учеников у репетитора
-    total_students_count = db.get_total_students_count(tutor_id)
+    # Получаем количество активных учеников
+    active_students_count = db.get_active_students_count(tutor_id)
     
     if not lessons:
         # Возвращаем только финансовую статистику, если нет занятий
         return (
             f"У вас сегодня не запланировано занятий.\n\n"
-            f"👨‍🎓 <b>Всего учеников:</b> {total_students_count}\n"
+            f"👨‍🎓 <b>Активных учеников:</b> {active_students_count}\n"
             f"💰 <b>Финансовая статистика:</b>\n\n"
             f"📈 За {month_names[current_month]}: {current_month_earnings} руб\n"
             f"📊 За {month_names[prev_month]}: {prev_month_earnings} руб"
@@ -167,7 +167,7 @@ async def get_today_schedule_text(tutor_id: int) -> str:
     
     # Форматируем расписание
     schedule_text = (
-        f"👨‍🎓 <b>Всего учеников:</b> {total_students_count}\n"
+        f"👨‍🎓 <b>Активных учеников:</b> {active_students_count}\n"
         f"💰 <b>Заработано в {month_names[current_month]}:</b> {current_month_earnings} руб\n"
         f"📊 <b>Заработано в {month_names[prev_month]}:</b> {prev_month_earnings} руб\n\n"
         f"📅 <b>Ваше расписание на сегодня:</b>\n\n"

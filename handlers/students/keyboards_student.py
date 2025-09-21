@@ -93,7 +93,7 @@ def get_students_pagination_keyboard(students, page=0, page_size=5):
             )
         )
     
-    # Добавляем кнопки навигации, если нужно
+    # Добавляем кнопки навигации
     if len(students) > page_size:
         navigation_buttons = []
         
@@ -105,7 +105,7 @@ def get_students_pagination_keyboard(students, page=0, page_size=5):
                 )
             )
         
-        if end_idx < len(students):
+        if end_idx < len(active_students):
             navigation_buttons.append(
                 types.InlineKeyboardButton(
                     text="➡️ Вперед",

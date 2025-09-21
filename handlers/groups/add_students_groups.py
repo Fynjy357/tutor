@@ -54,9 +54,17 @@ async def add_specific_student(callback_query: CallbackQuery):
     student_count = len(students)
     
     # Формируем список учеников (используем full_name как в вашем примере)
-    students_list = "\n".join([f"• {s['full_name']}" for s in students[:3]])
-    if student_count > 3:
-        students_list += f"\n• ... и еще {student_count - 3} учеников"
+    active_students = []
+    for s in students:
+        status = str(s.get('status', '')).lower().strip()
+        if status != 'inactive':
+            active_students.append(s)
+
+    students_list = "👥 <b>Ученики:</b>\n"
+    if active_students:
+        students_list += "\n".join([f"• {s['full_name']}" for s in active_students])
+    else:
+        students_list += "Нет активных учеников"
     
     # Переходим к меню группы
     await callback_query.message.edit_text(
@@ -119,9 +127,17 @@ async def remove_specific_student(callback_query: CallbackQuery):
     student_count = len(students)
     
     # Формируем список учеников (используем full_name)
-    students_list = "\n".join([f"• {s['full_name']}" for s in students[:3]])
-    if student_count > 3:
-        students_list += f"\n• ... и еще {student_count - 3} учеников"
+    active_students = []
+    for s in students:
+        status = str(s.get('status', '')).lower().strip()
+        if status != 'inactive':
+            active_students.append(s)
+
+    students_list = "👥 <b>Ученики:</b>\n"
+    if active_students:
+        students_list += "\n".join([f"• {s['full_name']}" for s in active_students])
+    else:
+        students_list += "Нет активных учеников"
     
     # Показываем обновленную информацию о группе
     await callback_query.message.edit_text(

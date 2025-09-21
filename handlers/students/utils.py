@@ -43,7 +43,7 @@ def get_students_stats(students):
     """Возвращает статистику по ученикам"""
     try:
         if not students:
-            return "Всего учеников: 0\nАктивных: 0\n\n"
+            return "Всего учеников: 0\n\n"
         
         active_count = sum(1 for s in students if str(s.get('status', '')).lower() == 'active')
         return f"Всего учеников: {len(students)}\nАктивных: {active_count}\n\n"

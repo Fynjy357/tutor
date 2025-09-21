@@ -108,11 +108,19 @@ async def back_to_students(callback_query: types.CallbackQuery, state: FSMContex
     if data.get('lesson_type') == 'individual':
         students = db.get_students_by_tutor(tutor_id)
         
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[])
-        for student in students:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+    active_students_count = 0
+
+    for student in students:
+        # Более надежная проверка статуса
+        status = student.get('status', '').lower()  # Приводим к нижнему регистру для надежности
+        if status != 'inactive':
             keyboard.inline_keyboard.append([
                 InlineKeyboardButton(text=f"👤 {student['full_name']}", callback_data=f"add_lesson_student_{student['id']}")
             ])
+            active_students_count += 1
+
+    if active_students_count > 0:
         keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_time_input")])
         
         await callback_query.message.edit_text(
