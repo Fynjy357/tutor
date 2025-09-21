@@ -77,10 +77,13 @@ def get_students_list_menu_keyboard():  # ИЗМЕНЕНО ИМЯ ФУНКЦИИ
 def get_students_pagination_keyboard(students, page=0, page_size=5):
     builder = InlineKeyboardBuilder()
     
-    # Добавляем кнопки для учеников на текущей странице
+    # Фильтруем студентов, оставляем только активных (status != 'inactive')
+    active_students = [student for student in students if student.get('status') != 'inactive']
+    
+    # Добавляем кнопки для активных учеников на текущей странице
     start_idx = page * page_size
     end_idx = start_idx + page_size
-    current_page_students = students[start_idx:end_idx]
+    current_page_students = active_students[start_idx:end_idx]
     
     for student in current_page_students:
         builder.row(

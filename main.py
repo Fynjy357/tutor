@@ -40,6 +40,7 @@ from commands.backup.backup import router as backup
 from commands.system_info.system_info import router as system_help
 from important_doc.handlers import consent_router, ConsentMiddleware
 from important_doc.models import consent_manager
+from commands.message.message import message_router
 
 
 # Настройка логирования
@@ -156,6 +157,7 @@ class BotApp:
             self.dp.include_router(logs)
             self.dp.include_router(backup)
             self.dp.include_router(system_help)
+            self.dp.include_router(message_router)
 
             
             

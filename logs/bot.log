@@ -29510,3 +29510,805 @@ or mount method to a bot instance `method.as_(bot)` and then call it `await meth
 2025-09-19 22:29:21 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
 2025-09-19 22:29:21 - __main__ - INFO - Планировщик напоминаний остановлен
 2025-09-19 22:29:21 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:16:03 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:16:03 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:16:03 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:16:03 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:03 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:03 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:16:03 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:16:03 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:16:03 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:16:03 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:16:03 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:16:03 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:16:03 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:16:03 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:16:03 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:16:03 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:03 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:03 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:03 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:16:03 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:16:03 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:16:03 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:16:03 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:16:03 - notify.models - INFO - 📨 Уже отправленные уведомления: 0
+2025-09-21 03:16:03 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 2
+2025-09-21 03:16:03 - notify.models - INFO -    ✅ Для уведомления: #3 - Ариша
+2025-09-21 03:16:03 - notify.models - INFO -    ✅ Для уведомления: #51 - Юлия
+2025-09-21 03:16:03 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 2
+2025-09-21 03:16:03 - notify.scheduler - INFO - 🔍 Анализ занятия #3: telegram_id=8154965609
+2025-09-21 03:16:03 - notify.scheduler - INFO - 📩 Обрабатываем занятие #3 для ученика 8154965609 (ID: 7)
+2025-09-21 03:16:03 - notify.scheduler - INFO - ⏰ Время занятия: 2025-09-21 12:00:00, время уведомления: 2025-09-20 12:00:00
+2025-09-21 03:16:03 - notify.models - INFO - 📝 Создана запись подтверждения для занятия #3, student_id: 7, ID записи: 25
+2025-09-21 03:16:03 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:16:03 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:16:04 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:16:04 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:16:04
+2025-09-21 03:16:04 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:16:04
+2025-09-21 03:16:04 - notify.models - ERROR - ❌ Ошибка при отправке уведомления: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+2025-09-21 03:16:04 - notify.models - ERROR - Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1169, in _create_direct_connection
+    hosts = await asyncio.shield(host_resolved)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 880, in _resolve_host
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\resolver.py", line 33, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py", line 868, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 1187, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 574, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 907, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1183, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tutor\notify\models.py", line 252, in send_notification_to_student
+    await bot.send_message(
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 2925, in send_message
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+2025-09-21 03:16:04 - notify.scheduler - ERROR - ❌ Не удалось отправить уведомление
+2025-09-21 03:16:04 - notify.scheduler - INFO - 🔍 Анализ занятия #51: telegram_id=1444123210
+2025-09-21 03:16:04 - notify.scheduler - INFO - 📩 Обрабатываем занятие #51 для ученика 1444123210 (ID: 16)
+2025-09-21 03:16:04 - notify.scheduler - INFO - ⏰ Время занятия: 2025-09-22 16:30:00, время уведомления: 2025-09-21 16:30:00
+2025-09-21 03:16:04 - notify.models - INFO - 📝 Создана запись подтверждения для занятия #51, student_id: 16, ID записи: 26
+2025-09-21 03:16:04 - notify.models - ERROR - ❌ Ошибка при отправке уведомления: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+2025-09-21 03:16:04 - notify.models - ERROR - Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1169, in _create_direct_connection
+    hosts = await asyncio.shield(host_resolved)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 880, in _resolve_host
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\resolver.py", line 33, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py", line 868, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 1187, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 574, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 907, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1183, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tutor\notify\models.py", line 252, in send_notification_to_student
+    await bot.send_message(
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 2925, in send_message
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+2025-09-21 03:16:04 - notify.scheduler - ERROR - ❌ Не удалось отправить уведомление
+2025-09-21 03:16:04 - __main__ - ERROR - Ошибка в основном цикле: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+2025-09-21 03:16:04 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1169, in _create_direct_connection
+    hosts = await asyncio.shield(host_resolved)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1169, in _create_direct_connection
+    hosts = await asyncio.shield(host_resolved)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 880, in _resolve_host
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\resolver.py", line 33, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py", line 868, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 1187, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 574, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 907, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1183, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tutor\main.py", line 261, in run
+    await self.dp.start_polling(self.bot)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 591, in start_polling
+    await asyncio.gather(*done)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 362, in _polling
+    user: User = await bot.me()
+                 ^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 357, in me
+    self._me = await self.get_me()
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 1797, in get_me
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+2025-09-21 03:16:04 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:16:04 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:16:04 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:16:04 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:16:13 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:16:13 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:16:13 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:16:13 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:13 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:13 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:16:13 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:16:13 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:16:13 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:16:13 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:16:13 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:16:13 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:16:13 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:16:13 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:16:13 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:16:13 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:13 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:13 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:13 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:16:13 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:16:13 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:16:13 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:16:13 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:16:13 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:16:13 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:16:13 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:16:13 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:16:13 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:16:13 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:16:13 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:16:13 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:16:13 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:16:13
+2025-09-21 03:16:13 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:16:13
+2025-09-21 03:16:13 - __main__ - ERROR - Ошибка в основном цикле: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+2025-09-21 03:16:13 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1169, in _create_direct_connection
+    hosts = await asyncio.shield(host_resolved)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 880, in _resolve_host
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\resolver.py", line 33, in resolve
+    infos = await self._loop.getaddrinfo(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py", line 868, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11004] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 1187, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\client.py", line 574, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 907, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiohttp\connector.py", line 1183, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tutor\main.py", line 261, in run
+    await self.dp.start_polling(self.bot)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 591, in start_polling
+    await asyncio.gather(*done)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 362, in _polling
+    user: User = await bot.me()
+                 ^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 357, in me
+    self._me = await self.get_me()
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 1797, in get_me
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [getaddrinfo failed]
+
+2025-09-21 03:16:13 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:16:13 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:16:13 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:16:13 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:16:37 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:16:37 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:16:37 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:16:37 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:37 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:16:37 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:16:37 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:16:37 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:16:37 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:16:37 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:16:37 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:16:37 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:16:37 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:16:37 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:16:37 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:16:37 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:37 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:37 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:16:37 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:16:37 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:16:37 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:16:37 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:16:37 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:16:37 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:16:37 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:16:37 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:16:37 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:16:37 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:16:37 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:16:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:16:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:16:37 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:16:37 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:16:37 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:16:37
+2025-09-21 03:16:37 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:16:37
+2025-09-21 03:16:37 - handlers.start.main - INFO - Обработчик /start вызван для пользователя 79669142
+2025-09-21 03:17:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:17:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:18:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:18:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:19:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:19:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:20:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:20:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:21:37 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:21:37 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:21:37 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:21:37 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:21:37 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:21:37 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:21:37 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:21:37 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:21:37 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:21:37 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:21:37 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:21:37 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:21:37 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:21:37 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:21:37 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:21:37 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:21:37 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:21:37
+2025-09-21 03:21:37 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:21:37
+2025-09-21 03:21:37 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:21:37 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:22:08 - __main__ - INFO - Получен сигнал остановки
+2025-09-21 03:22:08 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:22:08 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:22:08 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:22:08 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:22:08 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:22:08 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:22:08 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:22:11 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:22:11 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:22:11 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:22:11 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:22:11 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:22:11 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:22:11 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:22:11 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:22:11 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:22:11 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:22:11 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:22:11 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:22:11 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:22:11 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:22:11 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:22:11 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:22:11 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:22:11 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:22:11 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:22:11 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:22:11 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:22:11 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:22:11 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:22:11 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:22:11 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:22:11 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:22:11 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:22:11 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:22:11 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:22:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:22:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:22:11 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:22:11 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:22:11 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:22:11
+2025-09-21 03:22:11 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:22:11
+2025-09-21 03:23:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:23:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:24:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:24:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:25:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:25:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:26:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:26:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:27:11 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:27:11 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:27:11 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:27:11 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:27:11 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:27:11 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:27:11 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:27:11 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:27:11 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:27:11 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:27:11 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:27:11 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:27:11 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:27:11 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:27:11 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:27:11 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:27:11 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:27:11
+2025-09-21 03:27:11 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:27:11
+2025-09-21 03:27:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:27:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:28:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:28:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:29:11 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:29:11 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:29:14 - __main__ - INFO - Получен сигнал остановки
+2025-09-21 03:29:14 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:29:14 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:29:14 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:29:14 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:29:14 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:29:14 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:29:14 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:29:17 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:29:17 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:29:17 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:29:17 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:29:17 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:29:17 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:29:17 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:29:17 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:29:17 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:29:17 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:29:17 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:29:17 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:29:17 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:29:17 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:29:17 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:29:17 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:29:17 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:29:17 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:29:17 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:29:17 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:29:17 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:29:17 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:29:17 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:29:17 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:29:17 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:29:17 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:29:17 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:29:17 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:29:17 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:29:17 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:29:17 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:29:17 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:29:17 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:29:17 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:29:17
+2025-09-21 03:29:17 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:29:17
+2025-09-21 03:30:15 - __main__ - INFO - Получен сигнал остановки
+2025-09-21 03:30:15 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:30:15 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:30:15 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:30:15 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:30:15 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:30:15 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:30:15 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:30:18 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:30:18 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:30:18 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:30:18 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:30:18 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:30:18 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:30:18 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:30:18 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:30:18 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:30:18 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:30:18 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:30:18 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:30:18 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:30:18 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:30:18 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:30:18 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:30:18 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:30:18 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:30:18 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:30:18 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:30:18 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:30:18 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:30:18 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:30:18 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:30:18 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:30:18 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:30:18 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:30:18 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:30:18 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:30:18 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:30:18 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:30:18 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:30:18 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:30:18 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:30:18
+2025-09-21 03:30:18 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:30:18
+2025-09-21 03:31:18 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:31:18 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:31:36 - __main__ - INFO - Получен сигнал остановки
+2025-09-21 03:31:36 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:31:36 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:31:36 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:31:36 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:31:36 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:31:36 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:31:36 - __main__ - INFO - Бот успешно остановлен
+2025-09-21 03:32:08 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:32:08 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:32:08 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:32:08 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:32:08 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:32:08 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:32:08 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:32:08 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:32:08 - __main__ - ERROR - Ошибка при запуске бота: Router is already attached to <Dispatcher '0x2385d875050'>
+2025-09-21 03:32:08 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\tutor\main.py", line 181, in startup
+    self.dp.include_router(admin_router)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 248, in include_router
+    router.parent_router = self
+    ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 211, in parent_router
+    raise RuntimeError(f"Router is already attached to {self._parent_router!r}")
+RuntimeError: Router is already attached to <Dispatcher '0x2385d875050'>
+
+2025-09-21 03:32:47 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:32:47 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:32:47 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:32:47 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:32:47 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:32:47 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:32:47 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:32:47 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:32:48 - __main__ - ERROR - Ошибка при запуске бота: Router is already attached to <Dispatcher '0x1b8f4371190'>
+2025-09-21 03:32:48 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\tutor\main.py", line 181, in startup
+    self.dp.include_router(admin_router)
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 248, in include_router
+    router.parent_router = self
+    ^^^^^^^^^^^^^^^^^^^^
+  File "D:\tutor\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 211, in parent_router
+    raise RuntimeError(f"Router is already attached to {self._parent_router!r}")
+RuntimeError: Router is already attached to <Dispatcher '0x1b8f4371190'>
+
+2025-09-21 03:34:35 - __main__ - INFO - Запуск приложения...
+2025-09-21 03:34:35 - notify.models - INFO - 📊 Менеджер уведомлений инициализирован
+2025-09-21 03:34:35 - notify.models - INFO - 🔍 Проверка формата дат занятий
+2025-09-21 03:34:35 - notify.models - INFO - 📊 Примеры дат из базы:
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #9: '2025-09-21 10:00:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #10: '2025-09-21 10:00:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #11: '2025-09-21 10:00:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #3: '2025-09-21 12:00:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #51: '2025-09-22 16:30:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #80: '2025-09-23 11:15:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #81: '2025-09-23 11:15:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #82: '2025-09-23 11:15:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #38: '2025-09-24 18:00:00' - planned
+2025-09-21 03:34:35 - notify.models - INFO -    Занятие #39: '2025-09-24 18:00:00' - planned
+2025-09-21 03:34:35 - notify.handlers.confirmation_handlers - INFO - ✅ Обработчики инлайн-кнопок подтверждения зарегистрированы
+2025-09-21 03:34:35 - notify.handlers.notification_handlers - INFO - ✅ Обработчики уведомлений настроены
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 Including routers in order:
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 1. type_lesson
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 2. frequency_of_lesson
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 3. student_choice
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 4. confirm_lesson
+2025-09-21 03:34:35 - handlers.schedule.add_lesson.handlers_add_lesson - INFO - 🔥 5. utils
+2025-09-21 03:34:35 - __main__ - INFO - Бот успешно инициализирован
+2025-09-21 03:34:35 - __main__ - INFO - Планировщик напоминаний запущен
+2025-09-21 03:34:35 - __main__ - INFO - Бот запущен и готов к работе
+2025-09-21 03:34:35 - notify.scheduler - INFO - 🚀 Планировщик уведомлений запущен
+2025-09-21 03:34:35 - notify.models - INFO - 🔍 Поиск занятий для уведомления (сегодня + завтра)
+2025-09-21 03:34:35 - notify.models - INFO - 📊 Все занятия на сегодня и завтра: 5
+2025-09-21 03:34:35 - notify.models - INFO -    📅 #3: Ариша - 2025-09-21 12:00:00 - статус: planned - TG: 8154965609
+2025-09-21 03:34:35 - notify.models - INFO -    📅 #9: Карина - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:34:35 - notify.models - INFO -    📅 #10: Егор - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:34:35 - notify.models - INFO -    📅 #11: Даша Б. - 2025-09-21 10:00:00 - статус: planned - TG: None
+2025-09-21 03:34:35 - notify.models - INFO -    📅 #51: Юлия - 2025-09-22 16:30:00 - статус: planned - TG: 1444123210
+2025-09-21 03:34:35 - notify.models - INFO - 👥 Ученики без telegram_id: 3
+2025-09-21 03:34:35 - notify.models - INFO -    ❌ #9: Карина - TG: None
+2025-09-21 03:34:35 - notify.models - INFO -    ❌ #10: Егор - TG: None
+2025-09-21 03:34:35 - notify.models - INFO -    ❌ #11: Даша Б. - TG: None
+2025-09-21 03:34:35 - notify.models - INFO - 📨 Уже отправленные уведомления: 2
+2025-09-21 03:34:35 - notify.models - INFO -    📤 #3 - отправлено в 2025-09-21 00:16:03
+2025-09-21 03:34:35 - notify.models - INFO -    📤 #51 - отправлено в 2025-09-21 00:16:04
+2025-09-21 03:34:35 - notify.models - INFO - 🎯 Найдено занятий для уведомления: 0
+2025-09-21 03:34:35 - notify.scheduler - INFO - 📋 Найдено занятий для уведомления: 0
+2025-09-21 03:34:35 - lesson_reports.handlers - INFO - 🚀 Запуск планировщика уведомлений о завершении занятий
+2025-09-21 03:34:35 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:34:35 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:34:35 - notify.notify_tutors.reminder_scheduler - INFO - 🚀 Планировщик напоминаний запущен
+2025-09-21 03:34:35 - notify.notify_tutors.reminder_scheduler - INFO - Сброшено 0 напоминаний для прошедших занятий
+2025-09-21 03:34:35 - database - INFO - 🕒 UTC время в БД: 2025-09-21 00:34:35
+2025-09-21 03:34:35 - database - INFO - 🏠 Локальное время в БД: 2025-09-21 03:34:35
+2025-09-21 03:35:35 - lesson_reports.handlers - INFO - 🔍 Проверка завершенных занятий...
+2025-09-21 03:35:35 - lesson_reports.handlers - INFO - Найдено завершенных занятий (группировано): 0
+2025-09-21 03:35:44 - commands.message.message - INFO - Superadmin 79669142 sent message to user 79669142: Привет! Это тест
+2025-09-21 03:35:54 - __main__ - INFO - Получен сигнал остановки
+2025-09-21 03:35:54 - __main__ - INFO - Завершение работы бота...
+2025-09-21 03:35:54 - notify.notify_tutors.reminder_scheduler - INFO - Остановка планировщика напоминаний...
+2025-09-21 03:35:54 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний остановлен по запросу
+2025-09-21 03:35:54 - notify.notify_tutors.reminder_scheduler - INFO - Цикл планировщика завершен
+2025-09-21 03:35:54 - notify.notify_tutors.reminder_scheduler - INFO - Планировщик напоминаний успешно остановлен
+2025-09-21 03:35:54 - __main__ - INFO - Планировщик напоминаний остановлен
+2025-09-21 03:35:54 - __main__ - INFO - Бот успешно остановлен
