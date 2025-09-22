@@ -95,6 +95,7 @@ async def process_parent_phone_and_save(message: types.Message, state: FSMContex
 async def cancel_add_student(callback_query: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
     
+    
     # Проверяем, находимся ли мы в состоянии добавления ученика
     if current_state and current_state.startswith("AddStudentStates"):
         await callback_query.answer()

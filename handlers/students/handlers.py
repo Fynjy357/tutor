@@ -134,31 +134,3 @@ async def back_to_main_menu(callback_query: types.CallbackQuery, state: FSMConte
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
-
-
-# # Обработчик возврата к ученику из меню приглашения
-# @router.callback_query(F.data.startswith("back_to_student_"))
-# async def back_to_student_from_invite(callback_query: types.CallbackQuery):
-#     await callback_query.answer()
-    
-#     student_id = int(callback_query.data.split("_")[3])
-#     student = db.get_student_by_id(student_id)
-    
-#     if not student:
-#         await callback_query.message.edit_text("❌ Ученик не найден!")
-#         return
-    
-#     text = format_student_info(student)
-    
-#     try:
-#         await callback_query.message.edit_text(
-#             text,
-#             reply_markup=get_student_detail_keyboard(student_id),
-#             parse_mode="HTML"
-#         )
-#     except TelegramBadRequest:
-#         await callback_query.message.answer(
-#             text,
-#             reply_markup=get_student_detail_keyboard(student_id),
-#             parse_mode="HTML"
-#         )

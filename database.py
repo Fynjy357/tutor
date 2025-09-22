@@ -2530,7 +2530,82 @@ class Database:
         except Exception as e:
             logger.error(f"❌ Ошибка в debug_parent_connections: {e}")
             return {'error': str(e)}
+    def get_inactive_students(self, tutor_id: int):
+        """Получить неактивных учеников преподавателя"""
+        try:
+            logger.info(f"🔍 Запрос неактивных учеников для tutor_id: {tutor_id}")
             
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT id, full_name, phone, parent_phone, student_telegram_id, 
+                        parent_telegram_id, registration_date, timezone
+                    FROM students 
+                    WHERE tutor_id = ? AND status = 'inactive'
+                    ORDER BY full_name
+                    """,
+                    (tutor_id,)
+                )
+                students = cursor.fetchall()
+                
+                logger.info(f"📊 Найдено неактивных учеников: {len(students)}")
+                if students:
+                    for student in students:
+                        logger.debug(f"👤 Ученик: {student['full_name']} (ID: {student['id']})")
+                
+                return [dict(student) for student in students]
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения неактивных учеников: {e}", exc_info=True)
+            return []
+
+    def activate_student(self, student_id: int):
+        """Активировать ученика"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    UPDATE students 
+                    SET status = 'active'
+                    WHERE id = ?
+                    """,
+                    (student_id,)
+                )
+                conn.commit()
+                success = cursor.rowcount > 0
+                logger.info(f"✅ Активирован ученик ID {student_id}: {success}")
+                return success
+        except Exception as e:
+            logger.error(f"❌ Ошибка активации ученика: {e}")
+            return False
+
+    def check_student_table_structure(self):
+        """Проверить структуру таблицы students для отладки"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA table_info(students)")
+                columns = cursor.fetchall()
+                
+                logger.info("📋 Структура таблицы students:")
+                for column in columns:
+                    logger.info(f"   {column['name']} - {column['type']}")
+                    
+                # Проверим есть ли статусы
+                cursor.execute("SELECT DISTINCT status FROM students WHERE status IS NOT NULL")
+                statuses = cursor.fetchall()
+                found_statuses = [s['status'] for s in statuses if s['status']]
+                logger.info(f"📊 Найденные статусы: {found_statuses}")
+                
+                # Дополнительно: посмотрим статусы с учетом регистра
+                cursor.execute("SELECT DISTINCT LOWER(status) as lower_status FROM students WHERE status IS NOT NULL")
+                lower_statuses = cursor.fetchall()
+                lower_found = [s['lower_status'] for s in lower_statuses if s['lower_status']]
+                logger.info(f"📊 Статусы в нижнем регистре: {lower_found}")
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка проверки структуры таблицы: {e}")
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

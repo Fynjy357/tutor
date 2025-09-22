@@ -31,6 +31,13 @@ def get_students_menu_keyboard():
     
     builder.row(
         types.InlineKeyboardButton(
+            text="🌙 Неактивные ученики",
+            callback_data="show_inactive_menu"
+        )
+    )
+
+    builder.row(
+        types.InlineKeyboardButton(
             text="◀️ Назад в главное меню",
             callback_data="back_to_main_students"
         )
