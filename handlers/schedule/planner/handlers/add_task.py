@@ -25,17 +25,7 @@ async def planner_add_task_start(callback: CallbackQuery, state: FSMContext):
         await callback.answer("❌ Ошибка: репетитор не найден", show_alert=True)
         return
     
-    # Проверяем подписку
-    if not db.check_tutor_subscription(tutor_id):
-        await callback.message.edit_text(
-            "❌ <b>Доступ ограничен</b>\n\n"
-            "Функция планера доступна только с активной подпиской.\n\n"
-            "Для использования этой функции необходимо оформить подписку.",
-            reply_markup=get_planner_keyboard()
-        )
-        await callback.answer()
-        return
-    
+    # Убрана проверка подписки - сразу переходим к выбору типа занятия
     await show_lesson_type_selection(callback, state)
 
 async def show_lesson_type_selection(callback: CallbackQuery, state: FSMContext):
@@ -376,4 +366,3 @@ async def planner_enter_price(message: Message, state: FSMContext):
         )
     
     await state.clear()
-
