@@ -11,6 +11,7 @@ from database import db
 # Импортируем необходимые функции
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
+from handlers.start.welcome import show_main_menu
 from keyboards.main_menu import get_main_menu_keyboard
 
 
@@ -45,36 +46,11 @@ async def cancel_feedback_callback(callback_query: types.CallbackQuery, state: F
     await state.clear()
     await callback_query.answer()
     
-    # Получаем данные репетитора
-    tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
-    tutor_name = tutor[2] if tutor else "Пользователь"
-    tutor_id = tutor[0]  # ID репетитора
-    
-    # Получаем расписание на сегодня
-    schedule_text = await get_today_schedule_text(tutor_id)
-    # Проверяем активную подписку
-    has_active_subscription = db.check_tutor_subscription(tutor_id)
-    subscription_icon = "💎 " if has_active_subscription else ""
-
-    # Формируем полный текст приветствия
-    formatted_text = WELCOME_BACK_TEXT.format(
-        tutor_name=tutor_name,
-        schedule_text=schedule_text
+     # Используем универсальную функцию для показа главного меню
+    await show_main_menu(
+        chat_id=callback_query.from_user.id,
+        callback_query=callback_query
     )
-    welcome_text = f"{subscription_icon}{formatted_text}"
-    
-    try:
-        await callback_query.message.edit_text(
-            welcome_text,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
-        )
-    except TelegramBadRequest:
-        await callback_query.message.answer(
-            welcome_text,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
-        )
 
 @router.message(FeedbackStates.waiting_for_feedback)
 async def process_feedback_message(message: types.Message, state: FSMContext, bot):
@@ -131,26 +107,7 @@ async def process_feedback_message(message: types.Message, state: FSMContext, bo
             parse_mode='Markdown'
         )
         
-        # Получаем данные репетитора для возврата в главное меню
-        tutor = db.get_tutor_by_telegram_id(user_id)
-        tutor_name = tutor[2] if tutor else "Пользователь"
-        tutor_id = tutor[0] if tutor else None
-        
-        # Получаем расписание на сегодня
-        schedule_text = await get_today_schedule_text(tutor_id) if tutor_id else "Расписание недоступно"
-        
-        # Проверяем активную подписку
-        has_active_subscription = db.check_tutor_subscription(tutor_id)
-        subscription_icon = "💎 " if has_active_subscription else ""
-
-        # Формируем полный текст приветствия
-        formatted_text = WELCOME_BACK_TEXT.format(
-            tutor_name=tutor_name,
-            schedule_text=schedule_text
-        )
-        welcome_text = f"{subscription_icon}{formatted_text}"
-        
-        # Подтверждаем пользователю и возвращаем в главное меню
+        # Подтверждаем пользователю
         await message.answer(
             "✅ **Ваше обращение отправлено!**\n\n"
             "Спасибо за ваше сообщение. Мы рассмотрим его в ближайшее время.\n\n"
@@ -158,10 +115,10 @@ async def process_feedback_message(message: types.Message, state: FSMContext, bo
             parse_mode='Markdown'
         )
         
-        await message.answer(
-            welcome_text,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
+        # ЗАМЕНА: Используем универсальную функцию для возврата в главное меню
+        await show_main_menu(
+            chat_id=message.from_user.id,
+            message=message
         )
         
     except Exception as e:
@@ -172,31 +129,17 @@ async def process_feedback_message(message: types.Message, state: FSMContext, bo
     
     await state.clear()
 
+
 @router.message(F.text.lower() == "отмена", FeedbackStates.waiting_for_feedback)
 async def cancel_feedback_text(message: types.Message, state: FSMContext):
     await state.clear()
     
-    # Получаем данные репетитора
-    tutor = db.get_tutor_by_telegram_id(message.from_user.id)
-    tutor_name = tutor[2] if tutor else "Пользователь"
-    tutor_id = tutor[0] if tutor else None
+@router.message(F.text.lower() == "отмена", FeedbackStates.waiting_for_feedback)
+async def cancel_feedback_text(message: types.Message, state: FSMContext):
+    await state.clear()
     
-    # Получаем расписание на сегодня
-    schedule_text = await get_today_schedule_text(tutor_id) if tutor_id else "Расписание недоступно"
-
-    # Проверяем активную подписку
-    has_active_subscription = db.check_tutor_subscription(tutor_id)
-    subscription_icon = "💎 " if has_active_subscription else ""
-    
-    # Формируем полный текст приветствия
-    formatted_text = WELCOME_BACK_TEXT.format(
-        tutor_name=tutor_name,
-        schedule_text=schedule_text
-    )
-    welcome_text = f"{subscription_icon}{formatted_text}"
-    
-    await message.answer(
-        welcome_text,
-        reply_markup=get_main_menu_keyboard(),
-        parse_mode="HTML"
+    # Используем универсальную функцию для возврата в главное меню
+    await show_main_menu(
+        chat_id=message.from_user.id,
+        message=message
     )

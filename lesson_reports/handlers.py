@@ -1,13 +1,14 @@
 import logging
 import sqlite3
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
+from handlers.start.welcome import show_main_menu
 from parent_report.handlers import ParentReportHandlers
 
 logger = logging.getLogger(__name__)
@@ -300,14 +301,12 @@ class LessonReportHandlers:
         # Очищаем состояние
         await state.clear()
         
-        # Получаем данные репетитора и показываем приветствие с главным меню
-        tutor = self.db.get_tutor_by_telegram_id(message.from_user.id)
-        
-        # Импортируем функцию show_welcome_back (замените на правильный импорт)
-        from handlers.start.welcome import show_welcome_back  # замените your_main_module на нужный модуль
-        
-        # Вызываем функцию приветствия
-        await show_welcome_back(message, tutor)
+        # ЗАМЕНА: Используем универсальную функцию для возврата в главное меню
+        await show_main_menu(
+            chat_id=message.from_user.id,
+            message=message
+        )
+
 
     async def start_group_report(self, callback: CallbackQuery, state: FSMContext):
         """Начинает заполнение отчета для группового занятия"""

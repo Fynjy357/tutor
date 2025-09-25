@@ -4,6 +4,38 @@ from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.keyboards_start import get_student_welcome_keyboard, get_parent_welcome_keyboard, get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
 from handlers.start.config import WELCOME_BACK_TEXT, REGISTRATION_TEXT
+from aiogram.exceptions import TelegramBadRequest
+from datetime import datetime
+
+from aiogram.exceptions import TelegramBadRequest
+import logging
+
+logger = logging.getLogger(__name__)
+
+# И добавьте функцию safe_edit_message в первый файл
+async def safe_edit_message(message, text, reply_markup=None, parse_mode=None):
+    """
+    Безопасное редактирование сообщения с обработкой ошибки 'message not modified'
+    """
+    try:
+        await message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode=parse_mode
+        )
+        return True
+    except TelegramBadRequest as e:
+        if "message is not modified" in str(e):
+            # Сообщение не изменилось - это нормально
+            return False
+        else:
+            logger.error(f"Error editing message: {e}")
+            return False
+    except Exception as e:
+        logger.error(f"Error editing message: {e}")
+        return False
+
+logger = logging.getLogger(__name__)
 
 async def show_welcome_message(message: types.Message):
     """Показ приветственного сообщения"""
@@ -145,28 +177,14 @@ def format_parent_welcome(main_parent: dict, students: list, tutors: list) -> st
 
 async def show_welcome_back(message: types.Message, tutor: tuple):
     """Приветствие для зарегистрированного репетитора с расписанием на сегодня"""
-    tutor_name = tutor[2] if tutor else "Пользователь"
-    tutor_id = tutor[0]  # ID репетитора
-    
-    # Получаем расписание на сегодня
-    schedule_text = await get_today_schedule_text(tutor_id)
-
-    # Проверяем активную подпику
-    has_active_subscription = db.check_tutor_subscription(tutor_id)
-    subscription_icon = "💎 " if has_active_subscription else ""
-    
-    # Формируем полный текст приветствия
-    formatted_text = WELCOME_BACK_TEXT.format(
-        tutor_name=tutor_name,
-        schedule_text=schedule_text
+    await show_main_menu(
+        chat_id=message.from_user.id,
+        message=message
     )
-    welcome_text = f"{subscription_icon}{formatted_text}"
-    
-    await message.answer(
-        welcome_text,
-        reply_markup=get_main_menu_keyboard(),
-        parse_mode="HTML"
-    )
+# # В любом другом месте, где нужно вернуться в главное меню
+# await show_main_menu(chat_id=user_id, message=message)
+# # или
+# await show_main_menu(chat_id=user_id, callback_query=callback_query)
 
 async def show_registration_message(message: types.Message):
     """Приветствие для нового пользователя"""
@@ -175,3 +193,108 @@ async def show_registration_message(message: types.Message):
         reply_markup=get_registration_keyboard(),
         parse_mode="HTML"
     )
+
+async def show_main_menu(chat_id: int, message: types.Message = None, callback_query: types.CallbackQuery = None):
+    """Универсальная функция для показа главного меню"""
+    from database import Database
+    from aiogram.exceptions import TelegramBadRequest
+    
+    db = Database()
+    
+    # Получаем данные репетитора
+    tutor = db.get_tutor_by_telegram_id(chat_id)
+    
+    if not tutor:
+        error_text = "❌ Ошибка: не найдены данные репетитора"
+        if callback_query:
+            # Используем safe_edit_message вместо прямого edit_text
+            success = await safe_edit_message(
+                callback_query.message,
+                text=error_text,
+                parse_mode="HTML"
+            )
+            if not success:
+                await callback_query.message.answer(error_text, parse_mode="HTML")
+        elif message:
+            await message.answer(error_text, parse_mode="HTML")
+        return
+    
+    tutor_name = tutor[2] if tutor else "Пользователь"
+    tutor_id = tutor[0]
+    
+    # Получаем расписание на сегодня
+    schedule_text = await get_today_schedule_text(tutor_id)
+
+    # Получаем текст подписки
+    subscription_text = ""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
+            tutor_data = cursor.fetchone()
+            
+            if tutor_data:
+                telegram_id = tutor_data[0]
+                
+                cursor.execute('''
+                SELECT valid_until FROM payments 
+                WHERE user_id = ? 
+                AND status = 'succeeded'
+                AND valid_until >= datetime('now')
+                ORDER BY created_at DESC
+                LIMIT 1
+                ''', (telegram_id,))
+                
+                subscription_data = cursor.fetchone()
+                
+                if subscription_data:
+                    valid_until = subscription_data[0]
+                    
+                    if isinstance(valid_until, str):
+                        try:
+                            valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+                        except:
+                            pass
+                    
+                    if isinstance(valid_until, datetime):
+                        formatted_date = valid_until.strftime('%d.%m.%Y %H:%M')
+                        subscription_text = f"💎 Подписка активна до: {formatted_date}\n"
+                    else:
+                        subscription_text = "💎 Подписка активна\n"
+    
+    except Exception as e:
+        logger.error(f"Error getting subscription details: {e}")
+        if db.check_tutor_subscription(tutor_id):
+            subscription_text = "💎 Подписка активна\n\n"
+
+    # Формируем полный текст
+    formatted_text = WELCOME_BACK_TEXT.format(
+        tutor_name=tutor_name,
+        schedule_text=schedule_text
+    )
+    welcome_text = f"{subscription_text}{formatted_text}"
+    
+    # Отправляем сообщение в зависимости от контекста
+    if callback_query:
+        # Используем safe_edit_message
+        success = await safe_edit_message(
+            callback_query.message,
+            text=welcome_text,
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
+        # Если редактирование не удалось, отправляем новое сообщение
+        if not success:
+            await callback_query.message.answer(
+                welcome_text,
+                reply_markup=get_main_menu_keyboard(),
+                parse_mode="HTML"
+            )
+    elif message:
+        await message.answer(
+            welcome_text,
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
+

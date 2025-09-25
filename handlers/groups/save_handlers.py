@@ -44,24 +44,34 @@ async def delete_group_confirmation(callback_query: CallbackQuery):
     group = db.get_group_by_id(group_id)
     
     await callback_query.message.edit_text(
-        f"⚠️ <b>Удалить группу?</b>\n\n{group['name']}\n\nЭто действие нельзя отменить!",
+        f"⚠️ <b>Удалить группу?</b>\n\n{group['name']}\n\n"
+        f"Будут удалены:\n"
+        f"• Группа и все её занятия\n"
+        f"• Все будущие занятия группы\n"
+        f"• Планировщики для этой группы\n\n"
+        f"Это действие нельзя отменить!",
         reply_markup=get_delete_confirmation_keyboard(group_id),
         parse_mode="HTML"
     )
 
-# Подтверждение удаления группы
+
 @router.callback_query(F.data.startswith("confirm_delete_"))
 async def confirm_delete_group(callback_query: CallbackQuery, state: FSMContext):
-    """Подтвержденное удаление группы"""
+    """Подтвержденное удаление группы с каскадным удалением зависимостей"""
     await callback_query.answer()
     
     group_id = int(callback_query.data.split("_")[2])
     group = db.get_group_by_id(group_id)
     
-    success = db.delete_group(group_id)
-    text = f"✅ Группа удалена!\n{group['name']}" if success else "❌ Ошибка!"
+    # Используем новую функцию каскадного удаления
+    success = db.delete_group_with_dependencies(group_id)
     
-    await callback_query.message.edit_text(text)
+    if success:
+        text = f"✅ <b>Группа удалена!</b>\n\nГруппа \"{group['name']}\" и все связанные данные успешно удалены."
+    else:
+        text = "❌ <b>Ошибка при удалении группы!</b>"
+    
+    await callback_query.message.edit_text(text, parse_mode="HTML")
     
     # Отправляем главное меню групп как новое сообщение
     await callback_query.message.answer(

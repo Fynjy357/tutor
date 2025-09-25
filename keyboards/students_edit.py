@@ -48,17 +48,17 @@ def get_status_keyboard(student_id):
         )
     )
     
-    builder.row(
-        types.InlineKeyboardButton(
-            text="⏸️ На паузе",
-            callback_data=f"set_status_paused_{student_id}"
-        )
-    )
+    # builder.row(
+    #     types.InlineKeyboardButton(
+    #         text="⏸️ На паузе",
+    #         callback_data=f"set_status_paused_{student_id}"
+    #     )
+    # )
     
     builder.row(
         types.InlineKeyboardButton(
             text="❌ Неактивный",
-            callback_data=f"set_status_inactive_{student_id}"
+            callback_data=f"status_inactive_{student_id}"
         )
     )
     

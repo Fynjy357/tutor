@@ -6,14 +6,19 @@ def get_schedule_keyboard():
     """Клавиатура для управления расписанием"""
     builder = InlineKeyboardBuilder()
     
-    # Первый ряд
+    # Первый ряд - две кнопки в одной строке
     builder.row(
         types.InlineKeyboardButton(
-            text="➕ Добавить занятие",
+            text="➕ Единоразовое",
             callback_data="add_lesson"
-        )
+        ),
+        types.InlineKeyboardButton(
+            text="🔄 Регулярное",
+            callback_data="planer_lessons"
+        ),
+        width=2  # Две кнопки в строке
     )
-    
+
     # Второй ряд
     builder.row(
         types.InlineKeyboardButton(

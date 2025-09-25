@@ -133,6 +133,22 @@ class Database:
             except sqlite3.OperationalError:
                 # Поле уже существует - игнорируем ошибку
                 pass
+            # Сначала добавляем столбец
+            try:
+                cursor.execute('ALTER TABLE lessons ADD COLUMN planner_action_id INTEGER')
+                print("✅ Столбец planner_action_id добавлен")
+            except sqlite3.OperationalError as e:
+                print(f"❌ Ошибка добавления столбца: {e}")
+                # Поле уже существует - игнорируем ошибку
+                pass
+
+            # Потом создаем индекс
+            try:
+                cursor.execute('CREATE INDEX idx_lessons_planner ON lessons(planner_action_id, lesson_date)')
+                print("✅ Индекс создан")
+            except sqlite3.OperationalError as e:
+                print(f"❌ Ошибка создания индекса: {e}")
+                pass
 
             # Таблица подтверждений занятий
             cursor.execute('''
@@ -274,6 +290,27 @@ class Database:
                 migration_status TEXT DEFAULT 'pending',
                 migrated_at TIMESTAMP,
                 FOREIGN KEY (main_id) REFERENCES main_students (id)
+            )
+            ''')
+            # планер регулярных занятий
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS planner_actions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tutor_id INTEGER NOT NULL,
+                lesson_type TEXT NOT NULL,
+                student_id INTEGER,
+                group_id INTEGER,
+                weekday TEXT NOT NULL,
+                time TEXT NOT NULL,
+                duration INTEGER NOT NULL,
+                price REAL NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                last_created TIMESTAMP DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (tutor_id) REFERENCES tutors (id),
+                FOREIGN KEY (student_id) REFERENCES students (id),
+                FOREIGN KEY (group_id) REFERENCES groups (id)
             )
             ''')
             
@@ -647,7 +684,7 @@ class Database:
             logger.error(f"Ошибка при получении занятий студента: {e}")
             return []
 
-    def get_upcoming_lessons(self, tutor_id: int, days: int = 7):
+    def get_upcoming_lessons(self, tutor_id: int, days: int = 14):
         """Получает ближайшие занятия репетитора"""
         try:
             with self.get_connection() as conn:
@@ -743,35 +780,137 @@ class Database:
             logger.error(f"Ошибка при получении группы: {e}")
             return None
 
-    def add_student_to_group(self, student_id: int, group_id: int):
-        """Добавляет ученика в группу"""
+    def add_student_to_group(self, student_id: int, group_id: int) -> bool:
+        """Добавляет ученика в группу и создает для него будущие занятия"""
         try:
+            logger.info(f"👥 Добавление ученика {student_id} в группу {group_id}")
+            
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
-                INSERT OR IGNORE INTO student_groups (student_id, group_id)
-                VALUES (?, ?)
-                ''', (student_id, group_id))
+                
+                # 1. Проверяем существование группы
+                cursor.execute("SELECT id, tutor_id FROM groups WHERE id = ?", (group_id,))
+                group_data = cursor.fetchone()
+                
+                if not group_data:
+                    logger.error(f"❌ Группа {group_id} не найдена")
+                    return False
+                
+                tutor_id = group_data['tutor_id']
+                
+                # 2. Проверяем существование ученика
+                cursor.execute("SELECT id FROM students WHERE id = ?", (student_id,))
+                if not cursor.fetchone():
+                    logger.error(f"❌ Ученик {student_id} не найден")
+                    return False
+                
+                # 3. Проверяем, не состоит ли ученик уже в группе
+                cursor.execute(
+                    "SELECT 1 FROM student_groups WHERE student_id = ? AND group_id = ?",
+                    (student_id, group_id)
+                )
+                if cursor.fetchone():
+                    logger.warning(f"⚠️ Ученик {student_id} уже состоит в группе {group_id}")
+                    return True
+                
+                # 4. Добавляем ученика в группу
+                cursor.execute(
+                    "INSERT INTO student_groups (student_id, group_id) VALUES (?, ?)",
+                    (student_id, group_id)
+                )
+                
+                # 5. Создаем занятия для ученика на основе существующих групповых занятий
+                cursor.execute(
+                    """
+                    SELECT lesson_date, duration, price 
+                    FROM lessons 
+                    WHERE group_id = ? AND lesson_date > datetime('now')
+                    GROUP BY lesson_date, duration, price
+                    """,
+                    (group_id,)
+                )
+                future_lessons = cursor.fetchall()
+                
+                created_count = 0
+                for lesson in future_lessons:
+                    # Проверяем, нет ли уже занятия для этого ученика в это время
+                    cursor.execute(
+                        """
+                        SELECT 1 FROM lessons 
+                        WHERE student_id = ? AND lesson_date = ? AND group_id = ?
+                        """,
+                        (student_id, lesson['lesson_date'], group_id)
+                    )
+                    if not cursor.fetchone():
+                        cursor.execute(
+                            """
+                            INSERT INTO lessons 
+                            (tutor_id, student_id, group_id, lesson_date, duration, price, status)
+                            VALUES (?, ?, ?, ?, ?, ?, 'planned')
+                            """,
+                            (tutor_id, student_id, group_id, lesson['lesson_date'], 
+                            lesson['duration'], lesson['price'])
+                        )
+                        created_count += 1
+                
                 conn.commit()
-                return cursor.rowcount > 0
+                logger.info(f"✅ Ученик {student_id} добавлен в группу {group_id}")
+                logger.info(f"📚 Создано {created_count} будущих занятий")
+                
+                return True
+                
         except Exception as e:
-            logger.error(f"Ошибка при добавлении ученика в группу: {e}")
+            logger.error(f"❌ Ошибка добавления ученика в группу: {e}", exc_info=True)
             return False
 
-    def remove_student_from_group(self, student_id: int, group_id: int):
-        """Удаляет ученика из группы"""
+
+
+    def remove_student_from_group(self, student_id: int, group_id: int) -> bool:
+        """Удаляет ученика из группы, его будущие занятия и регулярные действия планера"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
-                DELETE FROM student_groups 
-                WHERE student_id = ? AND group_id = ?
-                ''', (student_id, group_id))
+                
+                # 1. Удаляем будущие занятия ученика (планируемые)
+                cursor.execute("""
+                    DELETE FROM lessons 
+                    WHERE student_id = ? AND lesson_date > datetime('now') AND status = 'planned'
+                """, (student_id,))
+                
+                deleted_lessons = cursor.rowcount
+                
+                # 2. Деактивируем регулярные действия планера для этого ученика в группе
+                cursor.execute("""
+                    UPDATE planner_actions 
+                    SET is_active = FALSE 
+                    WHERE student_id = ? AND group_id = ? AND is_active = TRUE
+                """, (student_id, group_id))
+                
+                deactivated_actions = cursor.rowcount
+                
+                # 3. Удаляем ученика из группы
+                cursor.execute("""
+                    DELETE FROM student_groups 
+                    WHERE student_id = ? AND group_id = ?
+                """, (student_id, group_id))
+                
                 conn.commit()
-                return cursor.rowcount > 0
+                
+                success = cursor.rowcount > 0
+                if success:
+                    logger.info(f"✅ Ученик {student_id} удален из группы {group_id}")
+                    logger.info(f"🗑️ Удалено будущих занятий: {deleted_lessons}")
+                    logger.info(f"🗑️ Деактивировано регулярных действий: {deactivated_actions}")
+                else:
+                    logger.warning(f"⚠️ Ученик {student_id} не найден в группе {group_id}")
+                
+                return success
+                
         except Exception as e:
-            logger.error(f"Ошибка при удалении ученика из группы: {e}")
+            logger.error(f"❌ Ошибка удаления ученика {student_id} из группы {group_id}: {e}")
             return False
+
+
 
     def get_students_in_group(self, group_id: int):
         """Получает всех учеников в группе"""
@@ -2606,6 +2745,214 @@ class Database:
                 
         except Exception as e:
             logger.error(f"❌ Ошибка проверки структуры таблицы: {e}")
+
+
+    def delete_group_with_dependencies(self, group_id: int) -> bool:
+        """Удаляет группу и все связанные данные"""
+        try:
+            logger.info(f"🗑️ Запрос на удаление группы ID {group_id} с зависимостями")
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # 1. Удаляем будущие занятия группы
+                cursor.execute('''
+                DELETE FROM lessons 
+                WHERE group_id = ? AND lesson_date > datetime('now')
+                ''', (group_id,))
+                
+                deleted_lessons = cursor.rowcount
+                logger.info(f"📚 Удалено будущих занятий: {deleted_lessons}")
+                
+                # 2. Удаляем планировщики для этой группы
+                cursor.execute('''
+                DELETE FROM planner_actions 
+                WHERE group_id = ?
+                ''', (group_id,))
+                
+                deleted_planners = cursor.rowcount
+                logger.info(f"📅 Удалено планировщиков: {deleted_planners}")
+                
+                # 3. Удаляем саму группу
+                cursor.execute('DELETE FROM groups WHERE id = ?', (group_id,))
+                group_deleted = cursor.rowcount > 0
+                
+                conn.commit()
+                
+                if group_deleted:
+                    logger.info(f"✅ Группа ID {group_id} и зависимости успешно удалены")
+                else:
+                    logger.warning(f"⚠️ Группа ID {group_id} не найдена")
+                    
+                return group_deleted
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка при удалении группы {group_id}: {e}", exc_info=True)
+            return False
+
+    def update_student_status(self, student_id: int, new_status: str) -> bool:
+        """Обновляет статус ученика"""
+        try:
+            logger.info(f"📊 Обновление статуса ученика {student_id} на '{new_status}'")
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE students SET status = ? WHERE id = ?",
+                    (new_status, student_id)
+                )
+                conn.commit()
+                
+                success = cursor.rowcount > 0
+                if success:
+                    logger.info(f"✅ Статус ученика {student_id} обновлен на '{new_status}'")
+                else:
+                    logger.warning(f"⚠️ Ученик {student_id} не найден при обновлении статуса")
+                
+                return success
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка обновления статуса ученика: {e}")
+            return False
+    def get_student_groups(self, student_id: int) -> list:
+        """Получает все группы, в которых состоит ученик"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT g.id, g.name 
+                    FROM groups g
+                    JOIN student_groups sg ON g.id = sg.group_id
+                    WHERE sg.student_id = ?
+                """, (student_id,))
+                
+                groups = []
+                for row in cursor.fetchall():
+                    groups.append({
+                        'id': row[0],
+                        'name': row[1]
+                    })
+                
+                return groups
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения групп ученика {student_id}: {e}")
+            return []
+
+    def deactivate_student_completely(self, student_id: int) -> dict:
+        """Полная деактивация ученика: удаляет из всех групп, занятий и регулярных действий планера"""
+        try:
+            logger.info(f"🔴 Полная деактивация ученика {student_id}")
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                result = {
+                    'groups_removed': 0,
+                    'future_lessons_deleted': 0,
+                    'planner_actions_deactivated': 0
+                }
+                
+                # 1. Получаем все группы ученика
+                cursor.execute("""
+                    SELECT group_id FROM student_groups WHERE student_id = ?
+                """, (student_id,))
+                
+                groups = [row[0] for row in cursor.fetchall()]
+                result['groups_removed'] = len(groups)
+                
+                # 2. Удаляем будущие занятия ученика (планируемые)
+                cursor.execute("""
+                    DELETE FROM lessons 
+                    WHERE student_id = ? AND lesson_date > datetime('now') AND status = 'planned'
+                """, (student_id,))
+                result['future_lessons_deleted'] = cursor.rowcount
+                
+                # 3. Деактивируем регулярные действия планера для этого ученика
+                cursor.execute("""
+                    UPDATE planner_actions 
+                    SET is_active = FALSE 
+                    WHERE student_id = ? AND is_active = TRUE
+                """, (student_id,))
+                result['planner_actions_deactivated'] = cursor.rowcount
+                
+                # 4. Удаляем ученика из всех групп
+                cursor.execute("""
+                    DELETE FROM student_groups WHERE student_id = ?
+                """, (student_id,))
+                
+                conn.commit()
+                
+                logger.info(f"✅ Полная деактивация ученика {student_id} завершена:")
+                logger.info(f"   👥 Удален из групп: {result['groups_removed']}")
+                logger.info(f"   📅 Удалено будущих занятий: {result['future_lessons_deleted']}")
+                logger.info(f"   📋 Деактивировано регулярных действий: {result['planner_actions_deactivated']}")
+                
+                return result
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка полной деактивации ученика {student_id}: {e}")
+            return {'error': str(e)}
+
+
+    def get_student_planner_actions(self, student_id: int) -> list:
+        """Получает все активные регулярные действия для ученика"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT id, lesson_type, group_id, weekday, time, duration, price
+                    FROM planner_actions 
+                    WHERE student_id = ? AND is_active = TRUE
+                    ORDER BY weekday, time
+                """, (student_id,))
+                
+                actions = []
+                for row in cursor.fetchall():
+                    actions.append({
+                        'id': row[0],
+                        'lesson_type': row[1],
+                        'group_id': row[2],
+                        'weekday': row[3],
+                        'time': row[4],
+                        'duration': row[5],
+                        'price': row[6]
+                    })
+                
+                return actions
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения регулярных действий ученика {student_id}: {e}")
+            return []
+    def get_future_lessons(self, student_id: int) -> list:
+        """Получает будущие занятия ученика"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT id, tutor_id, lesson_date, duration, price, status
+                    FROM lessons 
+                    WHERE student_id = ? AND lesson_date > datetime('now')
+                    ORDER BY lesson_date
+                """, (student_id,))
+                
+                lessons = []
+                for row in cursor.fetchall():
+                    lessons.append({
+                        'id': row[0],
+                        'tutor_id': row[1],
+                        'lesson_date': row[2],
+                        'duration': row[3],
+                        'price': row[4],
+                        'status': row[5]
+                    })
+                
+                return lessons
+                
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения будущих занятий ученика {student_id}: {e}")
+            return []
+
 
 # Создаем глобальный экземпляр базы данных
 db = Database()

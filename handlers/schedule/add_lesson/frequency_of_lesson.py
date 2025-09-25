@@ -6,9 +6,8 @@ from database import db
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.schedule.states import AddLessonStates
 import logging
+from handlers.start.welcome import show_main_menu
 
-from handlers.start.config import WELCOME_BACK_TEXT
-from keyboards.main_menu import get_main_menu_keyboard
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -186,29 +185,10 @@ async def process_time(message: types.Message, state: FSMContext):
                 )
                 await state.clear()
                 
-                # Получаем данные репетитора для главного меню
-                tutor = db.get_tutor_by_telegram_id(message.from_user.id)
-                tutor_name = tutor[2] if tutor else "Пользователь"
-                tutor_id = tutor[0] if tutor else None
-                
-                # Получаем расписание на сегодня
-                schedule_text = await get_today_schedule_text(tutor_id) if tutor_id else "Расписание недоступно"
-                
-                # Проверяем активную подписку
-                has_active_subscription = db.check_tutor_subscription(tutor_id)
-                subscription_icon = "💎 " if has_active_subscription else ""
-                
-                # Формируем полный текст приветствия
-                formatted_text = WELCOME_BACK_TEXT.format(
-                    tutor_name=tutor_name,
-                    schedule_text=schedule_text
-                )
-                welcome_text = f"{subscription_icon}{formatted_text}"
-                
-                await message.answer(
-                    welcome_text,
-                    reply_markup=get_main_menu_keyboard(),
-                    parse_mode="HTML"
+                # Используем универсальную функцию для возврата в главное меню
+                await show_main_menu(
+                    chat_id=message.from_user.id,
+                    message=message
                 )
                 return
             
@@ -247,7 +227,7 @@ async def process_time(message: types.Message, state: FSMContext):
                 confirmation_text += f"👥 Группа: {data.get('group_name')}\n"
                 confirmation_text += f"📅 День: {weekdays[weekday]}\n"
                 confirmation_text += f"⏰ Время: {message.text}\n"
-                confirmation_text += "🔄 Тип: Регулярное\n"
+                # confirmation_text += "🔄 Тип: Регулярное\n"
                 
             else:
                 # Преобразуем дату обратно в читаемый формат

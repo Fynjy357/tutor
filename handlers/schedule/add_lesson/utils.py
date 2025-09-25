@@ -28,12 +28,12 @@ async def back_to_frequency(callback_query: types.CallbackQuery, state: FSMConte
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📅 Единоразовое", callback_data="frequency_single")],
-        [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
+        # [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_lesson_type")]
     ])
     
     await callback_query.message.edit_text(
-        "📅 <b>Регулярное или единоразовое занятие добавить?</b>",
+        "📅 <b>Какое занятие добавить?</b>",
         reply_markup=keyboard,
         parse_mode="HTML"
     )

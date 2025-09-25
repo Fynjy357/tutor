@@ -3,15 +3,11 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.exceptions import TelegramBadRequest
-from handlers.schedule.schedule_utils import get_today_schedule_text
-from handlers.start.config import WELCOME_BACK_TEXT
-from handlers.start.keyboards_start import get_registration_keyboard
-from keyboards.main_menu import get_main_menu_keyboard
+from handlers.start.welcome import show_main_menu
 from payment.config import TARIF
 from .models import PaymentManager
 from .yookassa_integration import YooKassaManager
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -335,19 +331,10 @@ async def back_to_main_menu_handler(callback: types.CallbackQuery):
             )
             return
         
-        tutor_id = tutor['id']
-        schedule_text = await get_today_schedule_text(tutor_id)
-        
-            # Проверяем активную подписку
-        has_active_subscription = db.check_tutor_subscription(tutor_id)
-        subscription_icon = "💎 " if has_active_subscription else ""
-        welcome_message = f"{subscription_icon}{WELCOME_BACK_TEXT.format(tutor_name=tutor['full_name'], schedule_text=schedule_text)}"
-
-        await safe_edit_message(
-            callback.message,
-            text=welcome_message,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
+        # Используем универсальную функцию
+        await show_main_menu(
+            chat_id=callback.from_user.id,
+            callback_query=callback
         )
         
     except Exception as e:

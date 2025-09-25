@@ -5,16 +5,13 @@ from aiogram.exceptions import TelegramBadRequest
 import logging
 
 from handlers.schedule.schedule_utils import get_today_schedule_text
-from handlers.start.config import WELCOME_BACK_TEXT
+from handlers.start.welcome import show_main_menu
 from handlers.students.config import ADD_STUDENT
-from handlers.students.keyboards import get_invite_keyboard
-from keyboards.main_menu import get_main_menu_keyboard
 
 from .states import AddStudentStates
 
 from .utils import get_students_stats
 from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard, get_students_pagination_keyboard
-from .edit_handlers import router as edit_router
 from database import db
 from handlers.students.handlers_add_student import router as add_students_router
 from handlers.students.handlers_edit_student import router as student_
@@ -94,43 +91,8 @@ async def back_to_main_menu(callback_query: types.CallbackQuery, state: FSMConte
     if current_state:
         await state.clear()
     
-    # Получаем данные репетитора
-    tutor = db.get_tutor_by_telegram_id(callback_query.from_user.id)
-    
-    if not tutor:
-        # Если репетитор не найден, показываем сообщение об ошибке
-        try:
-            await callback_query.message.edit_text(
-                "❌ Ошибка: не найдены данные репетитора",
-                parse_mode="HTML"
-            )
-        except TelegramBadRequest:
-            await callback_query.message.answer(
-                "❌ Ошибка: не найдены данные репетитора",
-                parse_mode="HTML"
-            )
-        return
-    
-    # Используем функцию show_welcome_back для показа главного меню
-    tutor_id = tutor[0]
-    schedule_text = await get_today_schedule_text(tutor_id)
-    # Проверяем активную подписку
-    has_active_subscription = db.check_tutor_subscription(tutor_id)
-    subscription_icon = "💎 " if has_active_subscription else ""
-    
-    welcome_message = f"{subscription_icon}{WELCOME_BACK_TEXT.format(tutor_name=tutor[2], schedule_text=schedule_text)}"
-
-    try:
-        # Пытаемся изменить текущее сообщение
-        await callback_query.message.edit_text(
-            welcome_message,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
-        )
-    except TelegramBadRequest:
-        # Если не получается изменить, отправляем новое сообщение
-        await callback_query.message.answer(
-            welcome_message,
-            reply_markup=get_main_menu_keyboard(),
-            parse_mode="HTML"
-        )
+    # Используем универсальную функцию для показа главного меню
+    await show_main_menu(
+        chat_id=callback_query.from_user.id,
+        callback_query=callback_query
+    )

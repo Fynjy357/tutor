@@ -28,11 +28,11 @@ async def process_student_selection(callback_query: types.CallbackQuery, state: 
         weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
         confirmation_text += f"📅 День: {weekdays[data.get('weekday')]}\n"
         confirmation_text += f"⏰ Время: {data.get('time')}\n"
-        confirmation_text += "🔄 Тип: Регулярное\n"
+        # confirmation_text += "🔄 Тип: Регулярное\n"
     else:
         confirmation_text += f"📅 Дата: {data.get('date')}\n"
         confirmation_text += f"⏰ Время: {data.get('time')}\n"
-        confirmation_text += "📋 Тип: Единоразовое\n"
+        # confirmation_text += "📋 Тип: Единоразовое\n"
     
     # Получаем имя студента
     tutor_id = db.get_tutor_id_by_telegram_id(callback_query.from_user.id)

@@ -42,6 +42,8 @@ from important_doc.handlers import consent_router, ConsentMiddleware
 from important_doc.models import consent_manager
 from commands.message.message import message_router
 from payment.notifications.trial_notification_task import start_trial_notification_task
+from handlers.schedule.planner.timer.planner_manager import planner_manager
+from handlers.schedule.planner.timer.planner_commands import router as planner_commands_router
 
 
 # Настройка логирования
@@ -159,6 +161,8 @@ class BotApp:
             self.dp.include_router(backup)
             self.dp.include_router(system_help)
             self.dp.include_router(message_router)
+            # роутер планера регулярных занятий
+            self.dp.include_router(planner_commands_router)
 
             
             
@@ -197,6 +201,12 @@ class BotApp:
             
         logger.info("Завершение работы бота...")
         self.is_running = False
+        # останавливаем планер регулярных задач
+        try:
+            await planner_manager.stop_planner()
+            logger.info("Планер успешно остановлен")
+        except Exception as e:
+            logger.error(f"Ошибка при остановке планера: {e}")
 
         # Остановка планировщика напоминаний  # ← ДОБАВЛЕНО
         if self.reminder_scheduler:  # ← ДОБАВЛЕНО
@@ -263,6 +273,13 @@ class BotApp:
             # ЗАПУСК ЗАДАЧИ УВЕДОМЛЕНИЙ О ПРОБНОМ ПЕРИОДЕ ← ДОБАВЬТЕ ЭТО
             self.tasks.append(asyncio.create_task(start_trial_notification_task(self.bot)))
             logger.info("Задача уведомлений о пробном периоде запущена")
+
+            # запуск планера регулярных занятий
+            try:
+                await planner_manager.start_planner()
+                logger.info("Планер успешно запущен")
+            except Exception as e:
+                logger.error(f"Ошибка при запуске планера: {e}")
 
             logger.info("Бот запущен и готов к работе")
             await self.dp.start_polling(self.bot)

@@ -49,12 +49,12 @@ async def process_individual_lesson_type(callback_query: types.CallbackQuery, st
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📅 Единоразовое", callback_data="frequency_single")],
-        [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
+        # [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_lesson_type")]
     ])
     
     await callback_query.message.edit_text(
-        "📅 <b>Регулярное или единоразовое занятие добавить?</b>",
+        "📅 <b>Какое занятие добавить?</b>",
         reply_markup=keyboard,
         parse_mode="HTML"
     )
@@ -141,13 +141,13 @@ async def group_selected_for_lesson(callback_query: types.CallbackQuery, state: 
     # Переходим к выбору частоты занятия
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📅 Единоразовое", callback_data="frequency_single")],
-        [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
+        # [InlineKeyboardButton(text="🔄 Регулярное", callback_data="frequency_regular")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_group_selection")]
     ])
     
     await callback_query.message.edit_text(
-        f"✅ <b>Группа выбрана:</b> {group['name']}\n\n"
-        "📅 <b>Регулярное или единоразовое занятие добавить?</b>",
+        f"✅ <b>Группа выбрана:</b> {group['name']}\n\n",
+        # "📅 <b>Регулярное или единоразовое занятие добавить?</b>",
         reply_markup=keyboard,
         parse_mode="HTML"
     )

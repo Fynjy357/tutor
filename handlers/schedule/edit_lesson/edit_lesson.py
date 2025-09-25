@@ -24,7 +24,7 @@ async def edit_lesson_start(callback_query: types.CallbackQuery, state: FSMConte
         return
     
     # Получаем ближайшие занятия (7 дней вперед)
-    upcoming_lessons = db.get_upcoming_lessons(tutor_id, days=7)
+    upcoming_lessons = db.get_upcoming_lessons(tutor_id, days=14)
     
     if not upcoming_lessons:
         await callback_query.message.answer("📭 У вас нет предстоящих занятий для редактирования.")
