@@ -258,7 +258,7 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     schedule_text = await get_today_schedule_text(tutor_id)
 
     # Формируем основной текст (приветствие + расписание)
-    welcome_base_text = f"👋 Добро пожаловать, {tutor_name}!\n\n{schedule_text}"
+    welcome_base_text = f"<b>Добро пожаловать, {tutor_name}</b>!\n\n{schedule_text}"
 
     # Формируем блок подписки/статистики (будет ПОСЛЕ расписания)
     subscription_block = ""
