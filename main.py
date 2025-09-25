@@ -41,6 +41,7 @@ from commands.system_info.system_info import router as system_help
 from important_doc.handlers import consent_router, ConsentMiddleware
 from important_doc.models import consent_manager
 from commands.message.message import message_router
+from commands.message import broadcast_router
 from payment.notifications.trial_notification_task import start_trial_notification_task
 from handlers.schedule.planner.timer.planner_manager import planner_manager
 from handlers.schedule.planner.timer.planner_commands import router as planner_commands_router
@@ -161,6 +162,8 @@ class BotApp:
             self.dp.include_router(backup)
             self.dp.include_router(system_help)
             self.dp.include_router(message_router)
+            self.dp.include_router(broadcast_router)
+            
             # роутер планера регулярных занятий
             self.dp.include_router(planner_commands_router)
 
