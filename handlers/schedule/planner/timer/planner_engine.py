@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from database import db
+from payment.models import PaymentManager  # Добавляем импорт
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class PlannerEngine:
             try:
                 # Проверяем каждые 6 часов
                 await self._check_and_create_lessons()
-                await asyncio.sleep(7 * 24 * 60 * 60)  # 7 дней 
+                await asyncio.sleep(7 * 24 * 60 * 60)  # 6 часов (было 7 дней)
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -50,7 +51,7 @@ class PlannerEngine:
                 await asyncio.sleep(60)
     
     async def _check_and_create_lessons(self):
-        """Проверяет и создает занятия на 2 недели вперед"""
+        """Проверяет и создает занятия на 2 недели вперед с проверкой подписки"""
         logger.info("Проверка планера: начало")
         
         try:
@@ -60,13 +61,63 @@ class PlannerEngine:
                 logger.info("Нет активных задач планера")
                 return
             
+            # 🔥 ГРУППИРУЕМ ЗАДАЧИ ПО РЕПЕТИТОРАМ И ПРОВЕРЯЕМ ПОДПИСКУ
+            tutors_tasks = {}
             for task in planner_tasks:
-                await self._create_lessons_for_task(task)
+                tutor_id = task['tutor_id']
+                if tutor_id not in tutors_tasks:
+                    tutors_tasks[tutor_id] = []
+                tutors_tasks[tutor_id].append(task)
             
-            logger.info(f"Проверка планера завершена. Обработано задач: {len(planner_tasks)}")
+            for tutor_id, tasks in tutors_tasks.items():
+                # Получаем telegram_id репетитора для проверки подписки
+                telegram_id = self._get_tutor_telegram_id(tutor_id)
+                if not telegram_id:
+                    logger.warning(f"Не найден telegram_id для репетитора {tutor_id}")
+                    continue
+                
+                # 🔥 ПРОВЕРЯЕМ ПОДПИСКУ
+                has_active_subscription = await PaymentManager.check_subscription(telegram_id)
+                
+                if not has_active_subscription:
+                    # Отключаем все задачи этого репетитора
+                    self._deactivate_tutor_tasks(tutor_id)
+                    logger.info(f"Планер отключен для репетитора {tutor_id} (нет подписки)")
+                    continue
+                
+                # Если подписка активна - создаем занятия
+                for task in tasks:
+                    await self._create_lessons_for_task(task)
+            
+            logger.info(f"Проверка планера завершена. Обработано репетиторов: {len(tutors_tasks)}")
             
         except Exception as e:
             logger.error(f"Ошибка при проверке планера: {e}")
+    
+    def _get_tutor_telegram_id(self, tutor_id: int) -> int:
+        """Получает telegram_id репетитора"""
+        try:
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            logger.error(f"Ошибка при получении telegram_id репетитора {tutor_id}: {e}")
+            return None
+    
+    def _deactivate_tutor_tasks(self, tutor_id: int):
+        """Отключает все задачи планера для репетитора"""
+        try:
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE planner_actions SET is_active = 0 WHERE tutor_id = ?
+                ''', (tutor_id,))
+                conn.commit()
+                logger.info(f"Отключено задач планера для репетитора {tutor_id}")
+        except Exception as e:
+            logger.error(f"Ошибка при отключении задач репетитора {tutor_id}: {e}")
     
     def _get_all_planner_tasks(self) -> List[Dict[str, Any]]:
         """Получает все активные задачи планера"""
@@ -91,7 +142,7 @@ class PlannerEngine:
             return []
     
     async def _create_lessons_for_task(self, task: Dict[str, Any]):
-        """Создает только недостающие занятия, не трогает существующие"""
+        """Создает только недостающие занятия, не трогая существующие"""
         try:
             # Проверяем, нужно ли создавать занятия для этой задачи
             if not self._should_create_lessons(task):
@@ -142,7 +193,6 @@ class PlannerEngine:
         logger.debug(f"Задача {task['id']} не имеет будущих занятий - создаем")
         return True
 
-    
     def _get_target_dates_for_weekday(self, weekday: str) -> List[datetime]:
         """Получает даты на 2 недели вперед для указанного дня недели"""
         weekday_map = {
@@ -200,8 +250,6 @@ class PlannerEngine:
             logger.error(f"Ошибка при проверке существования занятия: {e}")
             return True
 
-
-        
     def delete_lessons_by_planner_action(self, planner_action_id: int):
         """Удаляет все занятия, связанные с задачей планера"""
         try:
@@ -229,7 +277,6 @@ class PlannerEngine:
             logger.error(f"Ошибка при получении занятий для задачи {planner_action_id}: {e}")
             return []
 
-    
     def _create_lesson(self, task: Dict[str, Any], lesson_date: datetime):
         """Создает занятие в базе данных"""
         try:
@@ -245,7 +292,7 @@ class PlannerEngine:
                     INSERT INTO lessons (tutor_id, student_id, lesson_date, duration, price, status, planner_action_id)
                     VALUES (?, ?, ?, ?, ?, 'planned', ?)
                     ''', (task['tutor_id'], task['student_id'], lesson_datetime, 
-                        task['duration'], task['price'], task['id']))  # ← ДОБАВЛЯЕМ planner_action_id
+                        task['duration'], task['price'], task['id']))
                 else:
                     # Групповое занятие
                     cursor.execute('''
@@ -259,7 +306,7 @@ class PlannerEngine:
                         INSERT INTO lessons (tutor_id, student_id, group_id, lesson_date, duration, price, status, planner_action_id)
                         VALUES (?, ?, ?, ?, ?, ?, 'planned', ?)
                         ''', (task['tutor_id'], student[0], task['group_id'], lesson_datetime,
-                            task['duration'], task['price'], task['id']))  # ← ДОБАВЛЯЕМ planner_action_id
+                            task['duration'], task['price'], task['id']))
                 
                 conn.commit()
                 
@@ -267,8 +314,6 @@ class PlannerEngine:
             logger.error(f"Ошибка при создании занятия: {e}")
             raise
 
-
-    
     def _update_last_created(self, task_id: int):
         """Обновляет время последнего создания занятий для задачи"""
         try:

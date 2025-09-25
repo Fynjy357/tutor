@@ -232,3 +232,29 @@ class PaymentManager:
         except Exception as e:
             logger.error(f"Ошибка создания бесплатной подписки: {e}")
             return False
+    @staticmethod
+    async def activate_planner_immediately(telegram_id: int):
+        """Немедленная активация планера после оплаты"""
+        try:
+            from handlers.schedule.planner.timer.planner_manager import planner_manager
+            
+            # Проверяем подписку
+            has_subscription = await PaymentManager.check_subscription(telegram_id)
+            
+            if has_subscription:
+                # НЕМЕДЛЕННО включаем планер
+                success = await planner_manager.update_tutor_planner_status(telegram_id, True)
+                
+                if success:
+                    logger.info(f"Планер НЕМЕДЛЕННО активирован для {telegram_id} после оплаты")
+                    return True
+                else:
+                    logger.error(f"Ошибка немедленной активации планера для {telegram_id}")
+                    return False
+            else:
+                logger.warning(f"У {telegram_id} нет активной подписки для немедленной активации")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Ошибка при немедленной активации планера: {e}")
+            return False

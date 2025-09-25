@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime
 from .planner_engine import planner_engine
+from payment.models import PaymentManager  # Добавляем импорт
 
 logger = logging.getLogger(__name__)
 
@@ -50,5 +51,39 @@ class PlannerManager:
             'is_running': planner_engine.is_running,
             'last_check': datetime.now().isoformat() if planner_engine.is_running else None
         }
+    
+    # 🔥 НОВЫЙ МЕТОД: Принудительная активация/деактивация для репетитора
+    async def update_tutor_planner_status(self, telegram_id: int, has_subscription: bool):
+        """Обновляет статус планера для репетитора"""
+        try:
+            from database import db
+            
+            tutor_id = db.get_tutor_id_by_telegram_id(telegram_id)
+            if not tutor_id:
+                logger.error(f"Репетитор не найден для telegram_id {telegram_id}")
+                return False
+            
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if has_subscription:
+                    # Включаем планер
+                    cursor.execute('''
+                    UPDATE planner_actions SET is_active = 1 WHERE tutor_id = ?
+                    ''', (tutor_id,))
+                    logger.info(f"Планер включен для репетитора {tutor_id}")
+                else:
+                    # Отключаем планер
+                    cursor.execute('''
+                    UPDATE planner_actions SET is_active = 0 WHERE tutor_id = ?
+                    ''', (tutor_id,))
+                    logger.info(f"Планер отключен для репетитора {tutor_id}")
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении статуса планера для репетитора {telegram_id}: {e}")
+            return False
 
 planner_manager = PlannerManager()

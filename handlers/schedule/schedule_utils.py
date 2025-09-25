@@ -126,9 +126,8 @@ async def get_upcoming_lessons_text(tutor_id: int) -> str:
 
 
 
-# получение расписания на сегодня
 async def get_today_schedule_text(tutor_id: int) -> str:
-    """Формирует текст расписания на сегодня в новом формате"""
+    """Формирует текст расписания на сегодня (только расписание, без статистики)"""
     from datetime import datetime, date, timedelta
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -151,40 +150,12 @@ async def get_today_schedule_text(tutor_id: int) -> str:
     date_str = f"{current_date.day} {month_names[current_date.month]}, {day_name}"
     
     if not lessons:
-        # Финансовая статистика
-        current_month = datetime.now().month
-        current_year = datetime.now().year
-        
-        current_month_earnings = db.get_earnings_by_period(
-            tutor_id, 
-            date(current_year, current_month, 1), 
-            datetime.now().date()
-        )
-        
-        if current_month == 1:
-            prev_month = 12
-            prev_year = current_year - 1
-        else:
-            prev_month = current_month - 1
-            prev_year = current_year
-        
-        prev_month_earnings = db.get_earnings_by_period(
-            tutor_id,
-            date(prev_year, prev_month, 1),
-            date(prev_year, prev_month, 1).replace(day=28) + timedelta(days=4)
-        )
-        
-        active_students_count = db.get_active_students_count(tutor_id)
-        
         return (
             f"📅 <b>Расписание на сегодня</b>\n"
             f"━━━━━━━━━━━━━━━━━━\n"
             f"🗓️ <b>{date_str.capitalize()}</b>\n"
             f"━━━━━━━━━━━━━━━━━━\n\n"
-            f"📭 <b>Занятий нет</b>\n\n"
-            f"👨‍🎓 <b>Активных учеников:</b> {active_students_count}\n"
-            f"💰 <b>Заработано в {month_names[current_month]}:</b> {current_month_earnings} руб\n"
-            f"📊 <b>Заработано в {month_names[prev_month]}:</b> {prev_month_earnings} руб"
+            f"📭 <b>Занятий нет</b>"
         )
     
     # Группируем занятия по времени
@@ -252,38 +223,4 @@ async def get_today_schedule_text(tutor_id: int) -> str:
                 f"🎓 {students_text}\n\n"
             )
     
-    # Добавляем финансовую статистику
-    current_month = datetime.now().month
-    current_year = datetime.now().year
-    
-    current_month_earnings = db.get_earnings_by_period(
-        tutor_id, 
-        date(current_year, current_month, 1), 
-        datetime.now().date()
-    )
-    
-    if current_month == 1:
-        prev_month = 12
-        prev_year = current_year - 1
-    else:
-        prev_month = current_month - 1
-        prev_year = current_year
-    
-    prev_month_earnings = db.get_earnings_by_period(
-        tutor_id,
-        date(prev_year, prev_month, 1),
-        date(prev_year, prev_month, 1).replace(day=28) + timedelta(days=4)
-    )
-    
-    active_students_count = db.get_active_students_count(tutor_id)
-    
-    schedule_text += (
-        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 <b>Статистика</b>\n\n"
-        f"👨‍🎓 <b>Активных учеников:</b> {active_students_count}\n"
-        f"💰 <b>Заработано в {month_names[current_month]}:</b> {current_month_earnings} руб\n"
-        f"📈 <b>Заработано в {month_names[prev_month]}:</b> {prev_month_earnings} руб"
-    )
-    
-    return schedule_text
-
+    return schedule_text.strip()

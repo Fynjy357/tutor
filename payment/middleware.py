@@ -1,3 +1,4 @@
+# payment/middleware.py
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery, Update
 from typing import Callable, Dict, Any, Awaitable
@@ -13,7 +14,8 @@ class SubscriptionMiddleware(BaseMiddleware):
         ]
         
         self.premium_callbacks = [
-            'groups', 'lesson_type_group', 'invite_student_', 'invite_parent_', 'edit_datetime'
+            'edit_datetime', 'planner_', 'planner_add_task', 'planner_type_', 'planner_student_', 
+            'planner_group_', 'planner_weekday_', 'planner_back_to_', 'back_to_planner'
         ]
 
     async def __call__(

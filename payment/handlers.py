@@ -8,6 +8,7 @@ from payment.config import TARIF
 from .models import PaymentManager
 from .yookassa_integration import YooKassaManager
 import logging
+from handlers.schedule.planner.timer.planner_manager import planner_manager
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -254,6 +255,10 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
             if not success:
                 logger.error(f"Failed to create payment record for user {user_id}")
             
+            # ✅ ВСТАВЛЯЕМ ЗДЕСЬ - НЕМЕДЛЕННАЯ АКТИВАЦИЯ ПЛАНЕРА
+            # После создания/обновления подписки:
+            await PaymentManager.activate_planner_immediately(user_id)
+            
             # Проверяем текущий статус подписки пользователя
             current_subscription = await PaymentManager.get_payment_info(user_id)
             logger.info(f"Current subscription after payment: {current_subscription}")
@@ -277,6 +282,12 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
                     f"📅 Подписка активна до: {formatted_date}\n"
                     f"💳 Тариф: {tariff_name}\n\n"
                     f"🎉 Вам доступен весь функционал!"
+                )
+                
+                # ✅ ВСТАВЛЯЕМ ЗДЕСЬ - СООБЩЕНИЕ ОБ АКТИВАЦИИ ПЛАНЕРА
+                await callback.message.answer(
+                    "✅ Оплата прошла успешно! Планер активирован.\n"
+                    "Теперь вы можете создавать и редактировать задачи для учеников."
                 )
             else:
                 text = "❌ Ошибка активации подписки. Обратитесь в поддержку."
@@ -305,6 +316,7 @@ async def check_payment_handler(callback: types.CallbackQuery, state: FSMContext
     except Exception as e:
         logger.error(f"Error in check_payment_handler: {e}", exc_info=True)
         await callback.answer("❌ Ошибка проверки платежа", show_alert=True)
+
 
 @router.callback_query(F.data == "back_to_settings")
 async def back_to_settings_handler(callback: types.CallbackQuery, state: FSMContext):
@@ -342,3 +354,19 @@ async def back_to_main_menu_handler(callback: types.CallbackQuery):
         await callback.answer("❌ Ошибка возврата в главное меню", show_alert=True)
     
     await callback.answer()
+
+async def handle_payment_success(telegram_id: int):
+    """Обработка успешной оплаты - включаем планер"""
+    success = await planner_manager.update_tutor_planner_status(telegram_id, True)
+    if success:
+        logger.info(f"Планер включен для репетитора {telegram_id} после оплаты")
+    else:
+        logger.error(f"Ошибка при включении планера для репетитора {telegram_id}")
+
+async def handle_payment_expired(telegram_id: int):
+    """Обработка истечения подписки - отключаем планер"""
+    success = await planner_manager.update_tutor_planner_status(telegram_id, False)
+    if success:
+        logger.info(f"Планер отключен для репетитора {telegram_id} (подписка истекла)")
+    else:
+        logger.error(f"Ошибка при отключении планера для репетитора {telegram_id}")

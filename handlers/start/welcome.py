@@ -198,6 +198,7 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     """Универсальная функция для показа главного меню"""
     from database import Database
     from aiogram.exceptions import TelegramBadRequest
+    from datetime import datetime, date, timedelta
     
     db = Database()
     
@@ -207,7 +208,6 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     if not tutor:
         error_text = "❌ Ошибка: не найдены данные репетитора"
         if callback_query:
-            # Используем safe_edit_message вместо прямого edit_text
             success = await safe_edit_message(
                 callback_query.message,
                 text=error_text,
@@ -222,21 +222,24 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     tutor_name = tutor[2] if tutor else "Пользователь"
     tutor_id = tutor[0]
     
-    # Получаем расписание на сегодня
-    schedule_text = await get_today_schedule_text(tutor_id)
-
-    # Получаем текст подписки
-    subscription_text = ""
+    # Русские названия месяцев
+    month_names = {
+        1: "января", 2: "февраля", 3: "марта", 4: "апреля",
+        5: "мая", 6: "июня", 7: "июля", 8: "августа",
+        9: "сентября", 10: "октября", 11: "ноября", 12: "декабря"
+    }
+    
+    # Проверяем активность подписки
+    has_active_subscription = False
+    
     try:
         with db.get_connection() as conn:
             cursor = conn.cursor()
-            
             cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
             tutor_data = cursor.fetchone()
             
             if tutor_data:
                 telegram_id = tutor_data[0]
-                
                 cursor.execute('''
                 SELECT valid_until FROM payments 
                 WHERE user_id = ? 
@@ -245,46 +248,161 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
                 ORDER BY created_at DESC
                 LIMIT 1
                 ''', (telegram_id,))
-                
                 subscription_data = cursor.fetchone()
-                
-                if subscription_data:
-                    valid_until = subscription_data[0]
-                    
-                    if isinstance(valid_until, str):
-                        try:
-                            valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
-                        except:
-                            pass
-                    
-                    if isinstance(valid_until, datetime):
-                        formatted_date = valid_until.strftime('%d.%m.%Y %H:%M')
-                        subscription_text = f"💎 Подписка активна до: {formatted_date}\n"
-                    else:
-                        subscription_text = "💎 Подписка активна\n"
-    
+                has_active_subscription = bool(subscription_data)
     except Exception as e:
-        logger.error(f"Error getting subscription details: {e}")
-        if db.check_tutor_subscription(tutor_id):
-            subscription_text = "💎 Подписка активна\n\n"
+        logger.error(f"Error checking subscription: {e}")
+        has_active_subscription = db.check_tutor_subscription(tutor_id)
 
-    # Формируем полный текст
-    formatted_text = WELCOME_BACK_TEXT.format(
-        tutor_name=tutor_name,
-        schedule_text=schedule_text
-    )
-    welcome_text = f"{subscription_text}{formatted_text}"
+    # Получаем расписание на сегодня (без статистики)
+    schedule_text = await get_today_schedule_text(tutor_id)
+
+    # Формируем основной текст (приветствие + расписание)
+    welcome_base_text = f"👋 Добро пожаловать, {tutor_name}!\n\n{schedule_text}"
+
+    # Формируем блок подписки/статистики (будет ПОСЛЕ расписания)
+    subscription_block = ""
     
-    # Отправляем сообщение в зависимости от контекста
+    if has_active_subscription:
+        try:
+            # Получаем статистику заработка (используем ту же логику, что в get_today_schedule_text)
+            current_month = datetime.now().month
+            current_year = datetime.now().year
+            
+            current_month_earnings = db.get_earnings_by_period(
+                tutor_id, 
+                date(current_year, current_month, 1), 
+                datetime.now().date()
+            )
+            
+            if current_month == 1:
+                prev_month = 12
+                prev_year = current_year - 1
+            else:
+                prev_month = current_month - 1
+                prev_year = current_year
+            
+            prev_month_earnings = db.get_earnings_by_period(
+                tutor_id,
+                date(prev_year, prev_month, 1),
+                date(prev_year, prev_month, 1).replace(day=28) + timedelta(days=4)
+            )
+            
+            active_students_count = db.get_active_students_count(tutor_id)
+            
+            statistics_text = (
+                f"👨‍🎓 Активных учеников: {active_students_count}\n"
+                f"💰 Заработано в {month_names[current_month]}: {current_month_earnings} руб\n"
+                f"📈 Заработано в {month_names[prev_month]}: {prev_month_earnings} руб\n\n"
+            )
+            
+            # Получаем информацию о подписке
+            try:
+                with db.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
+                    tutor_data = cursor.fetchone()
+                    
+                    if tutor_data:
+                        telegram_id = tutor_data[0]
+                        cursor.execute('''
+                        SELECT valid_until FROM payments 
+                        WHERE user_id = ? 
+                        AND status = 'succeeded'
+                        AND valid_until >= datetime('now')
+                        ORDER BY created_at DESC
+                        LIMIT 1
+                        ''', (telegram_id,))
+                        subscription_data = cursor.fetchone()
+                        
+                        if subscription_data:
+                            valid_until = subscription_data[0]
+                            if isinstance(valid_until, str):
+                                try:
+                                    valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+                                except:
+                                    pass
+                            
+                            if isinstance(valid_until, datetime):
+                                formatted_date = valid_until.strftime('%d.%m.%Y %H:%M')
+                                subscription_info = f"💎 Подписка активна до: {formatted_date}"
+                            else:
+                                subscription_info = "💎 Подписка активна"
+                        else:
+                            subscription_info = "💎 Подписка активна"
+                    else:
+                        subscription_info = "💎 Подписка активна"
+            except Exception as e:
+                logger.error(f"Error getting subscription info: {e}")
+                subscription_info = "💎 Подписка активна"
+            
+            subscription_block = f"\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n{statistics_text}{subscription_info}"
+            
+        except Exception as e:
+            logger.error(f"Error getting statistics: {e}")
+            # В случае ошибки показываем только информацию о подписке
+            try:
+                with db.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('SELECT telegram_id FROM tutors WHERE id = ?', (tutor_id,))
+                    tutor_data = cursor.fetchone()
+                    
+                    if tutor_data:
+                        telegram_id = tutor_data[0]
+                        cursor.execute('''
+                        SELECT valid_until FROM payments 
+                        WHERE user_id = ? 
+                        AND status = 'succeeded'
+                        AND valid_until >= datetime('now')
+                        ORDER BY created_at DESC
+                        LIMIT 1
+                        ''', (telegram_id,))
+                        subscription_data = cursor.fetchone()
+                        
+                        if subscription_data:
+                            valid_until = subscription_data[0]
+                            if isinstance(valid_until, str):
+                                try:
+                                    valid_until = datetime.strptime(valid_until, '%Y-%m-%d %H:%M:%S')
+                                except:
+                                    pass
+                            
+                            if isinstance(valid_until, datetime):
+                                formatted_date = valid_until.strftime('%d.%m.%Y %H:%M')
+                                subscription_info = f"💎 Подписка активна до: {formatted_date}"
+                            else:
+                                subscription_info = "💎 Подписка активна"
+                        else:
+                            subscription_info = "💎 Подписка активна"
+                    else:
+                        subscription_info = "💎 Подписка активна"
+            except Exception as e:
+                logger.error(f"Error getting subscription info: {e}")
+                subscription_info = "💎 Подписка активна"
+            
+            subscription_block = f"\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n📊 Статистика временно недоступна\n\n{subscription_info}"
+        
+    else:
+        # Нет подписки
+        subscription_block = (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "📊 Статистика\n\n"
+            "❌ Сервис не оплачен\n\n"
+            "Для доступа к статистике и полному функционалу бота "
+            "необходимо оплатить подписку."
+        )
+
+    # Собираем финальный текст: приветствие + расписание + статистика
+    welcome_text = f"{welcome_base_text}{subscription_block}"
+    
+    # Отправляем сообщение
     if callback_query:
-        # Используем safe_edit_message
         success = await safe_edit_message(
             callback_query.message,
             text=welcome_text,
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
-        # Если редактирование не удалось, отправляем новое сообщение
         if not success:
             await callback_query.message.answer(
                 welcome_text,
@@ -297,4 +415,3 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
             reply_markup=get_main_menu_keyboard(),
             parse_mode="HTML"
         )
-
