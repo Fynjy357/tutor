@@ -67,10 +67,10 @@ class ParentReportHandlers:
                 else:
                     message += "📝 Домашняя работа не выполнена\n"
                 
-                # Комментарий преподавателя
-                performance = report.get('student_performance')
-                if performance:
-                    message += f"\n📝 Комментарий преподавателя:\n{performance}\n"
+                # КОММЕНТАРИЙ ДЛЯ РОДИТЕЛЕЙ (parent_performance вместо student_performance)
+                parent_comment = report.get('parent_performance')
+                if parent_comment:
+                    message += f"\n💬 Комментарий преподавателя:\n{parent_comment}\n"
                 
                 # Отправляем сообщение родителю
                 try:
@@ -85,9 +85,3 @@ class ParentReportHandlers:
                     
         except Exception as e:
             logger.error(f"❌ Ошибка при подготовке отчета для родителя: {e}")
-    
-    async def send_reports_to_all_parents(self, bot: Bot, lesson_id: int, student_ids: list):
-        """Отправляет отчеты всем родителям группы"""
-        for student_id in student_ids:
-            await self.send_report_to_parent(bot, lesson_id, student_id)
-

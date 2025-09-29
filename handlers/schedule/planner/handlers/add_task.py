@@ -281,8 +281,9 @@ async def show_price_input(message: Message, state: FSMContext):
     builder.add(types.InlineKeyboardButton(text="◀️ Назад", callback_data="planner_back_to_duration"))
     
     await message.answer(
-        "💰 <b>Введите стоимость занятия (руб.):</b>\n\n"
-        "Пример: <code>1000</code>",
+        "💰 <b>Введите стоимость занятия для одного ученика (руб.):</b>\n\n"
+        "Пример: <code>1000</code>"
+        "<i>Укажите только цифры, без пробелов и символов.</i>",
         reply_markup=builder.as_markup()
     )
     await state.set_state(PlannerStates.waiting_for_price)

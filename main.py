@@ -45,7 +45,9 @@ from commands.message import broadcast_router
 from payment.notifications.trial_notification_task import start_trial_notification_task
 from handlers.schedule.planner.timer.planner_manager import planner_manager
 from handlers.schedule.planner.timer.planner_commands import router as planner_commands_router
-
+from report_pdf.handlers import router as report_router
+from handlers.debt import payment_debts_router
+from handlers.homework import homework_debts_router
 
 # Настройка логирования
 from logging.handlers import RotatingFileHandler
@@ -163,6 +165,9 @@ class BotApp:
             self.dp.include_router(system_help)
             self.dp.include_router(message_router)
             self.dp.include_router(broadcast_router)
+            self.dp.include_router(report_router)
+            self.dp.include_router(payment_debts_router)
+            self.dp.include_router(homework_debts_router)
             
             # роутер планера регулярных занятий
             self.dp.include_router(planner_commands_router)

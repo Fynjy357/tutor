@@ -37,7 +37,7 @@ def get_promo_keyboard():
     )
     return builder.as_markup()
 
-#Клавиатура для родителей
+# Клавиатура для родителей
 def get_parent_welcome_keyboard() -> InlineKeyboardMarkup:
     """Создает инлайн клавиатуру для родителя"""
     keyboard = InlineKeyboardMarkup(
@@ -52,6 +52,12 @@ def get_parent_welcome_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton(
                     text="💰 Посмотреть неоплаченные занятия", 
                     callback_data="parent_unpaid_lessons"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="📋 Отчеты по занятиям", 
+                    callback_data="parent_reports"
                 )
             ]
         ]

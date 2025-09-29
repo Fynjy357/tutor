@@ -1,3 +1,3 @@
-from lesson_reports.handlers import LessonReportHandlers
+from .handlers import LessonReportHandlers
 
 __all__ = ['LessonReportHandlers']

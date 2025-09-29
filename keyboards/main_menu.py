@@ -1,7 +1,11 @@
+# keyboards/main_menu.py
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types, F, Router
 router = Router()
+
+from aiogram import types
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 def get_main_menu_keyboard():
     builder = InlineKeyboardBuilder()
@@ -26,12 +30,20 @@ def get_main_menu_keyboard():
         )
     )
     
-    # Третий ряд
+    # Третий ряд - добавлена кнопка Статистика
     builder.row(
+        types.InlineKeyboardButton(
+            text="📊 Отчеты",
+            callback_data="statistics_menu"  # Ведет в меню отчетов
+        ),
         types.InlineKeyboardButton(
             text="📞 Техподдержка",
             callback_data="contact_developers"
-        ),
+        )
+    )
+    
+    # Четвертый ряд
+    builder.row(
         types.InlineKeyboardButton(
             text="💎 Премиум",
             callback_data="settings"

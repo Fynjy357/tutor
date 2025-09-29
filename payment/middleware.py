@@ -15,7 +15,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         
         self.premium_callbacks = [
             'edit_datetime', 'planner_', 'planner_add_task', 'planner_type_', 'planner_student_', 
-            'planner_group_', 'planner_weekday_', 'planner_back_to_', 'back_to_planner'
+            'planner_group_', 'planner_weekday_', 'planner_back_to_', 'back_to_planner', 'statistics_menu'
         ]
 
     async def __call__(

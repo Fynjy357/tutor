@@ -57,7 +57,7 @@ class PaymentManager:
     @staticmethod
     async def create_payment_record(user_id: int, payment_id: str, tariff_name: str, 
                                 amount: float, status: str, days: int) -> bool:
-        """Создает или ОБНОВЛЯЕТ запись о платеже и ПРОДЛЕВАЕТ подписку"""
+        """Создает или ОБНОВЛЯЕТ запись о платеже - НОВАЯ ЛОГИКА"""
         try:
             db = Database()
             with db.get_connection() as conn:
@@ -72,16 +72,25 @@ class PaymentManager:
                 )
                 existing_sub = cursor.fetchone()
                 
-                # 2. Рассчитываем новую дату окончания (ИСПОЛЬЗУЕМ ПЕРЕДАННЫЕ ДНИ)
-                new_valid_until = None
+                # 2. НОВАЯ ЛОГИКА: подписка всегда начинается с даты оплаты
+                payment_date = datetime.now()
                 
                 if existing_sub and existing_sub['valid_until']:
-                    # ПРОДЛЕВАЕМ существующую подписку
+                    # Проверяем, действует ли текущая подписка
                     current_end = datetime.strptime(existing_sub['valid_until'], '%Y-%m-%d %H:%M:%S')
-                    new_valid_until = current_end + timedelta(days=days)
+                    
+                    if current_end > payment_date:
+                        # Текущая подписка еще активна - ПРОДЛЕВАЕМ от даты окончания
+                        new_valid_until = current_end + timedelta(days=days)
+                        logger.info(f"Продление активной подписки: {current_end} + {days} дней = {new_valid_until}")
+                    else:
+                        # Текущая подписка истекла - НАЧИНАЕМ НОВУЮ с даты оплаты
+                        new_valid_until = payment_date + timedelta(days=days)
+                        logger.info(f"Новая подписка после истечения: {payment_date} + {days} дней = {new_valid_until}")
                 else:
-                    # Новая подписка (от текущего времени)
-                    new_valid_until = datetime.now() + timedelta(days=days)
+                    # Первая подписка пользователя
+                    new_valid_until = payment_date + timedelta(days=days)
+                    logger.info(f"Первая подписка: {payment_date} + {days} дней = {new_valid_until}")
                 
                 # 3. Проверяем, существует ли уже запись с таким payment_id
                 cursor.execute(
@@ -101,7 +110,7 @@ class PaymentManager:
                     )
                     logger.info(f"Updated existing payment record: {payment_id}")
                 else:
-                    # СОЗДАЕМ новую запись с правильной датой окончания
+                    # СОЗДАЕМ новую запись
                     cursor.execute(
                         """INSERT INTO payments 
                         (user_id, payment_id, tariff_name, amount, status, 
@@ -118,6 +127,7 @@ class PaymentManager:
         except Exception as e:
             logger.error(f"Error creating/updating payment record: {e}")
             return False
+
 
     @staticmethod
     async def update_payment_status(payment_id: str, status: str) -> bool:

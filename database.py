@@ -133,22 +133,24 @@ class Database:
             except sqlite3.OperationalError:
                 # Поле уже существует - игнорируем ошибку
                 pass
-            # Сначала добавляем столбец
-            try:
-                cursor.execute('ALTER TABLE lessons ADD COLUMN planner_action_id INTEGER')
-                print("✅ Столбец planner_action_id добавлен")
-            except sqlite3.OperationalError as e:
-                print(f"❌ Ошибка добавления столбца: {e}")
-                # Поле уже существует - игнорируем ошибку
-                pass
+            # НЕ УДАЛЯТЬ!!! этот метод нужен для создания столбца и индекса для планера, если БД удаляешь,
+            # то он создает дополнительные столбцы
+            # # Сначала добавляем столбец
+            # try:
+            #     cursor.execute('ALTER TABLE lessons ADD COLUMN planner_action_id INTEGER')
+            #     print("✅ Столбец planner_action_id добавлен")
+            # except sqlite3.OperationalError as e:
+            #     print(f"❌ Ошибка добавления столбца: {e}")
+            #     # Поле уже существует - игнорируем ошибку
+            #     pass
 
-            # Потом создаем индекс
-            try:
-                cursor.execute('CREATE INDEX idx_lessons_planner ON lessons(planner_action_id, lesson_date)')
-                print("✅ Индекс создан")
-            except sqlite3.OperationalError as e:
-                print(f"❌ Ошибка создания индекса: {e}")
-                pass
+            # # Потом создаем индекс
+            # try:
+            #     cursor.execute('CREATE INDEX idx_lessons_planner ON lessons(planner_action_id, lesson_date)')
+            #     print("✅ Индекс создан")
+            # except sqlite3.OperationalError as e:
+            #     print(f"❌ Ошибка создания индекса: {e}")
+            #     pass
 
             # Таблица подтверждений занятий
             cursor.execute('''
@@ -216,6 +218,16 @@ class Database:
                 UNIQUE(lesson_id, student_id)
             )
             ''')
+                        # МИГРАЦИЯ: Добавляем поле parent_performance если его нет
+            cursor.execute("PRAGMA table_info(lesson_reports)")
+            columns = [column[1] for column in cursor.fetchall()]
+            
+            if 'parent_performance' not in columns:
+                cursor.execute('''
+                ALTER TABLE lesson_reports 
+                ADD COLUMN parent_performance TEXT
+                ''')
+                print("✅ Поле parent_performance добавлено в таблицу lesson_reports")
 
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_subscriptions (
@@ -1316,7 +1328,8 @@ class Database:
             logger.error(f"Ошибка при обновлении подтверждения: {e}")
             return False
     def save_lesson_report(self, lesson_id, student_id, lesson_held=None, 
-                        lesson_paid=None, homework_done=None, student_performance=None):
+                        lesson_paid=None, homework_done=None, 
+                        student_performance=None, parent_performance=None):
         """Сохраняет отчет по занятию"""
         try:
             with self.get_connection() as conn:
@@ -1344,6 +1357,9 @@ class Database:
                     if student_performance is not None:
                         updates.append("student_performance = ?")
                         params.append(student_performance)
+                    if parent_performance is not None:
+                        updates.append("parent_performance = ?")
+                        params.append(parent_performance)
                     
                     if updates:
                         params.extend([lesson_id, student_id])
@@ -1356,15 +1372,18 @@ class Database:
                     # Создаем новую запись
                     cursor.execute('''
                     INSERT INTO lesson_reports 
-                    (lesson_id, student_id, lesson_held, lesson_paid, homework_done, student_performance)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    ''', (lesson_id, student_id, lesson_held, lesson_paid, homework_done, student_performance))
+                    (lesson_id, student_id, lesson_held, lesson_paid, homework_done, 
+                    student_performance, parent_performance)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (lesson_id, student_id, lesson_held, lesson_paid, 
+                        homework_done, student_performance, parent_performance))
                 
                 conn.commit()
                 return True
         except Exception as e:
             logger.error(f"Ошибка при сохранении отчета: {e}")
             return False
+
 
     def get_lesson_report(self, lesson_id, student_id):
         """Получает отчет по занятию"""
@@ -1575,11 +1594,19 @@ class Database:
             row = cursor.fetchone()
             if row:
                 report = dict(row)
-                # Преобразуем строку даты в объект date
+                
+                # Безопасное преобразование даты
                 if 'lesson_date' in report and report['lesson_date']:
-                    report['lesson_date'] = datetime.strptime(report['lesson_date'], '%Y-%m-%d %H:%M:%S').date()
+                    if isinstance(report['lesson_date'], str):
+                        # Если дата пришла как строка
+                        report['lesson_date'] = datetime.strptime(report['lesson_date'], '%Y-%m-%d %H:%M:%S').date()
+                    elif hasattr(report['lesson_date'], 'date'):
+                        # Если уже объект datetime
+                        report['lesson_date'] = report['lesson_date'].date()
+                
                 return report
             return None
+
 
     def update_report_attendance(self, report_id, new_value):
         """Обновляет статус присутствия"""
@@ -1624,6 +1651,18 @@ class Database:
                 WHERE id = ?
             ''', (new_comment, report_id))
             conn.commit()
+
+    def update_parent_comment(self, report_id, new_comment):
+        """Обновляет заметку для родителей в отчете"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE lesson_reports 
+                SET parent_performance = ? 
+                WHERE id = ?
+            ''', (new_comment, report_id))
+            conn.commit()
+    
     def get_lessons_for_reminder(self):
         """Получает все занятия, которые начнутся в ближайшие 60 минут"""
         try:
@@ -2061,8 +2100,8 @@ class Database:
         """Находит репетитора по реферальному коду (части ссылки после start=)"""
         try:
             # Формируем полную ссылку для поиска
-            # full_promo_link = f"https://t.me/egeTOP100_bot?start={referral_code}"
-            full_promo_link = f"https://t.me/TutorPlanetBot?start={referral_code}"
+            full_promo_link = f"https://t.me/egeTOP100_bot?start={referral_code}"
+            # full_promo_link = f"https://t.me/TutorPlanetBot?start={referral_code}"
             
             with self.get_connection() as conn:
                 cursor = conn.cursor()
@@ -2463,7 +2502,7 @@ class Database:
             return []
 
     def get_parent_unpaid_lessons(self, parent_telegram_id: int):
-        """Получает неоплаченные занятия родителя - ИСПРАВЛЕННАЯ ВЕРСИЯ"""
+        """Получает неоплаченные занятия родителя - УЛУЧШЕННАЯ ВЕРСИЯ"""
         try:
             with self.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
@@ -2478,15 +2517,15 @@ class Database:
                     s.full_name as student_name,
                     t.full_name as tutor_name,
                     COALESCE(lr.lesson_held, 1) as lesson_held,
-                    COALESCE(lr.lesson_paid, 0) as lesson_paid
+                    COALESCE(lr.lesson_paid, 0) as lesson_paid,
+                    lr.parent_performance as parent_performance  -- Получаем комментарий
                 FROM lessons l
                 JOIN students s ON l.student_id = s.id
                 JOIN tutors t ON l.tutor_id = t.id
                 LEFT JOIN lesson_reports lr ON l.id = lr.lesson_id AND lr.student_id = s.id
                 WHERE s.parent_telegram_id = ?
                 AND l.status = 'completed'
-                AND lr.id IS NOT NULL  -- ДОБАВЛЕНО: должен быть отчет
-                AND lr.lesson_paid = 0  -- ИЗМЕНЕНО: только явно неоплаченные
+                AND (lr.lesson_paid = 0 OR lr.lesson_paid IS NULL)  -- УСЛОВИЕ ИЗМЕНЕНО
                 ORDER BY l.lesson_date DESC
                 ''', (parent_telegram_id,))
                 
@@ -2497,10 +2536,12 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении неоплаченных занятий родителя: {e}")
             return []
+
+
         
         
     def get_parent_homeworks(self, parent_telegram_id: int):
-        """Получает домашние задания родителя"""
+        """Получает домашние задания родителя - ИСПРАВЛЕННАЯ ВЕРСИЯ"""
         try:
             with self.get_connection() as conn:
                 conn.row_factory = sqlite3.Row
@@ -2513,7 +2554,8 @@ class Database:
                     s.full_name as student_name,
                     t.full_name as tutor_name,
                     lr.homework_done,
-                    lr.student_performance
+                    lr.student_performance,
+                    lr.parent_performance    -- ДОБАВЛЕНО: комментарий для родителя
                 FROM lessons l
                 JOIN students s ON l.student_id = s.id
                 JOIN tutors t ON l.tutor_id = t.id
@@ -2527,6 +2569,7 @@ class Database:
         except Exception as e:
             logger.error(f"Ошибка при получении домашних заданий родителя: {e}")
             return []
+
     def get_parent_students(self, parent_telegram_id: int):
         """Получает всех учеников родителя"""
         try:
@@ -2953,6 +2996,20 @@ class Database:
             logger.error(f"❌ Ошибка получения будущих занятий ученика {student_id}: {e}")
             return []
 
-
+    def update_parent_performance(self, lesson_id, student_id, parent_performance):
+        """Обновляет заметку для родителей в отчете"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                UPDATE lesson_reports 
+                SET parent_performance = ?
+                WHERE lesson_id = ? AND student_id = ?
+                ''', (parent_performance, lesson_id, student_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            print(f"❌ Ошибка обновления заметки для родителей: {e}")
+            return False
 # Создаем глобальный экземпляр базы данных
 db = Database()

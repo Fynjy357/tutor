@@ -141,8 +141,13 @@ async def handle_student_homeworks(callback_query: types.CallbackQuery):
                         lesson_date = datetime.strptime(homework['lesson_date'], '%Y-%m-%d %H:%M:%S').strftime('%d.%m.%Y')
                         response_text += f"   • {lesson_date}"
                         
-                        # if homework.get('student_performance'):
-                        #     response_text += f"\n     💬 {homework['student_performance']}"
+                        # Добавляем информацию о производительности ученика, если есть
+                        if homework.get('student_performance'):
+                            # Обрезаем длинный текст для лучшего отображения
+                            performance_text = homework['student_performance']
+                            if len(performance_text) > 100:
+                                performance_text = performance_text[:97] + "..."
+                            response_text += f"\n     💬 <i>{performance_text}</i>"
                         
                         response_text += "\n"
                         total_undone += 1
@@ -170,6 +175,7 @@ async def handle_student_homeworks(callback_query: types.CallbackQuery):
         await callback_query.message.answer("❌ Произошла ошибка при получении данных о домашних работах")
     
     await callback_query.answer()
+
 
 @student_router.callback_query(F.data == "stud_view_upcoming")
 async def handle_student_upcoming_lessons(callback_query: types.CallbackQuery):

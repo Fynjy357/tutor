@@ -6,6 +6,37 @@ from commands.config import SUPER_ADMIN_ID
 
 router = Router()
 
+async def send_long_message(message: Message, text: str, max_length: int = 4096):
+    """Разбивает длинное сообщение на части и отправляет"""
+    if len(text) <= max_length:
+        await message.answer(text)
+        return
+    
+    # Разбиваем текст на части
+    parts = []
+    while text:
+        if len(text) <= max_length:
+            parts.append(text)
+            break
+        
+        # Ищем последний перенос строки перед лимитом
+        split_pos = text.rfind('\n', 0, max_length)
+        if split_pos == -1:
+            # Если переносов нет, разбиваем по границе слова
+            split_pos = text.rfind(' ', 0, max_length)
+            if split_pos == -1:
+                # Если и пробелов нет, просто обрезаем
+                split_pos = max_length
+        
+        parts.append(text[:split_pos])
+        text = text[split_pos:].lstrip()
+    
+    # Отправляем части
+    for i, part in enumerate(parts, 1):
+        if len(parts) > 1:
+            part = f"📄 Часть {i}/{len(parts)}\n\n{part}"
+        await message.answer(part)
+
 @router.message(Command("ref"))
 async def admin_referral_info(message: Message):
     # Проверяем, является ли пользователь суперадмином
@@ -61,8 +92,10 @@ async def admin_referral_info(message: Message):
                     f"🆔 ID в системе: {tutor_id}\n\n"
                     f"❌ Активных рефералов не найдено"
                 )
+                await message.answer(response)
             else:
-                response = (
+                # Заголовок сообщения
+                header = (
                     f"📊 Рефералы репетитора: {tutor_name}\n"
                     f"👤 Telegram ID: {telegram_id}\n"
                     f"📞 Телефон: {tutor_phone}\n"
@@ -70,6 +103,8 @@ async def admin_referral_info(message: Message):
                     f"✅ Активных рефералов: {len(referrals)}\n\n"
                 )
                 
+                # Формируем список рефералов
+                referrals_text = ""
                 for i, ref in enumerate(referrals, 1):
                     ref_id, code, visited_at, status, visitor_tg_id = ref
                     
@@ -86,15 +121,27 @@ async def admin_referral_info(message: Message):
                         invited_name = "Не зарегистрирован"
                         invited_phone = "Нет данных"
                     
-                    response += (
+                    referral_info = (
                         f"{i}. ФИО: {invited_name}\n"
                         f"   📞 Телефон: {invited_phone}\n"
                         f"   🔗 Реферальный код: {code}\n"
                         f"   📅 Дата перехода: {visited_at}\n"
                         f"   ---\n"
                     )
-            
-            await message.answer(response)
+                    
+                    # Проверяем, не превысит ли добавление этого реферала лимит
+                    if len(header + referrals_text + referral_info) > 4000:
+                        # Отправляем текущую часть
+                        await send_long_message(message, header + referrals_text)
+                        # Начинаем новую часть
+                        referrals_text = referral_info
+                        header = f"📊 Рефералы репетитора: {tutor_name} (продолжение)\n\n"
+                    else:
+                        referrals_text += referral_info
+                
+                # Отправляем оставшуюся часть
+                if referrals_text:
+                    await send_long_message(message, header + referrals_text)
             
     except Exception as e:
         await message.answer(f"❌ Ошибка при проверке рефералов: {e}")

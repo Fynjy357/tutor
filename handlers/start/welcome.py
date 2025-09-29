@@ -3,7 +3,7 @@ from database import db
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.keyboards_start import get_student_welcome_keyboard, get_parent_welcome_keyboard, get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
-from handlers.start.config import WELCOME_BACK_TEXT, REGISTRATION_TEXT
+from handlers.start.config import STUDENT_WELCOME_TEXT, WELCOME_BACK_TEXT, REGISTRATION_TEXT
 from aiogram.exceptions import TelegramBadRequest
 from datetime import datetime
 
@@ -108,16 +108,22 @@ def format_student_welcome(main_student: dict, tutors: list) -> str:
     header = f"🎓 Привет, {student_name}!\n\n"
     header += "Рад тебя видеть! Вот твоя информация:\n\n"
     
+    # Формируем заголовок
+    header = STUDENT_WELCOME_TEXT['header'].format(student_name=student_name)
+    
     # Информация о репетиторах
-    tutors_text = "📚 <b>Твои репетиторы:</b>\n"
+    tutors_text = STUDENT_WELCOME_TEXT['tutors_section']
     if tutors:
         for i, tutor in enumerate(tutors, 1):
-            tutors_text += f"{i}. {tutor['full_name']}"
+            tutor_line = STUDENT_WELCOME_TEXT['tutor_item'].format(
+                index=i, 
+                tutor_name=tutor['full_name']
+            )
             if tutor.get('phone'):
-                tutors_text += f" - {tutor['phone']}"
-            tutors_text += "\n"
+                tutor_line += STUDENT_WELCOME_TEXT['tutor_phone'].format(phone=tutor['phone'])
+            tutors_text += tutor_line + "\n"
     else:
-        tutors_text += "Пока не назначены\n"
+        tutors_text += STUDENT_WELCOME_TEXT['no_tutors'] + "\n"
     tutors_text += "\n"
     
     # Общая информация для ученика
@@ -202,6 +208,10 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     
     db = Database()
     
+    # Функция для форматирования чисел с пробелами
+    def format_currency(amount):
+        return f"{int(amount):,}".replace(",", " ") + " руб"
+    
     # Получаем данные репетитора
     tutor = db.get_tutor_by_telegram_id(chat_id)
     
@@ -265,7 +275,25 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
     
     if has_active_subscription:
         try:
-            # Получаем статистику заработка (используем ту же логику, что в get_today_schedule_text)
+            # Получаем статистику заработка за сегодня (ВСЕ занятия, любой статус)
+            today_earnings = 0
+            try:
+                today = datetime.now().date()
+                with db.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('''
+                    SELECT COALESCE(SUM(price), 0) as total_earnings
+                    FROM lessons 
+                    WHERE tutor_id = ? 
+                    AND DATE(lesson_date) = DATE('now')
+                    ''', (tutor_id,))
+                    result = cursor.fetchone()
+                    today_earnings = result[0] if result else 0
+            except Exception as e:
+                logger.error(f"Error calculating today earnings: {e}")
+                today_earnings = 0
+
+            # Получаем статистику заработка за месяц
             current_month = datetime.now().month
             current_year = datetime.now().year
             
@@ -290,10 +318,12 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
             
             active_students_count = db.get_active_students_count(tutor_id)
             
+            # Обновляем статистику с форматированием валюты
             statistics_text = (
                 f"👨‍🎓 Активных учеников: {active_students_count}\n"
-                f"💰 Заработано в {month_names[current_month]}: {current_month_earnings} руб\n"
-                f"📈 Заработано в {month_names[prev_month]}: {prev_month_earnings} руб\n\n"
+                f"💰 Планируете заработать сегодня: <b>{format_currency(today_earnings)}</b>\n"
+                f"📊 Заработано в {month_names[current_month]}: {format_currency(current_month_earnings)}\n"
+                f"📈 Заработано в {month_names[prev_month]}: {format_currency(prev_month_earnings)}\n\n"
             )
             
             # Получаем информацию о подписке
@@ -336,7 +366,7 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
                 logger.error(f"Error getting subscription info: {e}")
                 subscription_info = "💎 Подписка активна"
             
-            subscription_block = f"\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n{statistics_text}{subscription_info}"
+            subscription_block = f"\n━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n{statistics_text}{subscription_info}"
             
         except Exception as e:
             logger.error(f"Error getting statistics: {e}")
@@ -380,12 +410,12 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
                 logger.error(f"Error getting subscription info: {e}")
                 subscription_info = "💎 Подписка активна"
             
-            subscription_block = f"\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n📊 Статистика временно недоступна\n\n{subscription_info}"
+            subscription_block = f"\n━━━━━━━━━━━━━━━━━━\n📊 Статистика\n\n📊 Статистика временно недоступна\n\n{subscription_info}"
         
     else:
         # Нет подписки
         subscription_block = (
-            "\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "\n━━━━━━━━━━━━━━━━━━\n"
             "📊 Статистика\n\n"
             "❌ Сервис не оплачен\n\n"
             "Для доступа к статистике и полному функционалу бота "
@@ -394,7 +424,7 @@ async def show_main_menu(chat_id: int, message: types.Message = None, callback_q
             "• 📅 Планировщик регулярных занятий\n"
             "• ↩️ Возможность перенести занятие\n"
             "• 📊 Статистика на главном экране\n"
-
+            "• 📊 Доступна работа с отчетами\n"
         )
 
     # Собираем финальный текст: приветствие + расписание + статистика

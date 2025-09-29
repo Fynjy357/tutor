@@ -13,13 +13,13 @@ from database import db
 router = Router()
 logger = logging.getLogger(__name__)
 
-# Обработчик начала редактирования ученика
-@router.callback_query(F.data.startswith("edit_student_"))
+
+@router.callback_query(F.data.regexp(r"^edit_student_\d+$"))
 async def edit_student_start(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     
     try:
-        student_id = int(callback_query.data.split("_")[2])
+        student_id = int(callback_query.data.split("_")[-1])
         student = db.get_student_by_id(student_id)
         
         if not student:
@@ -36,6 +36,35 @@ async def edit_student_start(callback_query: types.CallbackQuery, state: FSMCont
             parse_mode="HTML",
             reply_markup=get_edit_student_keyboard(student_id)
         )
+            
+    except Exception as e:
+        logger.error(f"Ошибка в edit_student_start: {e}")
+        await callback_query.message.edit_text("❌ Произошла ошибка при загрузке информации")
+
+# пришлось редактировать метод, старый оставил на всякий случай, но со старым не работает редактирование комментария отчета
+# Обработчик начала редактирования ученика
+# @router.callback_query(F.data.startswith("edit_student_"))
+# async def edit_student_start(callback_query: types.CallbackQuery, state: FSMContext):
+#     await callback_query.answer()
+    
+#     try:
+#         student_id = int(callback_query.data.split("_")[2])
+#         student = db.get_student_by_id(student_id)
+        
+#         if not student:
+#             await callback_query.message.edit_text("❌ Ученик не найден!")
+#             return
+        
+#         await state.update_data(student_id=student_id)
+#         await state.set_state(EditStudentStates.waiting_for_edit_choice)
+        
+#         await callback_query.message.edit_text(
+#             f"✏️ <b>Редактирование ученика</b>\n\n"
+#             f"👤 {student['full_name']}\n\n"
+#             "Выберите, что хотите изменить:",
+#             parse_mode="HTML",
+#             reply_markup=get_edit_student_keyboard(student_id)
+#         )
             
     except (ValueError, IndexError) as e:
         logger.error(f"Ошибка парсинга callback data: {e}")

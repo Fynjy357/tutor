@@ -22,12 +22,12 @@ def get_students_menu_keyboard():
         )
     )
     
-    builder.row(
-        types.InlineKeyboardButton(
-            text="📝 Редактировать отчеты",
-            callback_data="edit_reports"
-        )
-    )
+    # builder.row(
+    #     types.InlineKeyboardButton(
+    #         text="📝 Редактировать отчеты",
+    #         callback_data="edit_reports"
+    #     )
+    # )
     
     builder.row(
         types.InlineKeyboardButton(
