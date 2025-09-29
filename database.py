@@ -2100,8 +2100,8 @@ class Database:
         """Находит репетитора по реферальному коду (части ссылки после start=)"""
         try:
             # Формируем полную ссылку для поиска
-            full_promo_link = f"https://t.me/egeTOP100_bot?start={referral_code}"
-            # full_promo_link = f"https://t.me/TutorPlanetBot?start={referral_code}"
+            # full_promo_link = f"https://t.me/egeTOP100_bot?start={referral_code}"
+            full_promo_link = f"https://t.me/TutorPlanetBot?start={referral_code}"
             
             with self.get_connection() as conn:
                 cursor = conn.cursor()
