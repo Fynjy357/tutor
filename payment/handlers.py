@@ -135,7 +135,7 @@ async def payment_menu_handler(callback: types.CallbackQuery, state: FSMContext)
         [InlineKeyboardButton(text="📅 1 год - 1000 руб", callback_data="payment_1year")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_settings")]
     ])
-    
+     
     text = TARIF
     
     await safe_edit_message(

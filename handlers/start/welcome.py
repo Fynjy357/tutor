@@ -1,9 +1,10 @@
 from aiogram import types
 from database import db
+
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.keyboards_start import get_student_welcome_keyboard, get_parent_welcome_keyboard, get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
-from handlers.start.config import STUDENT_WELCOME_TEXT, WELCOME_BACK_TEXT, REGISTRATION_TEXT
+from handlers.start.config import STUDENT_WELCOME_TEXT, REGISTRATION_TEXT
 from aiogram.exceptions import TelegramBadRequest
 from datetime import datetime
 

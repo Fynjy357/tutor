@@ -325,6 +325,32 @@ class Database:
                 FOREIGN KEY (group_id) REFERENCES groups (id)
             )
             ''')
+            # Таблица для бонусных рассылок   
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS bonus_mailings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                message_text TEXT NOT NULL,
+                file_paths TEXT,  -- JSON список путей к файлам
+                tariffs TEXT NOT NULL,  -- JSON список тарифов
+                start_date TIMESTAMP NOT NULL,
+                end_date TIMESTAMP NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+            # для логов отправки бонусных рассылок
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS mailing_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mailing_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status TEXT DEFAULT 'sent',
+                error_message TEXT,
+                FOREIGN KEY (mailing_id) REFERENCES bonus_mailings(id) ON DELETE CASCADE
+            )
+            ''')
             
             conn.commit()
         logger.info("База данных инициализирована")

@@ -4,7 +4,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import logging
 
-from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.welcome import show_main_menu
 from handlers.students.config import ADD_STUDENT
 
@@ -13,6 +12,7 @@ from .states import AddStudentStates
 from .utils import get_students_stats
 from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard, get_students_pagination_keyboard
 from database import db
+
 from handlers.students.handlers_add_student import router as add_students_router
 from handlers.students.handlers_edit_student import router as student_
 

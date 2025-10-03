@@ -1,6 +1,6 @@
 # handlers/schedule/planner/timer/planner_commands.py
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 from aiogram.filters import Command
 import logging
 from datetime import datetime
@@ -8,6 +8,7 @@ from datetime import datetime
 from commands.config import SUPER_ADMIN_ID
 from .planner_manager import planner_manager
 from database import db
+
 from payment.models import PaymentManager  # Добавляем импорт
 
 router = Router()

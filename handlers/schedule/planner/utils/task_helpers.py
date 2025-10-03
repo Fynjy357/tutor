@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database import db
 
+
 def get_planner_tasks(tutor_id: int):
     """Получает задачи из планера"""
     try:

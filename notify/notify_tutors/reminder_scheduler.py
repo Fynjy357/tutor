@@ -2,7 +2,8 @@
 import asyncio
 import logging
 from datetime import datetime
-from database import db  # Импортируем вашу базу данных
+from database import db
+ # Импортируем вашу базу данных
 
 logger = logging.getLogger(__name__)
 

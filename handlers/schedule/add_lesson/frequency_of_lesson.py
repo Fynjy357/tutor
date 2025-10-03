@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
 from database import db
-from handlers.schedule.schedule_utils import get_today_schedule_text
+
 from handlers.schedule.states import AddLessonStates
 import logging
 from handlers.start.welcome import show_main_menu

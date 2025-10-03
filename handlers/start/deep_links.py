@@ -1,9 +1,9 @@
 from aiogram import types
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import pytz
-import tzlocal
 from database import db
+
 from handlers.start.welcome import show_registration_message, show_welcome_back, show_welcome_message
 
 logger = logging.getLogger(__name__)

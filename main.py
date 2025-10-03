@@ -4,29 +4,23 @@ from aiogram.fsm.storage.memory import MemoryStorage
 import asyncio
 import logging
 import signal
-import sys
 import traceback
 
 from config import BOT_TOKEN
 from handlers.start import start_router
 from handlers.start import about_router
 from handlers.registration import registration_router
-# from handlers.students.edit_handlers import router as edit_students_router
-# from handlers.students.handlers import router as add_students_router
-# from handlers.students.main import router as students_router
-# from handlers.students.invitations import router as invitations_router
 from handlers.groups.handlers import router as groups_router
 from handlers.schedule import setup_schedule_handlers
-from notify import NotificationManager, lesson_notification_scheduler, setup_notification_handlers, register_confirmation_handlers
+from notify import NotificationManager, lesson_notification_scheduler, setup_notification_handlers
 from lesson_reports.handlers import LessonReportHandlers
 from keyboards import main_menu # на время разработки кнопок
-from database import db 
+from database import db
 from payment.middleware import SubscriptionMiddleware
 from payment.handlers import router as payment_router
 from commands.admin.admin import router as admin_router
 from handlers.start.handlers_parent import parent_router
 from handlers.start.handlers_student_by_student import student_router
-# from handlers.students.report_editor import router as report_editor_router
 from handlers.students import router as students_module_router
 from notify.notify_tutors.reminder_scheduler import ReminderScheduler
 from handlers.freedback.feedback_handlers import router as feedback
@@ -39,7 +33,6 @@ from commands.logs.logs import router as logs
 from commands.backup.backup import router as backup
 from commands.system_info.system_info import router as system_help
 from important_doc.handlers import consent_router, ConsentMiddleware
-from important_doc.models import consent_manager
 from commands.message.message import message_router
 from commands.message import broadcast_router
 from payment.notifications.trial_notification_task import start_trial_notification_task
@@ -48,6 +41,9 @@ from handlers.schedule.planner.timer.planner_commands import router as planner_c
 from report_pdf.handlers import router as report_router
 from handlers.debt import payment_debts_router
 from handlers.homework import homework_debts_router
+from commands.time_commands.time_commands import time_router
+from mailing.handlers import mailing_router
+from mailing.sender import mailing_scheduler
 
 # Настройка логирования
 from logging.handlers import RotatingFileHandler
@@ -107,8 +103,10 @@ class BotApp:
         self.notification_manager = None
         self.lesson_report_handlers = None
         self.reminder_scheduler = None
+        self.mailing_handler = None # Рассылка файлов
         self.tasks = []
         self.is_running = False
+
 
     async def startup(self):
         """Инициализация приложения"""
@@ -168,6 +166,8 @@ class BotApp:
             self.dp.include_router(report_router)
             self.dp.include_router(payment_debts_router)
             self.dp.include_router(homework_debts_router)
+            self.dp.include_router(time_router)
+            self.dp.include_router(mailing_router)
             
             # роутер планера регулярных занятий
             self.dp.include_router(planner_commands_router)
@@ -281,6 +281,10 @@ class BotApp:
             # ЗАПУСК ЗАДАЧИ УВЕДОМЛЕНИЙ О ПРОБНОМ ПЕРИОДЕ ← ДОБАВЬТЕ ЭТО
             self.tasks.append(asyncio.create_task(start_trial_notification_task(self.bot)))
             logger.info("Задача уведомлений о пробном периоде запущена")
+
+            # ЗАПУСК ПЛАНИРОВЩИКА бонусов
+            self.tasks.append(asyncio.create_task(mailing_scheduler(self.bot)))
+            logger.info("Планировщик рассылки бонусов запущен")
 
             # запуск планера регулярных занятий
             try:

@@ -57,6 +57,7 @@ class PlannerManager:
         """Обновляет статус планера для репетитора"""
         try:
             from database import db
+
             
             tutor_id = db.get_tutor_id_by_telegram_id(telegram_id)
             if not tutor_id:

@@ -3,6 +3,7 @@ from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
+
 from handlers.schedule.states import AddLessonStates
 import logging
 

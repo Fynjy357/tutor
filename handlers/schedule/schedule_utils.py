@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from database import db
 
+
 logger = logging.getLogger(__name__)
 
 async def get_upcoming_lessons_text(tutor_id: int) -> str:
@@ -15,7 +16,12 @@ async def get_upcoming_lessons_text(tutor_id: int) -> str:
     schedule_dict = {}
     
     for lesson in lessons:
-        lesson_date = datetime.strptime(lesson['lesson_date'], '%Y-%m-%d %H:%M:%S')
+        # Исправлено: всегда определяем lesson_date
+        if isinstance(lesson['lesson_date'], str):
+            lesson_date = datetime.strptime(lesson['lesson_date'], '%Y-%m-%d %H:%M:%S')
+        else:
+            lesson_date = lesson['lesson_date']  # Уже datetime объект
+        
         time_key = lesson_date.strftime('%Y-%m-%d %H:%M')
         group_id = lesson.get('group_id')
         lesson_id = lesson['id']  # Уникальный ID занятия
@@ -162,7 +168,12 @@ async def get_today_schedule_text(tutor_id: int) -> str:
     schedule_dict = {}
     
     for lesson in lessons:
-        lesson_date = datetime.strptime(lesson['lesson_date'], '%Y-%m-%d %H:%M:%S')
+        # Исправлено: всегда определяем lesson_date
+        if isinstance(lesson['lesson_date'], str):
+            lesson_date = datetime.strptime(lesson['lesson_date'], '%Y-%m-%d %H:%M:%S')
+        else:
+            lesson_date = lesson['lesson_date']  # Уже datetime объект
+        
         time_key = lesson_date.strftime('%H:%M')
         group_id = lesson.get('group_id')
         lesson_id = lesson['id']

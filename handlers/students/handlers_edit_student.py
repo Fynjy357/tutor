@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Router, types, F
 from database import db
+
 from handlers.students.keyboards_student import get_students_menu_keyboard
 from .keyboards import get_student_detail_keyboard
 from .utils import format_student_info

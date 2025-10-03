@@ -8,10 +8,10 @@ from handlers.students.keyboards import get_student_detail_keyboard
 from handlers.students.keyboards_student import get_cancel_keyboard_add_students, get_students_menu_keyboard
 from handlers.students.states import AddStudentStates
 from handlers.students.utils import format_student_info
-from keyboards.keyboard_phone import get_phone_keyboard
 
 
 from database import db
+
 
 router = Router()
 logger = logging.getLogger(__name__)

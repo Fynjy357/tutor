@@ -3,7 +3,8 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery, Update
 from typing import Callable, Dict, Any, Awaitable
 from .models import PaymentManager
-from database import db  # Импортируем базу данных
+from database import db
+ # Импортируем базу данных
 
 class SubscriptionMiddleware(BaseMiddleware):
     def __init__(self):

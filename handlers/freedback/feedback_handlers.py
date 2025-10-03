@@ -8,11 +8,9 @@ from aiogram.exceptions import TelegramBadRequest
 import os
 from database import db
 
+
 # Импортируем необходимые функции
-from handlers.schedule.schedule_utils import get_today_schedule_text
-from handlers.start.config import WELCOME_BACK_TEXT
 from handlers.start.welcome import show_main_menu
-from keyboards.main_menu import get_main_menu_keyboard
 
 
 router = Router()

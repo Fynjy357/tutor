@@ -1,12 +1,12 @@
 from aiogram import types, Router, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
+
 from datetime import datetime
 import logging
 import sqlite3
 import asyncio
 
-from handlers.start.keyboards_start import get_parent_welcome_keyboard
 from handlers.start.welcome import show_parent_welcome  # Импортируем функцию из welcome.py
 
 # Создаем роутер

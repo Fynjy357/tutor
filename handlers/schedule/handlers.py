@@ -7,6 +7,7 @@ import logging
 from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 from handlers.start.welcome import show_main_menu
 from database import db
+
 from handlers.schedule.add_lesson.handlers_add_lesson import router as add_new_lesson
 from handlers.schedule.schedule_utils import get_upcoming_lessons_text
 

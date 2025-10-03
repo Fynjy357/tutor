@@ -9,6 +9,7 @@ import json
 from typing import Optional, Dict
 from database import db
 
+
 logger = logging.getLogger(__name__)
 
 class YooKassaManager:

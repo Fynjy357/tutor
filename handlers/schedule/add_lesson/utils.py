@@ -1,8 +1,8 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from datetime import datetime
 from database import db
+
 from handlers.schedule.add_lesson.type_lesson import add_lesson_start
 from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 from handlers.schedule.states import AddLessonStates

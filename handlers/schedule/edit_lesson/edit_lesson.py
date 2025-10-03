@@ -1,7 +1,7 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
-from datetime import datetime
 from database import db
+
 from handlers.schedule.states import EditLessonStates
 from .keyboards import *
 from .utils import *

@@ -12,6 +12,7 @@ from handlers.schedule.planner.utils.helpers import (
     get_lesson_info_text, validate_time_format, validate_duration, validate_price
 )
 from database import db
+
 from handlers.schedule.planner.timer.planner_manager import planner_manager  # Добавляем импорт
 
 router = Router()

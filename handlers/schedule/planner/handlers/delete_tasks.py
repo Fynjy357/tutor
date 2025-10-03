@@ -4,9 +4,9 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMar
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import logging
 
-from handlers.schedule.planner.keyboards_planner import get_planner_keyboard
 from handlers.schedule.planner.utils.task_helpers import get_planner_tasks, get_task_by_id
 from database import db
+
 
 router = Router()
 logger = logging.getLogger(__name__)

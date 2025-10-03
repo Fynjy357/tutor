@@ -2,6 +2,7 @@
 from datetime import datetime
 from database import db
 
+
 async def get_lesson_info_text(data: dict, price: float) -> str:
     """Формирует текст с информацией о занятии в новом формате"""
     weekdays_ru = {

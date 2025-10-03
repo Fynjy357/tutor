@@ -3,12 +3,12 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 import re
 import logging
 
 from handlers.schedule.planner.utils.task_helpers import get_task_by_id, show_task_edit_menu_after_edit
 from database import db
+
 
 router = Router()
 logger = logging.getLogger(__name__)

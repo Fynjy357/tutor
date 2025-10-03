@@ -2,10 +2,8 @@ from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from datetime import datetime, timedelta
 from database import db
+
 from handlers.schedule.states import AddLessonStates
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from handlers.schedule.schedule_utils import get_upcoming_lessons_text
-from handlers.schedule.keyboards_schedule import get_schedule_keyboard
 import logging
 
 router = Router()

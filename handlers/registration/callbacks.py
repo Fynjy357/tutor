@@ -5,15 +5,15 @@ import logging
 import re
 
 from handlers.registration.states import RegistrationStates
-from handlers.registration.utils import show_confirmation, save_tutor_data
+from handlers.registration.utils import save_tutor_data
 from handlers.schedule.schedule_utils import get_today_schedule_text
 from handlers.start.config import WELCOME_BACK_TEXT
 from keyboards.keyboard_phone import get_phone_keyboard
 from handlers.registration.keyboards import get_cancel_keyboard
 from handlers.start.keyboards_start import get_registration_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
-from handlers.registration.utils import validate_phone_number, handle_invalid_phone
 from database import db
+
 
 from payment.models import PaymentManager  # Добавьте эту строку
 import time  # Добавьте эту строку для генерации payment_id

@@ -2,10 +2,10 @@ from datetime import datetime
 import re
 from database import db
 
+
 from datetime import datetime
 from aiogram import types
 from aiogram.fsm.context import FSMContext
-from database import db
 from .keyboards import get_lesson_selection_keyboard
 from .edit_lesson import EditLessonStates
 

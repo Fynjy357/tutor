@@ -10,6 +10,7 @@ from .utils import format_student_info, get_students_stats
 from handlers.students.keyboards_student import get_students_pagination_keyboard, get_students_menu_keyboard
 from database import db
 
+
 router = Router()
 logger = logging.getLogger(__name__)
 

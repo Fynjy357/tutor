@@ -8,6 +8,7 @@ from handlers.schedule.planner.keyboards_planner import get_planner_keyboard
 from handlers.schedule.planner.utils.task_helpers import get_planner_tasks
 from database import db
 
+
 router = Router()
 logger = logging.getLogger(__name__)
 

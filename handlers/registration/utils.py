@@ -3,6 +3,7 @@ from typing import Optional
 from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 from database import db
+
 from handlers.registration.states import RegistrationStates
 from handlers.registration.keyboards import get_confirmation_keyboard
 import secrets

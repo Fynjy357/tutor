@@ -2,6 +2,7 @@
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from database import db
+
 from keyboards.main_menu import get_main_menu_keyboard
 
 router = Router()
